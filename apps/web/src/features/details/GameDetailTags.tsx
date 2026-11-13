@@ -1,11 +1,11 @@
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import type { ScoredGame } from '../../../../../packages/core/src/models';
-import { MetadataBadge, type MetadataKind } from '../metadata';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { ScoredGame } from "../../../../../packages/core/src/models";
+import { MetadataBadge, type MetadataKind } from "../metadata";
 
 export interface GameDetailTagsProps {
   game: Pick<
     ScoredGame,
-    'status' | 'primaryGenre' | 'secondaryTags' | 'pace' | 'structure' | 'coop'
+    "status" | "primaryGenre" | "secondaryTags" | "pace" | "structure" | "coop"
   >;
   className?: string;
   testIdPrefix?: string;
@@ -19,30 +19,30 @@ interface TagItem {
 
 export function GameDetailTags({
   game,
-  className = '',
-  testIdPrefix = 'detail-badge',
+  className = "",
+  testIdPrefix = "detail-badge",
 }: GameDetailTagsProps) {
   const tags: TagItem[] = [];
 
   if (game.status) {
-    tags.push({ key: `status-${game.status}`, kind: 'status', value: game.status });
+    tags.push({ key: `status-${game.status}`, kind: "status", value: game.status });
   }
   if (game.primaryGenre) {
-    tags.push({ key: `genre-${game.primaryGenre}`, kind: 'genre', value: game.primaryGenre });
+    tags.push({ key: `genre-${game.primaryGenre}`, kind: "genre", value: game.primaryGenre });
   }
   for (const tag of game.secondaryTags ?? []) {
     if (tag) {
-      tags.push({ key: `tag-${tag}`, kind: 'tag', value: tag });
+      tags.push({ key: `tag-${tag}`, kind: "tag", value: tag });
     }
   }
   if (game.pace && game.pace.trim()) {
-    tags.push({ key: `pace-${game.pace}`, kind: 'pace', value: game.pace });
+    tags.push({ key: `pace-${game.pace}`, kind: "pace", value: game.pace });
   }
   if (game.structure && game.structure.trim()) {
-    tags.push({ key: `structure-${game.structure}`, kind: 'structure', value: game.structure });
+    tags.push({ key: `structure-${game.structure}`, kind: "structure", value: game.structure });
   }
   if (game.coop && game.coop.trim()) {
-    tags.push({ key: `coop-${game.coop}`, kind: 'tag', value: game.coop });
+    tags.push({ key: `coop-${game.coop}`, kind: "tag", value: game.coop });
   }
 
   const overflowCount = tags.length - 3;
@@ -73,7 +73,7 @@ export function GameDetailTags({
                 className="badge cursor-pointer inline-flex items-center justify-center rounded-full border border-border bg-muted/80 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                 aria-label={`Ver mais ${overflowCount} tags`}
               >
-                {'+' + overflowCount}
+                {"+" + overflowCount}
               </button>
             </PopoverTrigger>
             <PopoverContent

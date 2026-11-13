@@ -1,19 +1,19 @@
 import type {
   MetadataCatalog,
   MetadataCategory,
-} from '../../../../../../packages/core/src/metadata.ts';
-import type { ConfigDriver } from '../types.ts';
-import type { Sql } from '../../db.ts';
+} from "../../../../../../packages/core/src/metadata.ts";
+import type { ConfigDriver } from "../types.ts";
+import type { Sql } from "../../db.ts";
 
 // Only these source-controlled identifiers reach SQL identifier interpolation.
 const tables = {
-  genres: 'genre',
-  tags: 'tag',
-  mechanics: 'mechanic',
-  stores: 'store',
-  paces: 'ref_pace',
-  structures: 'ref_structure',
-  platforms: 'ref_platform',
+  genres: "genre",
+  tags: "tag",
+  mechanics: "mechanic",
+  stores: "store",
+  paces: "ref_pace",
+  structures: "ref_structure",
+  platforms: "ref_platform",
 } as const;
 const CACHE_MS = 10_000;
 
@@ -38,9 +38,9 @@ export class PgConfigDriver implements ConfigDriver {
       sql`(SELECT coalesce(json_agg(name ORDER BY name), '[]') FROM ${sql(tables[category])} WHERE name <> '')`;
     const [row] = await sql<{ catalog: MetadataCatalog }[]>`
       SELECT json_build_object(
-        'genres', ${list('genres')}, 'tags', ${list('tags')}, 'mechanics', ${list('mechanics')},
-        'stores', ${list('stores')}, 'paces', ${list('paces')},
-        'structures', ${list('structures')}, 'platforms', ${list('platforms')}
+        'genres', ${list("genres")}, 'tags', ${list("tags")}, 'mechanics', ${list("mechanics")},
+        'stores', ${list("stores")}, 'paces', ${list("paces")},
+        'structures', ${list("structures")}, 'platforms', ${list("platforms")}
       ) AS catalog`;
     if (writesBefore === this.writes)
       this.cached = { value: row.catalog, expires: Date.now() + CACHE_MS };
@@ -51,7 +51,7 @@ export class PgConfigDriver implements ConfigDriver {
     await this.sql.begin(async (sql) => {
       // Serialize option writes so normalized names stay unique in the name-keyed tables.
       await sql`SELECT pg_advisory_xact_lock(hashtext(${`checkpoint:config:${table}`}))`;
-      if (category === 'paces' || category === 'structures' || category === 'platforms') {
+      if (category === "paces" || category === "structures" || category === "platforms") {
         await sql`INSERT INTO ${sql(table)} (name) SELECT ${name} WHERE NOT EXISTS (SELECT 1 FROM ${sql(table)} WHERE norm_key(name) = norm_key(${name})) ON CONFLICT DO NOTHING`;
       } else
         await sql`INSERT INTO ${sql(table)} (name) VALUES (${name}) ON CONFLICT (key) DO NOTHING`;
@@ -60,15 +60,15 @@ export class PgConfigDriver implements ConfigDriver {
     this.writes++;
   }
 
-  async remove(category: MetadataCategory, name: string): Promise<'removed' | 'missing' | 'used'> {
+  async remove(category: MetadataCategory, name: string): Promise<"removed" | "missing" | "used"> {
     try {
       const rows = await this
         .sql`DELETE FROM ${this.sql(tables[category])} WHERE name <> '' AND norm_key(name) = norm_key(${name}) RETURNING name`;
       this.cached = null;
       this.writes++;
-      return rows.length ? 'removed' : 'missing';
+      return rows.length ? "removed" : "missing";
     } catch (error) {
-      if ((error as { code?: string }).code === '23503') return 'used';
+      if ((error as { code?: string }).code === "23503") return "used";
       throw error;
     }
   }

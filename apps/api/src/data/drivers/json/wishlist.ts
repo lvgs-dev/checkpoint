@@ -1,10 +1,10 @@
 // JSON local: lista de desejos. O jogo é gravado no driver de jogos (mesmo arquivo de jogos);
 // descrições e preços ficam no próprio arquivo. Um só usuário: `owner` é ignorado.
-import { randomUUID } from 'node:crypto';
-import type { Game, SteamApp, SteamPrice } from '../../../../../../packages/core/src/models.ts';
-import { normalizeMetadata } from '../../../../../../packages/core/src/metadata.ts';
-import type { GamesDriver, WishlistDriver } from '../types.ts';
-import { JsonFile } from './file.ts';
+import { randomUUID } from "node:crypto";
+import type { Game, SteamApp, SteamPrice } from "../../../../../../packages/core/src/models.ts";
+import { normalizeMetadata } from "../../../../../../packages/core/src/metadata.ts";
+import type { GamesDriver, WishlistDriver } from "../types.ts";
+import { JsonFile } from "./file.ts";
 
 interface WishlistFile {
   descriptions: Record<string, string>;
@@ -12,7 +12,7 @@ interface WishlistFile {
 }
 
 /** Mesmo jogo já cadastrado: mesmo appid da Steam ou, sem appid, mesmo nome. */
-const sameGame = (a: Pick<Game, 'steamAppId' | 'name'>, b: Pick<Game, 'steamAppId' | 'name'>) =>
+const sameGame = (a: Pick<Game, "steamAppId" | "name">, b: Pick<Game, "steamAppId" | "name">) =>
   a.steamAppId
     ? a.steamAppId === b.steamAppId
     : normalizeMetadata(a.name) === normalizeMetadata(b.name);
@@ -37,7 +37,7 @@ export class JsonWishlistDriver implements WishlistDriver {
       await this.ready;
       const existing = (await this.games.list(owner)).find((g) => sameGame(game, g));
       if (existing) return { id: existing.id, created: false, catalogCreated: false };
-      const id = game.steamAppId ? 'S' + game.steamAppId : 'W' + randomUUID().slice(0, 8);
+      const id = game.steamAppId ? "S" + game.steamAppId : "W" + randomUUID().slice(0, 8);
       await this.games.save(
         owner,
         { ...game, id, updatedAt: new Date().toISOString() },

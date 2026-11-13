@@ -1,23 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
-import type { ScoringConfig, ScoringSettings } from '../../../../../packages/core/src/models';
-import { api, listPath } from '../../api/http';
-import { useQueryKeys } from '../../query/keys';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import type { ScoringConfig, ScoringSettings } from "../../../../../packages/core/src/models";
+import { api, listPath } from "../../api/http";
+import { useQueryKeys } from "../../query/keys";
 
-const path = (listId: string) => listPath(listId) + '/settings/scoring';
+const path = (listId: string) => listPath(listId) + "/settings/scoring";
 
 const valid = (s: ScoringSettings | undefined) =>
   !!s &&
   Number.isInteger(s.version) &&
-  typeof s.config?.weights === 'object' &&
-  typeof s.config?.rules === 'object' &&
-  typeof s.config?.filters === 'object' &&
-  typeof s.filterOptions === 'object' &&
+  typeof s.config?.weights === "object" &&
+  typeof s.config?.rules === "object" &&
+  typeof s.config?.filters === "object" &&
+  typeof s.filterOptions === "object" &&
   Array.isArray(s.factors);
 
 async function fetchSettings(listId: string, signal?: AbortSignal) {
   const settings = await api.get<ScoringSettings>(path(listId), { signal });
-  if (!valid(settings)) throw new Error('Invalid scoring settings response');
+  if (!valid(settings)) throw new Error("Invalid scoring settings response");
   return settings;
 }
 
@@ -29,7 +29,7 @@ async function fetchSettings(listId: string, signal?: AbortSignal) {
 export function useScoringSettings(listId: string | null | undefined) {
   const k = useQueryKeys();
   return useQuery({
-    queryKey: k.settings(listId ?? ''),
+    queryKey: k.settings(listId ?? ""),
     queryFn: ({ signal }) => fetchSettings(listId!, signal),
     enabled: !!listId,
     staleTime: Infinity,
@@ -57,7 +57,7 @@ export const useSaveScoringSettings = () =>
 
 /** Restore the defaults, then re-read the settings. `mutate({ listId })`. */
 export const useResetScoringSettings = () =>
-  useChange((listId) => api.post<ScoringSettings>(path(listId) + '/reset', { json: {} }));
+  useChange((listId) => api.post<ScoringSettings>(path(listId) + "/reset", { json: {} }));
 
 /** Returns `(listId, version) => void`: invalidates the cached settings when the queue used another version. */
 export function useSyncScoringVersion() {

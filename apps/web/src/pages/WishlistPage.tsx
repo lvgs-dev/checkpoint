@@ -1,4 +1,4 @@
-import { WishlistScreen } from '../features/wishlist/WishlistScreen';
+import { WishlistScreen } from "../features/wishlist/WishlistScreen";
 
 export function WishlistPage() {
   return <WishlistScreen />;

@@ -1,15 +1,15 @@
 // Postgres: lista de desejos. O jogo desejado é um library_entry com status 'wishlist' sobre o
 // catálogo global (game), mais metadados da loja (game_metadata) e preços (game_price).
-import postgres from 'postgres';
-import type { Game, SteamApp, SteamPrice } from '../../../../../../packages/core/src/models.ts';
-import type { Sql } from '../../db.ts';
-import type { WishlistDriver } from '../types.ts';
-import { desireCode, isoTs } from './shared.ts';
+import postgres from "postgres";
+import type { Game, SteamApp, SteamPrice } from "../../../../../../packages/core/src/models.ts";
+import type { Sql } from "../../db.ts";
+import type { WishlistDriver } from "../types.ts";
+import { desireCode, isoTs } from "./shared.ts";
 
 export class PgWishlistDriver implements WishlistDriver {
   private sql: Sql;
   private countryCode: string;
-  constructor(sql: Sql, countryCode = 'BR') {
+  constructor(sql: Sql, countryCode = "BR") {
     this.sql = sql;
     this.countryCode = countryCode;
   }
@@ -45,8 +45,8 @@ export class PgWishlistDriver implements WishlistDriver {
           [target] = await tx<{ id: string; code: string }[]>`
           INSERT INTO game (name, steam_app_id, created_by, primary_genre_id, pace, structure, coop, size_label)
           VALUES (${game.name}, ${appId}, ${owner},
-                  (SELECT id FROM genre WHERE key = norm_key(${game.primaryGenre || ''})),
-                  ${game.pace || ''}, ${game.structure || ''}, ${game.coop || ''}, ${game.size || ''})
+                  (SELECT id FROM genre WHERE key = norm_key(${game.primaryGenre || ""})),
+                  ${game.pace || ""}, ${game.structure || ""}, ${game.coop || ""}, ${game.size || ""})
           RETURNING id, code`;
         if (catalogCreated && game.secondaryTags?.length) {
           for (let i = 0; i < game.secondaryTags.length; i++) {
@@ -62,7 +62,7 @@ export class PgWishlistDriver implements WishlistDriver {
         VALUES (${owner}, ${target.id}, 'wishlist',
                 coalesce(${desireCode[game.desire]}::desire_level, 'medium'::desire_level),
                 ${game.platform},
-                (SELECT id FROM store WHERE key = norm_key(${game.store || 'Steam'}::text)),
+                (SELECT id FROM store WHERE key = norm_key(${game.store || "Steam"}::text)),
                 ${game.notes ?? null})
         ON CONFLICT (user_id, game_id) DO NOTHING
         RETURNING id`;
@@ -81,7 +81,7 @@ export class PgWishlistDriver implements WishlistDriver {
         return { id: target.code, created: true, catalogCreated };
       });
     } catch (e) {
-      if (e instanceof postgres.PostgresError && e.code === '23505') {
+      if (e instanceof postgres.PostgresError && e.code === "23505") {
         const [mine] = await this.sql<{ code: string }[]>`
           SELECT g.code FROM library_entry e JOIN game g ON g.id = e.game_id
            WHERE e.user_id = ${owner}

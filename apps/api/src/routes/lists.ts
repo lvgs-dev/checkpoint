@@ -1,13 +1,13 @@
 // Rotas de listas (/api/v1/lists...), da fila e da configuração de pontuação, que também
 // existem sem o prefixo da lista (= lista padrão).
-import type { IncomingMessage } from 'node:http';
-import type { GameService } from '../services/games.ts';
-import { runInBackground } from './background.ts';
-import { createRequestAdmission } from '../shared/request-guard.ts';
-import { getContext } from '../shared/context.ts';
+import type { IncomingMessage } from "node:http";
+import type { GameService } from "../services/games.ts";
+import { runInBackground } from "./background.ts";
+import { createRequestAdmission } from "../shared/request-guard.ts";
+import { getContext } from "../shared/context.ts";
 
 const admitReorder = createRequestAdmission(30, 60_000);
-import { ApiPath, HttpMethod, type ReadJson, type RouteResult } from './http.ts';
+import { ApiPath, HttpMethod, type ReadJson, type RouteResult } from "./http.ts";
 
 export async function listsRoute(
   service: GameService,
@@ -39,32 +39,32 @@ export async function listsRoute(
   if (!scoped) return null;
   const listId = scoped[1] === undefined ? undefined : decodeURIComponent(scoped[1]);
   const route = scoped[2];
-  if (route === '/recommendations' && method === HttpMethod.Get)
+  if (route === "/recommendations" && method === HttpMethod.Get)
     return { data: await service.recommendations(listId) };
-  if (route === '/queue/reorder' && method === HttpMethod.Post) {
+  if (route === "/queue/reorder" && method === HttpMethod.Post) {
     const body = await readJson();
     // 200 assim que validar; o recálculo e a gravação continuam depois da resposta.
-    const release = admitReorder(getContext()?.userId ?? 'local');
+    const release = admitReorder(getContext()?.userId ?? "local");
     try {
       const { accepted, done } = await service.reorder(body.gameId, body.toPosition, listId);
       runInBackground(done.finally(release));
-      return { data: { ...accepted, status: 'accepted' } };
+      return { data: { ...accepted, status: "accepted" } };
     } catch (error) {
       release();
       throw error;
     }
   }
-  if (route === '/queue/adjustments' && method === HttpMethod.Get)
+  if (route === "/queue/adjustments" && method === HttpMethod.Get)
     return { data: await service.manualState(listId) };
-  if (route.startsWith('/queue/adjustments/') && method === HttpMethod.Delete) {
-    const gameId = decodeURIComponent(route.slice('/queue/adjustments/'.length));
+  if (route.startsWith("/queue/adjustments/") && method === HttpMethod.Delete) {
+    const gameId = decodeURIComponent(route.slice("/queue/adjustments/".length));
     return { data: await service.resetManual(gameId, listId) };
   }
-  if (route === '/settings/scoring' && method === HttpMethod.Get)
+  if (route === "/settings/scoring" && method === HttpMethod.Get)
     return { data: await service.scoringSettings(listId) };
-  if (route === '/settings/scoring' && method === HttpMethod.Put)
+  if (route === "/settings/scoring" && method === HttpMethod.Put)
     return { data: await service.saveScoringSettings(await readJson(), listId) };
-  if (route === '/settings/scoring/reset' && method === HttpMethod.Post)
+  if (route === "/settings/scoring/reset" && method === HttpMethod.Post)
     return { data: await service.resetScoringSettings(listId) };
   return null;
 }

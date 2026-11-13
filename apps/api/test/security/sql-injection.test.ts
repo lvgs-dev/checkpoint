@@ -1,6 +1,6 @@
 // Testes de segurança: injeção de SQL em query params, path params e campos JSON.
-import { describe, it, beforeAll, afterAll, expect } from 'vitest';
-import { startTestServer, testFetch, type TestServerContext } from './helper.ts';
+import { describe, it, beforeAll, afterAll, expect } from "vitest";
+import { startTestServer, testFetch, type TestServerContext } from "./helper.ts";
 
 const SQLI_PAYLOADS = [
   "' OR '1'='1",
@@ -9,10 +9,10 @@ const SQLI_PAYLOADS = [
   "'; DROP TABLE library_entry; --",
   "' UNION SELECT null, null, null --",
   "1' AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT((SELECT version()), FLOOR(RAND(0)*2)) x FROM information_schema.tables GROUP BY x) a) --",
-  '%%%%%%%%%%%%%%%%%%%%',
-  '_%_%_%_%_%_%_%_%_%',
+  "%%%%%%%%%%%%%%%%%%%%",
+  "_%_%_%_%_%_%_%_%_%",
   "\x00' OR 1=1 --",
-  '\\u0027 OR 1=1 --',
+  "\\u0027 OR 1=1 --",
 ];
 
 // Padrões de vazamento de erro/driver de banco de dados
@@ -26,7 +26,7 @@ const SQL_DRIVER_ERROR_PATTERNS = [
 ];
 
 describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
-  'Security: PostgreSQL injection regression cases',
+  "Security: PostgreSQL injection regression cases",
   () => {
     let ctx: TestServerContext;
 
@@ -38,7 +38,7 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
       await ctx?.close();
     });
 
-    it('resiste a payloads SQL em query parameters de /api/v1/games', async () => {
+    it("resiste a payloads SQL em query parameters de /api/v1/games", async () => {
       for (const payload of SQLI_PAYLOADS) {
         const res = await testFetch(
           ctx.baseUrl,
@@ -56,7 +56,7 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
       }
     });
 
-    it('resiste a payloads SQL em busca (/api/v1/games/search)', async () => {
+    it("resiste a payloads SQL em busca (/api/v1/games/search)", async () => {
       for (const payload of SQLI_PAYLOADS) {
         const res = await testFetch(
           ctx.baseUrl,
@@ -71,7 +71,7 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
       }
     });
 
-    it('resiste a payloads SQL em path parameters (/api/v1/games/:id, /api/v1/lists/:listId)', async () => {
+    it("resiste a payloads SQL em path parameters (/api/v1/games/:id, /api/v1/lists/:listId)", async () => {
       for (const payload of SQLI_PAYLOADS) {
         // Rota de jogo individual
         const resGame = await testFetch(
@@ -114,7 +114,7 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
       }
     });
 
-    it('resiste a payloads SQL em campos JSON de escrita (PATCH game, POST list, POST reorder)', async () => {
+    it("resiste a payloads SQL em campos JSON de escrita (PATCH game, POST list, POST reorder)", async () => {
       const games = await ctx.service.all();
       const game = games[0];
       expect(game).toBeTruthy();
@@ -127,8 +127,8 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
             ctx.baseUrl,
             `/api/v1/games/${encodeURIComponent(game.id)}`,
             {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ notes: payload }),
             },
           );
@@ -142,9 +142,9 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
           }
 
           // POST list
-          const resList = await testFetch(ctx.baseUrl, '/api/v1/lists', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const resList = await testFetch(ctx.baseUrl, "/api/v1/lists", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: payload.slice(0, 50) }),
           });
           expect(resList.status).not.toBe(500);
@@ -158,8 +158,8 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)(
         }
       } finally {
         await testFetch(ctx.baseUrl, `/api/v1/games/${encodeURIComponent(game.id)}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ notes: originalNotes }),
         });
       }

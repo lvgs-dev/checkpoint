@@ -8,11 +8,11 @@ import type {
   ScoringConfig,
   SteamApp,
   SteamPrice,
-} from '../../../../packages/core/src/models.ts';
-import type { MetadataCatalog, MetadataCategory } from '../../../../packages/core/src/metadata.ts';
-import type { ManualPin } from '../domain/scoring.ts';
-import type { DeployInput, Environment, NewRelease, Release } from '../domain/releases.ts';
-import type { GameBrowseQuery, GameBrowseResult } from './drivers/types.ts';
+} from "../../../../packages/core/src/models.ts";
+import type { MetadataCatalog, MetadataCategory } from "../../../../packages/core/src/metadata.ts";
+import type { ManualPin } from "../domain/scoring.ts";
+import type { DeployInput, Environment, NewRelease, Release } from "../domain/releases.ts";
+import type { GameBrowseQuery, GameBrowseResult } from "./drivers/types.ts";
 
 export interface GameRepository {
   list(): Promise<Game[]>;
@@ -35,7 +35,7 @@ export interface ListRepository {
   create(name: string): Promise<GameList>;
   rename(id: string, name: string): Promise<GameList | undefined>;
   /** 'last' = não apaga a única lista do usuário. */
-  remove(id: string): Promise<'removed' | 'missing' | 'last'>;
+  remove(id: string): Promise<"removed" | "missing" | "last">;
 }
 
 /**

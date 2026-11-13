@@ -9,19 +9,19 @@ import {
   type WishlistImportResult,
   type WishlistItem,
   GameStatus,
-} from '../../../../packages/core/src/models.ts';
+} from "../../../../packages/core/src/models.ts";
 import {
   compareWishlistItems,
   wishlistSorts,
   type WishlistSort,
-} from '../../../../packages/core/src/wishlist.ts';
-import { logger } from '../observability/logger.ts';
-import { AppError } from '../shared/errors.ts';
-import { desires, type GameService } from './games.ts';
-import { SteamError, type SteamClient } from '../integrations/steam/client.ts';
-import { emptyGame, gameFromSteamApp } from '../integrations/steam/mapping.ts';
-import { metadataFields, normalizeMetadata } from '../../../../packages/core/src/metadata.ts';
-import type { WishlistStore } from '../data/ports.ts';
+} from "../../../../packages/core/src/wishlist.ts";
+import { logger } from "../observability/logger.ts";
+import { AppError } from "../shared/errors.ts";
+import { desires, type GameService } from "./games.ts";
+import { SteamError, type SteamClient } from "../integrations/steam/client.ts";
+import { emptyGame, gameFromSteamApp } from "../integrations/steam/mapping.ts";
+import { metadataFields, normalizeMetadata } from "../../../../packages/core/src/metadata.ts";
+import type { WishlistStore } from "../data/ports.ts";
 
 export interface WishlistOptions {
   /** Perfil padrão para importar (STEAM_PROFILE). */
@@ -42,54 +42,54 @@ const unavailable = (): SteamPrice => ({
 });
 
 const appIdOf = (v: unknown) => {
-  const n = typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : v;
-  if (typeof n !== 'number' || !Number.isInteger(n) || n < 1 || n > 2 ** 31 - 1)
-    throw new AppError('appId inválido');
+  const n = typeof v === "string" && /^\d+$/.test(v) ? Number(v) : v;
+  if (typeof n !== "number" || !Number.isInteger(n) || n < 1 || n > 2 ** 31 - 1)
+    throw new AppError("appId inválido");
   return n;
 };
 
 /** Campos aceitos no cadastro manual (os mesmos que a tela de detalhe edita). */
 const MANUAL_STRINGS = [
-  'primaryGenre',
-  'store',
-  'platform',
-  'pace',
-  'structure',
-  'notes',
-  'size',
-  'coop',
-  'mechanic',
+  "primaryGenre",
+  "store",
+  "platform",
+  "pace",
+  "structure",
+  "notes",
+  "size",
+  "coop",
+  "mechanic",
 ] as const;
-const MANUAL_HOURS = ['mainHours', 'extraHours', 'completionistHours'] as const;
+const MANUAL_HOURS = ["mainHours", "extraHours", "completionistHours"] as const;
 
 function manualGame(body: Record<string, unknown>): Game {
   const name = body.name;
-  if (typeof name !== 'string' || !name.trim() || name.length > 300)
-    throw new AppError('Informe o nome do jogo');
+  if (typeof name !== "string" || !name.trim() || name.length > 300)
+    throw new AppError("Informe o nome do jogo");
   const game = emptyGame(name);
   for (const [k, v] of Object.entries(body)) {
-    if (k === 'name') continue;
+    if (k === "name") continue;
     if ((MANUAL_STRINGS as readonly string[]).includes(k)) {
-      if (typeof v !== 'string' || v.length > 10000) throw new AppError('Texto inválido: ' + k);
+      if (typeof v !== "string" || v.length > 10000) throw new AppError("Texto inválido: " + k);
       Object.assign(game, { [k]: v.trim() });
     } else if ((MANUAL_HOURS as readonly string[]).includes(k)) {
-      if (v !== null && (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 100000))
-        throw new AppError('Horas inválidas');
+      if (v !== null && (typeof v !== "number" || !Number.isFinite(v) || v < 0 || v > 100000))
+        throw new AppError("Horas inválidas");
       Object.assign(game, { [k]: v });
-    } else if (k === 'desire') {
-      if (!desires.includes(v as string)) throw new AppError('Vontade inválida');
+    } else if (k === "desire") {
+      if (!desires.includes(v as string)) throw new AppError("Vontade inválida");
       game.desire = v as Desire;
-    } else if (k === 'secondaryTags') {
+    } else if (k === "secondaryTags") {
       if (
         !Array.isArray(v) ||
         v.length > 3 ||
-        v.some((t) => typeof t !== 'string' || !t.trim() || t.length > 80)
+        v.some((t) => typeof t !== "string" || !t.trim() || t.length > 80)
       )
-        throw new AppError('Use até três tags secundárias');
+        throw new AppError("Use até três tags secundárias");
       game.secondaryTags = v.map((t: string) => t.trim());
-    } else if (k === 'steamAppId') {
+    } else if (k === "steamAppId") {
       game.steamAppId = v === null ? null : appIdOf(v);
-    } else throw new AppError('Campo não aceito: ' + k);
+    } else throw new AppError("Campo não aceito: " + k);
   }
   return game;
 }
@@ -100,10 +100,10 @@ async function steamCall<T>(fn: () => Promise<T>): Promise<T> {
     return await fn();
   } catch (e) {
     if (e instanceof SteamError) {
-      logger.warn('steam.call_failed', { status: e.status, error: e });
+      logger.warn("steam.call_failed", { status: e.status, error: e });
       // 4xx messages are authored in steam.ts; upstream/5xx details stay in the logs.
       if (e.status >= 400 && e.status < 500) throw new AppError(e.message, e.status);
-      throw new AppError('Steam indisponível', 502);
+      throw new AppError("Steam indisponível", 502);
     }
     throw e;
   }
@@ -119,7 +119,7 @@ export class WishlistService {
     games: GameService,
     store: WishlistStore,
     steam: SteamClient,
-    { defaultProfile = '', priceTtlMs = 6 * 3600_000 }: WishlistOptions = {},
+    { defaultProfile = "", priceTtlMs = 6 * 3600_000 }: WishlistOptions = {},
   ) {
     this.games = games;
     this.store = store;
@@ -129,22 +129,22 @@ export class WishlistService {
   }
 
   search(q: unknown) {
-    if (typeof q !== 'string' || !q.trim() || q.length > 100)
-      throw new AppError('Informe o nome (1 a 100 caracteres)');
+    if (typeof q !== "string" || !q.trim() || q.length > 100)
+      throw new AppError("Informe o nome (1 a 100 caracteres)");
     return steamCall(() => this.steam.search(q));
   }
 
   async app(id: unknown): Promise<SteamApp> {
     const appId = appIdOf(id);
     const app = await steamCall(() => this.steam.app(appId));
-    if (!app) throw new AppError('App não encontrado na Steam', 404);
+    if (!app) throw new AppError("App não encontrado na Steam", 404);
     return app;
   }
 
   /** Jogos desejados com preço (busca preços vencidos; se a Steam falhar, usa os antigos). */
-  async list(sort: string = 'recommendation'): Promise<WishlistItem[]> {
+  async list(sort: string = "recommendation"): Promise<WishlistItem[]> {
     if (!(wishlistSorts as readonly string[]).includes(sort))
-      throw new AppError('Ordenação inválida');
+      throw new AppError("Ordenação inválida");
     const wished = (await this.games.all()).filter((g) => g.status === GameStatus.Wishlist);
     const appIds = wished.flatMap((g) => (g.steamAppId ? [g.steamAppId] : []));
     const [prices, descriptions] = await Promise.all([
@@ -159,7 +159,7 @@ export class WishlistService {
       try {
         for (const [a, p] of await this.fetchPrices(stale)) prices.set(a, p);
       } catch (e) {
-        logger.warn('steam.prices_not_refreshed', { error: e });
+        logger.warn("steam.prices_not_refreshed", { error: e });
       }
     return wished
       .map((game) => this.item(game, prices, descriptions))
@@ -200,9 +200,9 @@ export class WishlistService {
     let app: SteamApp | null = null;
     if (body.appId !== undefined) {
       const { appId, desire, ...rest } = body;
-      if (Object.keys(rest).length) throw new AppError('Com appId, envie só appId e desire');
+      if (Object.keys(rest).length) throw new AppError("Com appId, envie só appId e desire");
       if (desire !== undefined && !desires.includes(desire as string))
-        throw new AppError('Vontade inválida');
+        throw new AppError("Vontade inválida");
       app = await this.app(appId);
       game = gameFromSteamApp(app, (desire as Desire | undefined) ?? Desire.Medium);
     } else {
@@ -211,17 +211,17 @@ export class WishlistService {
       for (const [category, field] of Object.entries(metadataFields)) {
         const options = catalog[category as keyof typeof metadataFields];
         const canonical = (value: string) => {
-          if (!value) return '';
+          if (!value) return "";
           const match = options.find(
             (option) => normalizeMetadata(option) === normalizeMetadata(value),
           );
-          if (!match) throw new AppError('Valor fora do catálogo: ' + field);
+          if (!match) throw new AppError("Valor fora do catálogo: " + field);
           return match;
         };
-        if (field === 'secondaryTags') {
+        if (field === "secondaryTags") {
           game.secondaryTags = game.secondaryTags.map(canonical);
           if (new Set(game.secondaryTags).size !== game.secondaryTags.length)
-            throw new AppError('Tags secundárias repetidas');
+            throw new AppError("Tags secundárias repetidas");
         } else game[field] = canonical(game[field]);
       }
     }
@@ -229,7 +229,7 @@ export class WishlistService {
     if (app?.price) await this.store.savePrices(new Map([[app.appId, app.price]]));
     if (created) this.games.invalidateUserCache();
     const scored = await this.games.game(id).catch(() => null);
-    if (!scored) throw new AppError('Jogo não encontrado após o cadastro', 500);
+    if (!scored) throw new AppError("Jogo não encontrado após o cadastro", 500);
     const [prices, descriptions] = await Promise.all([
       this.store.prices(scored.steamAppId ? [scored.steamAppId] : []),
       this.store.descriptions([id]),
@@ -243,14 +243,14 @@ export class WishlistService {
    */
   async importSteam(body: Record<string, unknown> = {}): Promise<WishlistImportResult> {
     const profile = body.profile ?? this.defaultProfile;
-    if (typeof profile !== 'string' || !profile.trim())
-      throw new AppError('Informe o perfil da Steam (SteamID64 ou URL) ou configure STEAM_PROFILE');
+    if (typeof profile !== "string" || !profile.trim())
+      throw new AppError("Informe o perfil da Steam (SteamID64 ou URL) ou configure STEAM_PROFILE");
     const steamId = await steamCall(() => this.steam.resolveSteamId(profile));
     const appIds = await steamCall(() => this.steam.wishlist(steamId));
-    if (appIds.length > 1000) throw new AppError('Importe até 1000 jogos por vez', 413);
+    if (appIds.length > 1000) throw new AppError("Importe até 1000 jogos por vez", 413);
     if (!appIds.length)
       throw new AppError(
-        'A lista de desejos da Steam está vazia ou privada (Steam > Privacidade > Detalhes dos jogos: Público)',
+        "A lista de desejos da Steam está vazia ou privada (Steam > Privacidade > Detalhes dos jogos: Público)",
         404,
       );
     const library = await this.games.library();
@@ -272,7 +272,7 @@ export class WishlistService {
         chunk.map(async (appId) => {
           const app = byId.get(appId);
           if (!app) {
-            result.failed.push({ appId, reason: 'Não encontrado na loja (removido ou oculto)' });
+            result.failed.push({ appId, reason: "Não encontrado na loja (removido ou oculto)" });
             return;
           }
           try {
@@ -281,8 +281,8 @@ export class WishlistService {
             else result.existing++;
             prices.set(appId, app.price ?? unavailable());
           } catch (e) {
-            logger.warn('wishlist.import_item_failed', { appId, error: e });
-            result.failed.push({ appId, reason: 'Falha ao importar' });
+            logger.warn("wishlist.import_item_failed", { appId, error: e });
+            result.failed.push({ appId, reason: "Falha ao importar" });
           }
         }),
       );

@@ -1,13 +1,13 @@
-import { spawn } from 'node:child_process';
+import { spawn } from "node:child_process";
 const processes = [
-  spawn(process.execPath, ['--watch', '--env-file-if-exists=.env', 'apps/api/src/main/server.ts'], {
-    stdio: 'inherit',
+  spawn(process.execPath, ["--watch", "--env-file-if-exists=.env", "apps/api/src/main/server.ts"], {
+    stdio: "inherit",
   }),
-  spawn('pnpm', ['--filter', '@checkpoint/web', 'dev', '--host', '127.0.0.1'], {
-    stdio: 'inherit',
+  spawn("pnpm", ["--filter", "@checkpoint/web", "dev", "--host", "127.0.0.1"], {
+    stdio: "inherit",
   }),
 ];
-for (const sig of ['SIGINT', 'SIGTERM'])
+for (const sig of ["SIGINT", "SIGTERM"])
   process.on(sig, () => {
     for (const p of processes) p.kill(sig);
     process.exit();

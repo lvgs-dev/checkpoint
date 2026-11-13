@@ -1,9 +1,9 @@
-import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import { renderToString } from 'react-dom/server';
-import { GameActionIcons } from './GameActionIcons';
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
+import { renderToString } from "react-dom/server";
+import { GameActionIcons } from "./GameActionIcons";
 
-vi.mock('../playing', () => ({
+vi.mock("../playing", () => ({
   useGameWriter: () => ({
     purchase: vi.fn(),
     unpurchase: vi.fn(),
@@ -11,32 +11,32 @@ vi.mock('../playing', () => ({
     togglePlaying: vi.fn(),
     setDesire: vi.fn(),
   }),
-  PlayingButton: ({ 'data-testid': testId }: { 'data-testid': string }) =>
-    React.createElement('button', { 'data-testid': testId }, 'Playing'),
+  PlayingButton: ({ "data-testid": testId }: { "data-testid": string }) =>
+    React.createElement("button", { "data-testid": testId }, "Playing"),
 }));
 
-vi.mock('../immediate', () => ({
-  ImmediateButton: ({ 'data-testid': testId }: { 'data-testid': string }) =>
-    React.createElement('button', { 'data-testid': testId }, 'Immediate'),
+vi.mock("../immediate", () => ({
+  ImmediateButton: ({ "data-testid": testId }: { "data-testid": string }) =>
+    React.createElement("button", { "data-testid": testId }, "Immediate"),
 }));
 
 const mockPurchasedGame = {
-  id: 'game-1',
-  name: 'Chrono Trigger',
-  primaryGenre: 'RPG',
-  secondaryTags: ['Clássico'],
-  status: 'Jogando' as const,
-  desire: 'Alta' as const,
-  store: 'Steam',
-  platform: 'PC',
-  pace: 'Moderado',
-  structure: 'Linear',
-  coop: 'Não',
+  id: "game-1",
+  name: "Chrono Trigger",
+  primaryGenre: "RPG",
+  secondaryTags: ["Clássico"],
+  status: "Jogando" as const,
+  desire: "Alta" as const,
+  store: "Steam",
+  platform: "PC",
+  pace: "Moderado",
+  structure: "Linear",
+  coop: "Não",
   actualHours: 15,
-  startedAt: '2025-01-01',
+  startedAt: "2025-01-01",
   finishedAt: null,
   rating: null,
-  notes: '',
+  notes: "",
   baseScore: 95,
   affinity: 90,
   plannedHours: 25,
@@ -45,12 +45,12 @@ const mockPurchasedGame = {
   mainHours: null,
   extraHours: null,
   completionistHours: null,
-  size: '',
-  timeVerification: '',
-  timeSource: '',
-  reviewNotes: '',
+  size: "",
+  timeVerification: "",
+  timeSource: "",
+  reviewNotes: "",
   previousEstimatedHours: null,
-  mechanic: '',
+  mechanic: "",
   prerequisiteId: null,
   steamUpdatedAt: null,
   updatedAt: null,
@@ -66,19 +66,19 @@ const mockPurchasedGame = {
 
 const mockWishlistGame = {
   ...mockPurchasedGame,
-  id: 'game-wish',
-  status: 'Desejado' as const,
+  id: "game-wish",
+  status: "Desejado" as const,
 };
 
 const html = (node: React.ReactElement) => renderToString(node);
 
-describe('GameActionIcons', () => {
-  it('renders 4 action buttons: immediate, playing, finish, and purchase', () => {
+describe("GameActionIcons", () => {
+  it("renders 4 action buttons: immediate, playing, finish, and purchase", () => {
     const out = html(
       React.createElement(GameActionIcons, {
         game: mockPurchasedGame,
         onFinish: () => {},
-        testIdPrefix: 'test',
+        testIdPrefix: "test",
       }),
     );
 
@@ -88,31 +88,31 @@ describe('GameActionIcons', () => {
     expect(out).toContain('data-testid="test-purchase"');
   });
 
-  it('renders money button as active/emerald when game is purchased', () => {
+  it("renders money button as active/emerald when game is purchased", () => {
     const out = html(
       React.createElement(GameActionIcons, {
         game: mockPurchasedGame,
         onFinish: () => {},
-        testIdPrefix: 'test',
+        testIdPrefix: "test",
       }),
     );
 
-    expect(out).toContain('text-emerald-400');
-    expect(out).toContain('Marcar Chrono Trigger como não comprado');
-    expect(out).toContain('Deseja marcar o jogo como não comprado?');
+    expect(out).toContain("text-emerald-400");
+    expect(out).toContain("Marcar Chrono Trigger como não comprado");
+    expect(out).toContain("Deseja marcar o jogo como não comprado?");
   });
 
-  it('renders money button as dimmed/muted when game is on wishlist', () => {
+  it("renders money button as dimmed/muted when game is on wishlist", () => {
     const out = html(
       React.createElement(GameActionIcons, {
         game: mockWishlistGame,
         onFinish: () => {},
-        testIdPrefix: 'test',
+        testIdPrefix: "test",
       }),
     );
 
-    expect(out).toContain('text-muted-foreground');
-    expect(out).toContain('Marcar Chrono Trigger como comprado');
-    expect(out).toContain('Você comprou o jogo?');
+    expect(out).toContain("text-muted-foreground");
+    expect(out).toContain("Marcar Chrono Trigger como comprado");
+    expect(out).toContain("Você comprou o jogo?");
   });
 });

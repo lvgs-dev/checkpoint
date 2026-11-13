@@ -1,27 +1,27 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router';
-import { Input } from '@/components/ui/input';
-import { EmptyState } from '@checkpoint/ui-react';
-import { getAllComponents, type ComponentCategory } from '@/components/registry';
+import { useMemo, useState } from "react";
+import { Link } from "react-router";
+import { Input } from "@/components/ui/input";
+import { EmptyState } from "@checkpoint/ui-react";
+import { getAllComponents, type ComponentCategory } from "@/components/registry";
 
-const CATEGORIES: { id: 'all' | ComponentCategory; label: string }[] = [
-  { id: 'all', label: 'Todos' },
-  { id: 'primitives', label: 'Primitives' },
-  { id: 'feedback', label: 'Feedback' },
-  { id: 'actions', label: 'Actions' },
-  { id: 'metadata', label: 'Metadata' },
-  { id: 'dialogs', label: 'Dialogs' },
+const CATEGORIES: { id: "all" | ComponentCategory; label: string }[] = [
+  { id: "all", label: "Todos" },
+  { id: "primitives", label: "Primitives" },
+  { id: "feedback", label: "Feedback" },
+  { id: "actions", label: "Actions" },
+  { id: "metadata", label: "Metadata" },
+  { id: "dialogs", label: "Dialogs" },
 ];
 
 export function ComponentCatalogPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | ComponentCategory>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<"all" | ComponentCategory>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const allComponents = useMemo(() => getAllComponents(), []);
 
   const filteredComponents = useMemo(() => {
     return allComponents.filter((comp) => {
-      const matchesCategory = selectedCategory === 'all' || comp.category === selectedCategory;
+      const matchesCategory = selectedCategory === "all" || comp.category === selectedCategory;
       const q = searchQuery.trim().toLowerCase();
       const matchesSearch =
         !q || comp.name.toLowerCase().includes(q) || comp.description.toLowerCase().includes(q);
@@ -70,8 +70,8 @@ export function ComponentCatalogPage() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                   active
-                    ? 'bg-primary text-primary-foreground shadow-xs'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                 }`}
                 aria-pressed={active}
               >

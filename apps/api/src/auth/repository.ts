@@ -1,4 +1,4 @@
-import type { Role } from '../../../../packages/core/src/authorization.ts';
+import type { Role } from "../../../../packages/core/src/authorization.ts";
 
 export interface Identity {
   id: string;
@@ -15,7 +15,7 @@ export interface SessionRecord {
   expiresAt: Date;
   userAgent: string;
 }
-export type TokenKind = 'verify_email' | 'reset_password';
+export type TokenKind = "verify_email" | "reset_password";
 export interface TokenRecord {
   id: string;
   identityId: string;

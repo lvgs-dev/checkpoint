@@ -1,6 +1,6 @@
-import { EmptyState, ErrorState } from '@checkpoint/ui-react';
-import { AppLoader } from '../loader/AppLoader';
-import type { useRouteListId } from './lists-store';
+import { EmptyState, ErrorState } from "@checkpoint/ui-react";
+import { AppLoader } from "../loader/AppLoader";
+import type { useRouteListId } from "./lists-store";
 
 /**
  * What a list route shows before it has a list id: a loader, an error with retry, or the empty
@@ -14,8 +14,8 @@ export function RouteListState({
   route: ReturnType<typeof useRouteListId>;
   prefix: string;
 }) {
-  if (route.status === 'ready') return null;
-  if (route.status === 'error')
+  if (route.status === "ready") return null;
+  if (route.status === "error")
     return (
       <ErrorState
         data-testid={`${prefix}-lists`}
@@ -24,7 +24,7 @@ export function RouteListState({
         onRetry={route.retry}
       />
     );
-  if (route.status === 'empty')
+  if (route.status === "empty")
     return (
       <EmptyState
         data-testid={`${prefix}-lists-empty`}

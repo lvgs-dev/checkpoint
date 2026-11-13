@@ -1,11 +1,11 @@
 // Persistência da lista de desejos: cadastro de jogos novos, descrição da loja e preços.
 // O jogo desejado é um Game comum com status 'Desejado'; edição, listagem e pontuação
 // continuam no GameRepository.
-import type { CreateResult, WishlistStore } from '../ports.ts';
-import type { Game, SteamApp, SteamPrice } from '../../../../../packages/core/src/models.ts';
-import type { WishlistDriver } from '../drivers/types.ts';
-import type { AppUserResolver } from '../ports.ts';
-import type { GameRepository } from '../ports.ts';
+import type { CreateResult, WishlistStore } from "../ports.ts";
+import type { Game, SteamApp, SteamPrice } from "../../../../../packages/core/src/models.ts";
+import type { WishlistDriver } from "../drivers/types.ts";
+import type { AppUserResolver } from "../ports.ts";
+import type { GameRepository } from "../ports.ts";
 
 export class WishlistStoreImpl implements WishlistStore {
   private driver: WishlistDriver;

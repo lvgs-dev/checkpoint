@@ -8,7 +8,7 @@
     border: 1px solid var(--border);
     border-radius: 9px;
     padding: 8px 18px;
-    font-family: 'Cambria Math', 'STIX Two Math', Georgia, serif;
+    font-family: "Cambria Math", "STIX Two Math", Georgia, serif;
     font-size: 15px;
     color: var(--text);
     overflow-wrap: anywhere;
@@ -23,12 +23,12 @@
     font-weight: 600;
   }
   .formula b {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: "DM Sans", system-ui, sans-serif;
     font-size: 13px;
     color: var(--accent);
   }
   .formula small {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: "DM Sans", system-ui, sans-serif;
     color: var(--muted);
     font-size: 11px;
   }
@@ -53,7 +53,7 @@
   }
   .chip {
     display: inline-block;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: "DM Sans", system-ui, sans-serif;
     font-size: 11px;
     line-height: 1.5;
     padding: 2px 8px;
@@ -74,7 +74,7 @@
     color: var(--text-2);
   }
   .legend var {
-    font-family: 'Cambria Math', Georgia, serif;
+    font-family: "Cambria Math", Georgia, serif;
     font-weight: 700;
   }
   .settings-section .muted {
@@ -166,7 +166,7 @@
     pointer-events: none;
   }
   .switch span::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 3px;
     left: 3px;
@@ -231,12 +231,12 @@
     color: var(--muted);
     margin-left: 2px;
   }
-  .pick[aria-pressed='true'] {
+  .pick[aria-pressed="true"] {
     background: var(--accent-soft);
     border-color: var(--accent-line);
     color: var(--accent-ink);
   }
-  .pick.exclude[aria-pressed='true'] {
+  .pick.exclude[aria-pressed="true"] {
     background: var(--warn-bg);
     border-color: var(--warn-line);
     color: var(--warn);
@@ -323,7 +323,7 @@
   }
   /* Toque: área de 44px no switch (o label inteiro alterna) e nos chips/campos. */
   .switch::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: -11px -6px;
   }

@@ -16,6 +16,7 @@ Owner: GitHub > Settings > Rules > Rulesets. After green CI, activate `Protect h
 Select the PR check names from the green run. Open the homolog-to-main PR; the owner approves and merges it.
 
 Created files:
+
 - `.dockerignore`
 - `.github/workflows/ci.yml`
 - `AI/operations/delivery-checklist.md`

@@ -3,9 +3,9 @@
 Call sites use one facade:
 
 ```ts
-import { log } from '../logger.ts';
-log.info('reorder.accepted', { gameId });
-const scoped = log.child({ component: 'steam' });
+import { log } from "../logger.ts";
+log.info("reorder.accepted", { gameId });
+const scoped = log.child({ component: "steam" });
 ```
 
 `requestId` and `userId` are added from the request context (AsyncLocalStorage). Events are redacted

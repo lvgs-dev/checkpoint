@@ -1,9 +1,9 @@
-import { QueueView } from '../features/queue/QueueView';
-import { RouteListState, useRouteListId } from '../features/lists';
+import { QueueView } from "../features/queue/QueueView";
+import { RouteListState, useRouteListId } from "../features/lists";
 
 /** Route /ordem and /ordem/:listId. Without a valid list id the hook redirects to the default list. */
 export function QueuePage() {
-  const route = useRouteListId('/ordem');
+  const route = useRouteListId("/ordem");
   const { listId } = route;
   return (
     <>

@@ -1,9 +1,9 @@
-import type { ManualMove } from '../../../../../packages/core/src/models.ts';
-import type { ManualAdjustmentRepository } from '../ports.ts';
-import type { ManualPin } from '../../domain/scoring.ts';
-import type { PinsDriver } from '../drivers/types.ts';
-import type { AppUserResolver } from '../ports.ts';
-import { toAppError } from './errors.ts';
+import type { ManualMove } from "../../../../../packages/core/src/models.ts";
+import type { ManualAdjustmentRepository } from "../ports.ts";
+import type { ManualPin } from "../../domain/scoring.ts";
+import type { PinsDriver } from "../drivers/types.ts";
+import type { AppUserResolver } from "../ports.ts";
+import { toAppError } from "./errors.ts";
 
 export class ManualAdjustmentRepositoryImpl implements ManualAdjustmentRepository {
   private driver: PinsDriver;

@@ -1,19 +1,19 @@
 // Provision an administrator and copy seed entries without writing credentials.
-import { randomUUID } from 'node:crypto';
-import postgres from 'postgres';
-import { hashPassword } from '../src/auth/password.ts';
+import { randomUUID } from "node:crypto";
+import postgres from "postgres";
+import { hashPassword } from "../src/auth/password.ts";
 
 const env = process.env;
-for (const key of ['DATABASE_URL', 'MASTER_EMAIL', 'MASTER_PASSWORD']) {
+for (const key of ["DATABASE_URL", "MASTER_EMAIL", "MASTER_PASSWORD"]) {
   if (!env[key]) throw new Error(`Set ${key}`);
 }
 if (env.MASTER_PASSWORD.length < 8 || Buffer.byteLength(env.MASTER_PASSWORD) > 1024)
-  throw new Error('MASTER_PASSWORD must contain 8 to 1024 bytes');
+  throw new Error("MASTER_PASSWORD must contain 8 to 1024 bytes");
 const email = env.MASTER_EMAIL.trim().toLowerCase();
-if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Invalid MASTER_EMAIL');
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Invalid MASTER_EMAIL");
 const passwordHash = await hashPassword(env.MASTER_PASSWORD);
-const seedId = '00000000-0000-4000-8000-000000000001';
-const reset = process.argv.includes('--reset');
+const seedId = "00000000-0000-4000-8000-000000000001";
+const reset = process.argv.includes("--reset");
 const sql = postgres(env.DATABASE_URL, { prepare: false, max: 1 });
 try {
   await sql.begin(async (tx) => {
@@ -46,7 +46,7 @@ try {
          AND NOT EXISTS (SELECT 1 FROM library_entry m
                           WHERE m.user_id = ${owner.id} AND m.game_id = e.game_id)`;
   });
-  console.info('Administrator provisioned. Existing sessions and recovery tokens are revoked.');
+  console.info("Administrator provisioned. Existing sessions and recovery tokens are revoked.");
 } finally {
   await sql.end();
 }

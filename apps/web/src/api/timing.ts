@@ -20,7 +20,7 @@ export interface RequestTiming {
 
 export function parseServerTiming(header: string | null): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const m of (header ?? '').matchAll(/([\w-]+);dur=(-?\d+(?:\.\d+)?)/g))
+  for (const m of (header ?? "").matchAll(/([\w-]+);dur=(-?\d+(?:\.\d+)?)/g))
     out[m[1]] = Number(m[2]);
   return out;
 }
@@ -44,7 +44,7 @@ export function computeTiming(input: {
 }): RequestTiming {
   const { serverTiming, totalMs, clickToSendMs = null, ...rest } = input;
   const { total, db, ...stages } = parseServerTiming(serverTiming);
-  const queryCount = /db;dur=[\d.-]+;desc=(\d+)/.exec(serverTiming ?? '');
+  const queryCount = /db;dur=[\d.-]+;desc=(\d+)/.exec(serverTiming ?? "");
   const serverMs = total ?? null;
   return {
     ...rest,
@@ -66,7 +66,7 @@ const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 const pct = (sorted: number[], p: number) =>
   sorted[Math.max(0, Math.ceil((p / 100) * sorted.length) - 1)];
 
-const METRICS = ['totalMs', 'serverMs', 'networkMs', 'dbMs'] as const;
+const METRICS = ["totalMs", "serverMs", "networkMs", "dbMs"] as const;
 type Stat = { p50: number; p95: number; max: number };
 export type TimingSummary = Record<string, { n: number } & Record<(typeof METRICS)[number], Stat>>;
 
@@ -74,7 +74,7 @@ export type TimingSummary = Record<string, { n: number } & Record<(typeof METRIC
 export function summarize(timings: RequestTiming[]): TimingSummary {
   const groups = new Map<string, RequestTiming[]>();
   for (const t of timings) {
-    const key = `${t.method} ${t.path.replace(UUID, ':id')}`;
+    const key = `${t.method} ${t.path.replace(UUID, ":id")}`;
     groups.set(key, [...(groups.get(key) ?? []), t]);
   }
   const out: TimingSummary = {};
@@ -99,5 +99,5 @@ export function recordTiming(timing: RequestTiming) {
   buffer.push(timing);
   if (buffer.length > BUFFER_SIZE) buffer.shift();
   Object.assign(window, { __timings: buffer, __timingSummary: () => summarize(buffer) });
-  if (import.meta.env.DEV) console.debug('[timing]', timing);
+  if (import.meta.env.DEV) console.debug("[timing]", timing);
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 /*
  * Tokens de cor. Tema em <html data-theme="light|dark"> e destaque em
  * <html data-accent="green|blue|violet|orange|rose">, aplicados antes do 1º paint por um
@@ -6,7 +6,7 @@
  * (suave, linha, tinta, capa) saem de color-mix, então cada paleta só define 2 cores.
  */
 :root {
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   font-synthesis: none;
   color-scheme: light;
   --accent: #116747;
@@ -56,7 +56,7 @@
   color: var(--text);
   background: var(--bg);
 }
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
   --accent: #4cc08a;
   --accent-bright: #6fd3a3;
@@ -101,35 +101,35 @@
   --b-gray: #b9c4be;
 }
 /* Paletas de destaque (claro / escuro). Contraste do texto sobre o destaque >= 4.5:1. */
-:root[data-accent='blue'] {
+:root[data-accent="blue"] {
   --accent: #1f5fae;
   --accent-bright: #4a86d4;
 }
-:root[data-accent='violet'] {
+:root[data-accent="violet"] {
   --accent: #6b40b0;
   --accent-bright: #946bd6;
 }
-:root[data-accent='orange'] {
+:root[data-accent="orange"] {
   --accent: #a84a15;
   --accent-bright: #d9773e;
 }
-:root[data-accent='rose'] {
+:root[data-accent="rose"] {
   --accent: #a92d57;
   --accent-bright: #d6628a;
 }
-:root[data-theme='dark'][data-accent='blue'] {
+:root[data-theme="dark"][data-accent="blue"] {
   --accent: #79aef0;
   --accent-bright: #9cc4f5;
 }
-:root[data-theme='dark'][data-accent='violet'] {
+:root[data-theme="dark"][data-accent="violet"] {
   --accent: #b69bf0;
   --accent-bright: #ccb8f5;
 }
-:root[data-theme='dark'][data-accent='orange'] {
+:root[data-theme="dark"][data-accent="orange"] {
   --accent: #f0a06a;
   --accent-bright: #f5bb93;
 }
-:root[data-theme='dark'][data-accent='rose'] {
+:root[data-theme="dark"][data-accent="rose"] {
   --accent: #f08fb0;
   --accent-bright: #f5adc6;
 }
@@ -238,7 +238,7 @@ summary {
 .brand small {
   display: block;
   font:
-    600 8px 'DM Sans',
+    600 8px "DM Sans",
     sans-serif;
   letter-spacing: 1.3px;
   margin-top: 5px;
@@ -444,7 +444,7 @@ h3 {
 }
 .stats strong span {
   font:
-    400 12px 'DM Sans',
+    400 12px "DM Sans",
     sans-serif;
   color: var(--muted);
   margin-left: 5px;
@@ -624,7 +624,7 @@ textarea {
   overflow: hidden;
 }
 .cover:not(:has(img)),
-.cover:has(img[style*='none']) {
+.cover:has(img[style*="none"]) {
   background: linear-gradient(130deg, var(--cover-a), var(--cover-b));
 }
 .cover img,
@@ -638,10 +638,10 @@ textarea {
   object-position: center;
   z-index: 1;
 }
-.cover:has(img:not([style*='none'])) .cover-fallback,
-.next-cover:has(img:not([style*='none'])) > span,
-.queue-cover:has(img:not([style*='none'])) > span,
-.detail-cover:has(img:not([style*='none'])) > span {
+.cover:has(img:not([style*="none"])) .cover-fallback,
+.next-cover:has(img:not([style*="none"])) > span,
+.queue-cover:has(img:not([style*="none"])) > span,
+.detail-cover:has(img:not([style*="none"])) > span {
   display: none;
 }
 .cover-fallback,
@@ -807,7 +807,7 @@ footer {
   background: var(--surface-2);
 }
 .next-cover:not(:has(img)),
-.next-cover:has(img[style*='none']) {
+.next-cover:has(img[style*="none"]) {
   background: linear-gradient(135deg, var(--cover-a), var(--cover-b));
 }
 .method {
@@ -968,7 +968,7 @@ footer {
   pointer-events: none;
 }
 .queue-row:has(.drag-handle:focus-visible),
-.queue-row:has(.drag-handle[aria-pressed='true']) {
+.queue-row:has(.drag-handle[aria-pressed="true"]) {
   outline: 1px solid var(--accent);
   outline-offset: -1px;
 }
@@ -1026,7 +1026,7 @@ footer {
   line-height: 1;
 }
 .chip-remove::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -12px;
 }
@@ -1159,7 +1159,7 @@ footer {
   flex-shrink: 0;
 }
 .queue-cover:not(:has(img)),
-.queue-cover:has(img[style*='none']) {
+.queue-cover:has(img[style*="none"]) {
   background: var(--cover-a);
 }
 .queue-cover > span {
@@ -1229,7 +1229,7 @@ footer {
   flex-shrink: 0;
 }
 .detail-cover:not(:has(img)),
-.detail-cover:has(img[style*='none']) {
+.detail-cover:has(img[style*="none"]) {
   background: var(--cover-a);
 }
 .detail-hero h1 {
@@ -1265,7 +1265,7 @@ footer {
   font-weight: 600;
   margin: 17px 0 0;
 }
-.panel input:not([type='checkbox']),
+.panel input:not([type="checkbox"]),
 .panel select,
 .panel textarea {
   display: block;
@@ -1351,7 +1351,7 @@ footer {
 .big-score small {
   display: block;
   font:
-    400 11px 'DM Sans',
+    400 11px "DM Sans",
     sans-serif;
   color: var(--muted);
   margin-top: 5px;

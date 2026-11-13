@@ -1,41 +1,41 @@
-import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import { renderToString } from 'react-dom/server';
-import { GameCard } from './GameCard';
-import type { ScoredGame } from '../../../../../packages/core/src/models';
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
+import { renderToString } from "react-dom/server";
+import { GameCard } from "./GameCard";
+import type { ScoredGame } from "../../../../../packages/core/src/models";
 
-vi.mock('react-router', () => ({
+vi.mock("react-router", () => ({
   Link: ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
-    React.createElement('a', props, children),
+    React.createElement("a", props, children),
 }));
 
-vi.mock('../playing', () => ({
-  PlayingButton: ({ 'data-testid': testId }: { 'data-testid': string }) =>
-    React.createElement('button', { 'data-testid': testId }, 'Playing'),
+vi.mock("../playing", () => ({
+  PlayingButton: ({ "data-testid": testId }: { "data-testid": string }) =>
+    React.createElement("button", { "data-testid": testId }, "Playing"),
 }));
 
-vi.mock('../immediate', () => ({
-  ImmediateButton: ({ 'data-testid': testId }: { 'data-testid': string }) =>
-    React.createElement('button', { 'data-testid': testId }, 'Immediate'),
+vi.mock("../immediate", () => ({
+  ImmediateButton: ({ "data-testid": testId }: { "data-testid": string }) =>
+    React.createElement("button", { "data-testid": testId }, "Immediate"),
 }));
 
 const mockPurchasedGame: ScoredGame = {
-  id: 'zelda-botw',
-  name: 'The Legend of Zelda: Breath of the Wild',
-  primaryGenre: 'Aventura',
-  secondaryTags: ['Mundo Aberto', 'Exploração'],
-  status: 'Não iniciado',
-  desire: 'Alta',
-  store: 'eShop',
-  platform: 'Switch',
-  pace: 'Longo',
-  structure: 'Mundo Aberto',
-  coop: 'Não',
+  id: "zelda-botw",
+  name: "The Legend of Zelda: Breath of the Wild",
+  primaryGenre: "Aventura",
+  secondaryTags: ["Mundo Aberto", "Exploração"],
+  status: "Não iniciado",
+  desire: "Alta",
+  store: "eShop",
+  platform: "Switch",
+  pace: "Longo",
+  structure: "Mundo Aberto",
+  coop: "Não",
   actualHours: null,
   startedAt: null,
   finishedAt: null,
   rating: null,
-  notes: '',
+  notes: "",
   baseScore: 97,
   affinity: 95,
   plannedHours: 50,
@@ -44,12 +44,12 @@ const mockPurchasedGame: ScoredGame = {
   mainHours: 50,
   extraHours: 80,
   completionistHours: 120,
-  size: 'Grande',
-  timeVerification: '',
-  timeSource: '',
-  reviewNotes: '',
+  size: "Grande",
+  timeVerification: "",
+  timeSource: "",
+  reviewNotes: "",
   previousEstimatedHours: null,
-  mechanic: 'Física',
+  mechanic: "Física",
   prerequisiteId: null,
   steamUpdatedAt: null,
   updatedAt: null,
@@ -65,15 +65,15 @@ const mockPurchasedGame: ScoredGame = {
 
 const mockWishlistGame: ScoredGame = {
   ...mockPurchasedGame,
-  id: 'elden-ring',
-  name: 'Elden Ring',
-  status: 'Desejado',
+  id: "elden-ring",
+  name: "Elden Ring",
+  status: "Desejado",
 };
 
 const html = (node: React.ReactElement) => renderToString(node);
 
-describe('GameCard action icons', () => {
-  it('renders all 4 action icons grouped on the right for purchased game', () => {
+describe("GameCard action icons", () => {
+  it("renders all 4 action icons grouped on the right for purchased game", () => {
     const out = html(
       React.createElement(GameCard, {
         game: mockPurchasedGame,
@@ -86,10 +86,10 @@ describe('GameCard action icons', () => {
     expect(out).toContain('data-testid="library-playing-zelda-botw"');
     expect(out).toContain('data-testid="library-finish-zelda-botw"');
     expect(out).toContain('data-testid="library-unpurchase-zelda-botw"');
-    expect(out).toContain('text-emerald-400');
+    expect(out).toContain("text-emerald-400");
   });
 
-  it('renders money button as library-purchase with dimmed style when game is desired', () => {
+  it("renders money button as library-purchase with dimmed style when game is desired", () => {
     const out = html(
       React.createElement(GameCard, {
         game: mockWishlistGame,
@@ -102,12 +102,12 @@ describe('GameCard action icons', () => {
     expect(out).toContain('data-testid="library-playing-elden-ring"');
     expect(out).toContain('data-testid="library-finish-elden-ring"');
     expect(out).toContain('data-testid="library-purchase-elden-ring"');
-    expect(out).toContain('text-muted-foreground');
+    expect(out).toContain("text-muted-foreground");
   });
 });
 
-describe('GameCard plannedHours display', () => {
-  it('renders estimated hours when plannedHours is positive', () => {
+describe("GameCard plannedHours display", () => {
+  it("renders estimated hours when plannedHours is positive", () => {
     const out = html(
       React.createElement(GameCard, {
         game: { ...mockPurchasedGame, plannedHours: 50 },
@@ -115,11 +115,11 @@ describe('GameCard plannedHours display', () => {
         onError: () => {},
       }),
     );
-    expect(out).toContain('h estimadas');
+    expect(out).toContain("h estimadas");
     expect(out).toMatch(/50<!-- --> h estimadas/);
   });
 
-  it('does not render estimated hours or confirmation sentence when plannedHours is null', () => {
+  it("does not render estimated hours or confirmation sentence when plannedHours is null", () => {
     const out = html(
       React.createElement(GameCard, {
         game: { ...mockPurchasedGame, plannedHours: null },
@@ -127,11 +127,11 @@ describe('GameCard plannedHours display', () => {
         onError: () => {},
       }),
     );
-    expect(out).not.toContain('estimadas');
-    expect(out).not.toContain('Tempo a confirmar');
+    expect(out).not.toContain("estimadas");
+    expect(out).not.toContain("Tempo a confirmar");
   });
 
-  it('does not render estimated hours when plannedHours is undefined or 0', () => {
+  it("does not render estimated hours when plannedHours is undefined or 0", () => {
     const outUndefined = html(
       React.createElement(GameCard, {
         game: { ...mockPurchasedGame, plannedHours: undefined as unknown as null },
@@ -139,8 +139,8 @@ describe('GameCard plannedHours display', () => {
         onError: () => {},
       }),
     );
-    expect(outUndefined).not.toContain('estimadas');
-    expect(outUndefined).not.toContain('Tempo a confirmar');
+    expect(outUndefined).not.toContain("estimadas");
+    expect(outUndefined).not.toContain("Tempo a confirmar");
 
     const outZero = html(
       React.createElement(GameCard, {
@@ -149,7 +149,7 @@ describe('GameCard plannedHours display', () => {
         onError: () => {},
       }),
     );
-    expect(outZero).not.toContain('estimadas');
-    expect(outZero).not.toContain('Tempo a confirmar');
+    expect(outZero).not.toContain("estimadas");
+    expect(outZero).not.toContain("Tempo a confirmar");
   });
 });

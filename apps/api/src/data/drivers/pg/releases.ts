@@ -1,9 +1,9 @@
 // Postgres: registro de versões (app_release) e evidências de build (app_release_deploy).
 // Também usado pelos scripts de release, que passam a própria conexão.
-import type { Sql } from '../../db.ts';
-import type { DeployInput, Environment, NewRelease, Release } from '../../../domain/releases.ts';
-import type { ReleaseDriver } from '../types.ts';
-import { pgError } from './shared.ts';
+import type { Sql } from "../../db.ts";
+import type { DeployInput, Environment, NewRelease, Release } from "../../../domain/releases.ts";
+import type { ReleaseDriver } from "../types.ts";
+import { pgError } from "./shared.ts";
 
 const rowJson = (sql: Sql) => sql`
   json_build_object(

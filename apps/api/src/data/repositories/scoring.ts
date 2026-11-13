@@ -1,10 +1,10 @@
-import type { ScoringConfig } from '../../../../../packages/core/src/models.ts';
-import type { ScoringConfigRepository, StoredScoringConfig } from '../ports.ts';
-import { AppError } from '../../shared/errors.ts';
-import { storedScoringConfig } from '../../domain/scoring-config.ts';
-import type { ScoringDriver, ScoringRecord } from '../drivers/types.ts';
-import type { AppUserResolver } from '../ports.ts';
-import { toAppError } from './errors.ts';
+import type { ScoringConfig } from "../../../../../packages/core/src/models.ts";
+import type { ScoringConfigRepository, StoredScoringConfig } from "../ports.ts";
+import { AppError } from "../../shared/errors.ts";
+import { storedScoringConfig } from "../../domain/scoring-config.ts";
+import type { ScoringDriver, ScoringRecord } from "../drivers/types.ts";
+import type { AppUserResolver } from "../ports.ts";
+import { toAppError } from "./errors.ts";
 
 /** Registro guardado → configuração completa (sem registro = padrão, versão 0). */
 export const toStoredScoring = (raw: ScoringRecord | null | undefined): StoredScoringConfig => ({
@@ -25,7 +25,7 @@ export class ScoringConfigRepositoryImpl implements ScoringConfigRepository {
   }
   async save(listId: string, config: ScoringConfig) {
     const saved = await this.driver.save(await this.user(), listId, config).catch(toAppError);
-    if (!saved) throw new AppError('Lista não encontrada', 404);
+    if (!saved) throw new AppError("Lista não encontrada", 404);
     return toStoredScoring(saved);
   }
 }

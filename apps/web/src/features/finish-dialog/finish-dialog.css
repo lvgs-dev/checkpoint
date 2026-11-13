@@ -160,7 +160,7 @@
     background: var(--surface);
   }
   .finish-grabber::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 50%;
     top: 10px;

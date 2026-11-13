@@ -1,17 +1,17 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { Desire, GameStatus } from '../../../../../packages/core/src/models';
-import { testIdKey, testIdValue } from '@/components/ui/test-id';
-import { cn } from '@/lib/utils';
-import { AppLoader } from '../loader/AppLoader';
-import { MetadataBadge } from './MetadataBadge';
-import type { MetadataKind } from './presentation';
+import { useEffect, useId, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { Desire, GameStatus } from "../../../../../packages/core/src/models";
+import { testIdKey, testIdValue } from "@/components/ui/test-id";
+import { cn } from "@/lib/utils";
+import { AppLoader } from "../loader/AppLoader";
+import { MetadataBadge } from "./MetadataBadge";
+import type { MetadataKind } from "./presentation";
 
 type Common = {
   label: string;
   kind: MetadataKind;
   options: string[];
-  'data-testid': string;
+  "data-testid": string;
   isLoading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
@@ -22,7 +22,7 @@ type Common = {
 };
 
 function metadataOptionKey(kind: MetadataKind, value: string) {
-  const codes = kind === 'status' ? GameStatus : kind === 'desire' ? Desire : {};
+  const codes = kind === "status" ? GameStatus : kind === "desire" ? Desire : {};
   const code = Object.entries(codes).find(([, label]) => label === value)?.[0];
   return code ? testIdKey(code) : testIdValue(value);
 }
@@ -52,7 +52,7 @@ export function MetadataSelect(props: Props) {
   const optionsListRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const max = props.multiple ? (props.max ?? 3) : 0;
   const selectedValues = props.multiple ? props.values : props.value ? [props.value] : [];
@@ -67,9 +67,9 @@ export function MetadataSelect(props: Props) {
 
   const close = (restoreFocus = true) => {
     setOpen(false);
-    setSearchQuery('');
+    setSearchQuery("");
     if (restoreFocus) {
-      root.current?.querySelector<HTMLButtonElement>('.select-trigger')?.focus();
+      root.current?.querySelector<HTMLButtonElement>(".select-trigger")?.focus();
     }
   };
 
@@ -86,8 +86,8 @@ export function MetadataSelect(props: Props) {
         close(false);
       }
     };
-    document.addEventListener('mousedown', outside);
-    return () => document.removeEventListener('mousedown', outside);
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
   }, [open]);
 
   useEffect(() => {
@@ -95,8 +95,8 @@ export function MetadataSelect(props: Props) {
     const list = optionsListRef.current;
     if (!list) return;
     const item = list.children[highlightedIndex] as HTMLElement | undefined;
-    if (item && typeof item.scrollIntoView === 'function') {
-      item.scrollIntoView({ block: 'nearest' });
+    if (item && typeof item.scrollIntoView === "function") {
+      item.scrollIntoView({ block: "nearest" });
     }
   }, [highlightedIndex, open]);
 
@@ -116,10 +116,10 @@ export function MetadataSelect(props: Props) {
     if (disabled) return;
     if (!open) {
       if (
-        event.key === 'ArrowDown' ||
-        event.key === 'ArrowUp' ||
-        event.key === 'Enter' ||
-        event.key === ' '
+        event.key === "ArrowDown" ||
+        event.key === "ArrowUp" ||
+        event.key === "Enter" ||
+        event.key === " "
       ) {
         event.preventDefault();
         openList();
@@ -127,29 +127,29 @@ export function MetadataSelect(props: Props) {
       return;
     }
 
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       event.preventDefault();
       close(true);
       return;
     }
-    if (event.key === 'Tab') {
+    if (event.key === "Tab") {
       close(false);
       return;
     }
     if (filteredOptions.length === 0) return;
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       event.preventDefault();
       setHighlightedIndex((prev) => (prev + 1) % filteredOptions.length);
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setHighlightedIndex((prev) => (prev - 1 + filteredOptions.length) % filteredOptions.length);
-    } else if (event.key === 'Home') {
+    } else if (event.key === "Home") {
       event.preventDefault();
       setHighlightedIndex(0);
-    } else if (event.key === 'End') {
+    } else if (event.key === "End") {
       event.preventDefault();
       setHighlightedIndex(filteredOptions.length - 1);
-    } else if (event.key === 'Enter' || event.key === ' ') {
+    } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       const item = filteredOptions[highlightedIndex];
       if (item) choose(item);
@@ -165,20 +165,20 @@ export function MetadataSelect(props: Props) {
   return (
     <div
       ref={root}
-      className={cn('relative block min-w-0', props.className ?? 'mt-[17px]', open && 'z-30')}
+      className={cn("relative block min-w-0", props.className ?? "mt-[17px]", open && "z-30")}
     >
-      <span className="block text-[11px] font-semibold max-sm:text-[13px]" id={id + '-label'}>
+      <span className="block text-[11px] font-semibold max-sm:text-[13px]" id={id + "-label"}>
         {label}
       </span>
       <button
-        data-testid={props['data-testid']}
+        data-testid={props["data-testid"]}
         type="button"
         role="combobox"
         disabled={disabled}
         aria-disabled={disabled || undefined}
         className={cn(
-          'select-trigger mt-2 flex min-h-[46px] w-full items-center justify-between gap-2 rounded-[7px] border border-border bg-card px-3 pr-3.5 py-2 text-left text-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30',
-          disabled && 'cursor-not-allowed opacity-50',
+          "select-trigger mt-2 flex min-h-[46px] w-full items-center justify-between gap-2 rounded-[7px] border border-border bg-card px-3 pr-3.5 py-2 text-left text-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30",
+          disabled && "cursor-not-allowed opacity-50",
         )}
         aria-labelledby={`${id}-label ${id}-value`}
         aria-haspopup="listbox"
@@ -188,7 +188,7 @@ export function MetadataSelect(props: Props) {
         onClick={() => !disabled && (open ? close() : openList())}
         onKeyDown={navigate}
       >
-        <span className="flex min-w-0 flex-wrap gap-[5px]" id={id + '-value'}>
+        <span className="flex min-w-0 flex-wrap gap-[5px]" id={id + "-value"}>
           {selectedValues.length ? (
             selectedValues.map((item) => (
               <MetadataBadge
@@ -201,17 +201,17 @@ export function MetadataSelect(props: Props) {
           ) : (
             <span className="text-xs text-muted-foreground">
               {isLoading
-                ? 'Carregando…'
+                ? "Carregando…"
                 : props.multiple
                   ? `Selecionar até ${max} tags`
-                  : 'Selecionar'}
+                  : "Selecionar"}
             </span>
           )}
         </span>
         <ChevronDown
           className={cn(
-            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
-            open && 'rotate-180',
+            "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180",
           )}
           aria-hidden="true"
         />
@@ -223,7 +223,7 @@ export function MetadataSelect(props: Props) {
           role="listbox"
           tabIndex={-1}
           id={id}
-          aria-labelledby={id + '-label'}
+          aria-labelledby={id + "-label"}
           aria-multiselectable={props.multiple || undefined}
         >
           {props.searchable && (
@@ -231,9 +231,9 @@ export function MetadataSelect(props: Props) {
               <input
                 type="search"
                 role="searchbox"
-                data-testid={`${props['data-testid']}-search`}
+                data-testid={`${props["data-testid"]}-search`}
                 className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring"
-                placeholder={props.searchPlaceholder ?? 'Buscar…'}
+                placeholder={props.searchPlaceholder ?? "Buscar…"}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
@@ -244,7 +244,7 @@ export function MetadataSelect(props: Props) {
           <div ref={optionsListRef} className="flex-1 overflow-auto overscroll-contain p-1.5">
             {isLoading ? (
               <div
-                data-testid={`${props['data-testid']}-loading`}
+                data-testid={`${props["data-testid"]}-loading`}
                 className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground"
                 role="status"
               >
@@ -252,14 +252,14 @@ export function MetadataSelect(props: Props) {
               </div>
             ) : isError ? (
               <div
-                data-testid={`${props['data-testid']}-error`}
+                data-testid={`${props["data-testid"]}-error`}
                 className="flex flex-col items-center justify-center gap-2 p-3 text-center text-xs text-muted-foreground"
                 role="alert"
               >
                 <span>Não foi possível carregar as opções.</span>
                 {onRetry && (
                   <button
-                    data-testid={`${props['data-testid']}-retry`}
+                    data-testid={`${props["data-testid"]}-retry`}
                     type="button"
                     onClick={onRetry}
                     className="button inline-flex items-center gap-1.5 px-2.5 py-1 text-xs"
@@ -270,7 +270,7 @@ export function MetadataSelect(props: Props) {
               </div>
             ) : filteredOptions.length === 0 ? (
               <div
-                data-testid={`${props['data-testid']}-empty`}
+                data-testid={`${props["data-testid"]}-empty`}
                 className="py-4 text-center text-xs text-muted-foreground"
               >
                 Nenhuma opção disponível
@@ -283,7 +283,7 @@ export function MetadataSelect(props: Props) {
                 return (
                   <button
                     id={`${id}-option-${metadataOptionKey(kind, item)}`}
-                    data-testid={`${props['data-testid']}-option-${metadataOptionKey(kind, item)}`}
+                    data-testid={`${props["data-testid"]}-option-${metadataOptionKey(kind, item)}`}
                     key={item}
                     type="button"
                     role="option"
@@ -292,9 +292,9 @@ export function MetadataSelect(props: Props) {
                     tabIndex={isSelected ? 0 : -1}
                     onMouseEnter={() => setHighlightedIndex(index)}
                     className={cn(
-                      'flex min-h-11 w-full items-center justify-between gap-2 rounded-md bg-transparent p-2 text-left text-foreground hover:bg-secondary focus-visible:bg-secondary',
-                      isHighlighted && 'bg-secondary',
-                      isUnavailable && 'cursor-not-allowed opacity-45',
+                      "flex min-h-11 w-full items-center justify-between gap-2 rounded-md bg-transparent p-2 text-left text-foreground hover:bg-secondary focus-visible:bg-secondary",
+                      isHighlighted && "bg-secondary",
+                      isUnavailable && "cursor-not-allowed opacity-45",
                     )}
                     onClick={() => choose(item)}
                   >
@@ -304,7 +304,7 @@ export function MetadataSelect(props: Props) {
                       className="!whitespace-normal text-left text-xs leading-snug"
                     />
                     <span className="min-w-4 text-primary" aria-hidden="true">
-                      {isSelected ? '✓' : ''}
+                      {isSelected ? "✓" : ""}
                     </span>
                   </button>
                 );

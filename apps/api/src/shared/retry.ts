@@ -22,7 +22,7 @@ export interface RetryOptions {
 export const retryDefaults = { attempts: 5, initialDelayMs: 200, factor: 2 } as const;
 
 const abortError = (signal: AbortSignal) =>
-  signal.reason instanceof Error ? signal.reason : new Error('Retentativa cancelada');
+  signal.reason instanceof Error ? signal.reason : new Error("Retentativa cancelada");
 
 export const sleep = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
@@ -32,10 +32,10 @@ export const sleep = (ms: number, signal?: AbortSignal) =>
       reject(abortError(signal!));
     };
     const timer = setTimeout(() => {
-      signal?.removeEventListener('abort', onAbort);
+      signal?.removeEventListener("abort", onAbort);
       resolve();
     }, ms);
-    signal?.addEventListener('abort', onAbort, { once: true });
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 
 /** Espera antes da tentativa `attempt + 1` (attempt começa em 1). */
@@ -55,7 +55,7 @@ export async function retry<T>(
 ): Promise<T> {
   const attempts = options.attempts ?? retryDefaults.attempts;
   if (!Number.isInteger(attempts) || attempts < 1)
-    throw new RangeError('attempts deve ser um inteiro >= 1');
+    throw new RangeError("attempts deve ser um inteiro >= 1");
   const wait = options.sleep ?? sleep;
   for (let attempt = 1; ; attempt++) {
     if (options.signal?.aborted) throw abortError(options.signal);

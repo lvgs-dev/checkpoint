@@ -1,4 +1,4 @@
-import type { Sql } from '../data/db.ts';
+import type { Sql } from "../data/db.ts";
 import type {
   AuthRepository,
   Identity,
@@ -6,14 +6,14 @@ import type {
   SessionRecord,
   TokenKind,
   TokenRecord,
-} from './repository.ts';
+} from "./repository.ts";
 
 interface IdentityRow {
   id: string;
   email: string | null;
   email_verified: boolean;
   password_hash: string | null;
-  role: Identity['role'];
+  role: Identity["role"];
   disabled_at: Date | null;
 }
 const identity = (row: IdentityRow): Identity => ({
@@ -89,10 +89,10 @@ export class PgAuthRepository implements AuthRepository {
         WHERE token_hash = ${hash} AND kind = ${kind} AND used_at IS NULL AND expires_at > ${now}
         RETURNING id`;
       if (!used.length) return false;
-      if (kind === 'verify_email') {
+      if (kind === "verify_email") {
         await tx`UPDATE auth_identity SET email_verified = true WHERE id = ${user.id}`;
       } else {
-        if (!passwordHash) throw new Error('Password hash required');
+        if (!passwordHash) throw new Error("Password hash required");
         await tx`UPDATE auth_identity SET password_hash = ${passwordHash}, email_verified = true WHERE id = ${user.id}`;
         await tx`UPDATE auth_session SET revoked_at = ${now} WHERE identity_id = ${user.id} AND revoked_at IS NULL`;
         await tx`UPDATE auth_token SET used_at = ${now} WHERE identity_id = ${user.id} AND used_at IS NULL`;
@@ -109,7 +109,7 @@ export class PgAuthRepository implements AuthRepository {
   async createProviderIdentity(user: Identity, provider: string, subject: string) {
     // Serialize creation for the same provider subject across API instances.
     return this.sql.begin(async (tx) => {
-      await tx`SELECT pg_advisory_xact_lock(hashtextextended(${provider + ':' + subject}, 0))`;
+      await tx`SELECT pg_advisory_xact_lock(hashtextextended(${provider + ":" + subject}, 0))`;
       const [existing] = await tx<
         IdentityRow[]
       >`SELECT i.* FROM auth_identity i JOIN auth_provider_link p ON p.identity_id = i.id

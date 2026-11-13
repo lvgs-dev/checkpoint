@@ -1,9 +1,9 @@
 // JSON local: pins da fila e histórico de movimentos, por lista. Um só usuário: `owner` é
 // ignorado. Itens sem lista (arquivos antigos) pertencem à lista padrão.
-import type { ManualAdjustment, ManualMove } from '../../../../../../packages/core/src/models.ts';
-import type { PinsDriver } from '../types.ts';
-import { JsonFile } from './file.ts';
-import { LOCAL_DEFAULT_LIST_ID } from './lists.ts';
+import type { ManualAdjustment, ManualMove } from "../../../../../../packages/core/src/models.ts";
+import type { PinsDriver } from "../types.ts";
+import { JsonFile } from "./file.ts";
+import { LOCAL_DEFAULT_LIST_ID } from "./lists.ts";
 
 type Stored<T> = T & { listId?: string };
 interface ManualFile {
@@ -24,14 +24,14 @@ export class JsonPinsDriver implements PinsDriver {
     this.ready = this.load();
   }
   private static key(listId: string, gameId: string) {
-    return listId + '\n' + gameId;
+    return listId + "\n" + gameId;
   }
   private async load() {
     const data = (await this.file.read()) as Partial<ManualFile> | undefined;
     if (!data) return;
     // Arquivos antigos (pontos manuais) sem posição são ignorados.
     for (const a of data.adjustments ?? [])
-      if (a && typeof a.gameId === 'string' && Number.isInteger(a.manualPosition)) {
+      if (a && typeof a.gameId === "string" && Number.isInteger(a.manualPosition)) {
         const listId = a.listId ?? LOCAL_DEFAULT_LIST_ID;
         this.adjustments.set(JsonPinsDriver.key(listId, a.gameId), {
           gameId: a.gameId,

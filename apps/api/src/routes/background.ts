@@ -1,6 +1,6 @@
 // Trabalho que continua depois da resposta HTTP.
 // Mantém as promises em execução rastreadas na memória do processo Node.
-import { logger } from '../observability/logger.ts';
+import { logger } from "../observability/logger.ts";
 
 const pending = new Set<Promise<unknown>>();
 
@@ -8,7 +8,7 @@ const pending = new Set<Promise<unknown>>();
 export function runInBackground(task: Promise<unknown>): void {
   const tracked = task
     .catch((e) => {
-      logger.error('background.failed', { error: e });
+      logger.error("background.failed", { error: e });
     })
     .finally(() => {
       pending.delete(tracked);

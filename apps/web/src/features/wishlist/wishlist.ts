@@ -1,7 +1,7 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { api } from '../../api/http';
-import { useQueryKeys } from '../../query/keys';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { api } from "../../api/http";
+import { useQueryKeys } from "../../query/keys";
 import type {
   Catalog,
   ScoredGame,
@@ -9,16 +9,16 @@ import type {
   SteamSearchItem,
   WishlistImportResult,
   WishlistItem,
-} from '../../../../../packages/core/src/models';
+} from "../../../../../packages/core/src/models";
 
 /** "R$ 46,99" from cents. */
 export function formatPrice(p: SteamPrice | null): string {
-  if (!p) return 'Sem preço';
-  if (p.isFree) return 'Gratuito';
-  if (p.finalCents === null) return 'Indisponível';
-  return (p.finalCents / 100).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: p.currency ?? 'BRL',
+  if (!p) return "Sem preço";
+  if (p.isFree) return "Gratuito";
+  if (p.finalCents === null) return "Indisponível";
+  return (p.finalCents / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: p.currency ?? "BRL",
   });
 }
 
@@ -27,11 +27,11 @@ export function useWishlist() {
   const k = useQueryKeys();
   const wishlist = useQuery({
     queryKey: k.wishlist(),
-    queryFn: ({ signal }) => api.get<WishlistItem[]>('wishlist', { signal }),
+    queryFn: ({ signal }) => api.get<WishlistItem[]>("wishlist", { signal }),
   });
   const catalog = useQuery({
     queryKey: k.catalog(),
-    queryFn: ({ signal }) => api.get<Catalog>('catalog', { signal }),
+    queryFn: ({ signal }) => api.get<Catalog>("catalog", { signal }),
   });
   return { wishlist, genres: catalog.data?.genres ?? [] };
 }
@@ -39,7 +39,7 @@ export function useWishlist() {
 /** Debounced (300 ms) Steam store search; returns at most 8 results. */
 export function useSteamSearch(term: string) {
   const k = useQueryKeys();
-  const [debounced, setDebounced] = useState('');
+  const [debounced, setDebounced] = useState("");
   const q = term.trim();
   useEffect(() => {
     if (q.length < 2) return;
@@ -48,9 +48,9 @@ export function useSteamSearch(term: string) {
   }, [q]);
   const enabled = q.length >= 2 && debounced === q;
   const query = useQuery({
-    queryKey: [...k.all, 'steam-search', debounced],
+    queryKey: [...k.all, "steam-search", debounced],
     queryFn: ({ signal }) =>
-      api.get<SteamSearchItem[]>('steam/search', { searchParams: { q: debounced }, signal }),
+      api.get<SteamSearchItem[]>("steam/search", { searchParams: { q: debounced }, signal }),
     enabled,
     placeholderData: keepPreviousData,
     select: (r) => r.slice(0, 8),
@@ -72,7 +72,7 @@ export function useWishlistActions() {
   return {
     add: useMutation({
       mutationFn: (json: Record<string, unknown>) =>
-        api.post<WishlistItem & { created: boolean }>('wishlist', { json }),
+        api.post<WishlistItem & { created: boolean }>("wishlist", { json }),
       onSuccess: invalidateDependents,
       onError: () => {},
     }),
@@ -81,7 +81,7 @@ export function useWishlistActions() {
         api.post<ScoredGame>(`games/${encodeURIComponent(id)}/purchase`, { json: {} }),
       onSuccess: (_data, id) =>
         Promise.all(
-          [k.wishlist(), k.games(), k.catalog(), [...k.all, 'queue'], k.game(id)].map((queryKey) =>
+          [k.wishlist(), k.games(), k.catalog(), [...k.all, "queue"], k.game(id)].map((queryKey) =>
             qc.invalidateQueries({ queryKey }),
           ),
         ),
@@ -92,7 +92,7 @@ export function useWishlistActions() {
         api.post<ScoredGame>(`games/${encodeURIComponent(id)}/unpurchase`, { json: {} }),
       onSuccess: (_data, id) =>
         Promise.all(
-          [k.wishlist(), k.games(), k.catalog(), [...k.all, 'queue'], k.game(id)].map((queryKey) =>
+          [k.wishlist(), k.games(), k.catalog(), [...k.all, "queue"], k.game(id)].map((queryKey) =>
             qc.invalidateQueries({ queryKey }),
           ),
         ),
@@ -100,14 +100,14 @@ export function useWishlistActions() {
     }),
     importSteam: useMutation({
       mutationFn: (profile: string) =>
-        api.post<WishlistImportResult>('wishlist/import-steam', {
+        api.post<WishlistImportResult>("wishlist/import-steam", {
           json: profile.trim() ? { profile: profile.trim() } : {},
         }),
       onSuccess: invalidateDependents,
       onError: () => {},
     }),
     refreshPrices: useMutation({
-      mutationFn: () => api.post<WishlistItem[]>('wishlist/prices/refresh', { json: {} }),
+      mutationFn: () => api.post<WishlistItem[]>("wishlist/prices/refresh", { json: {} }),
       onSuccess: (items) => qc.setQueryData(k.wishlist(), items),
       onError: () => {},
     }),

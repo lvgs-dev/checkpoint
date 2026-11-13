@@ -3,11 +3,11 @@
 // library_entry.user_id = owner. Toda operação é UMA instrução SQL (atômica por si, sem
 // BEGIN/COMMIT): com `prepare: false` cada query parametrizada custa 2 round trips, e
 // transações explícitas somariam mais 2; por isso evitamos múltiplos statements.
-import { GameStatus, type Game } from '../../../../../../packages/core/src/models.ts';
-import type { MetadataCatalog } from '../../../../../../packages/core/src/metadata.ts';
-import { normalizeMetadata } from '../../../../../../packages/core/src/metadata.ts';
-import type { Sql } from '../../db.ts';
-import type { GamesDriver, GameBrowseQuery, GameBrowseResult } from '../types.ts';
+import { GameStatus, type Game } from "../../../../../../packages/core/src/models.ts";
+import type { MetadataCatalog } from "../../../../../../packages/core/src/metadata.ts";
+import { normalizeMetadata } from "../../../../../../packages/core/src/metadata.ts";
+import type { Sql } from "../../db.ts";
+import type { GamesDriver, GameBrowseQuery, GameBrowseResult } from "../types.ts";
 import {
   desireCode,
   gameFrom,
@@ -16,7 +16,7 @@ import {
   statusCode,
   toGame,
   type RawGame,
-} from './shared.ts';
+} from "./shared.ts";
 
 /** Tags sem vazias e sem duplicadas pela chave normalizada (mesma regra de norm_key). */
 const cleanTags = (tags: string[]) => {
@@ -27,7 +27,7 @@ const cleanTags = (tags: string[]) => {
 };
 
 /** Vocabulários controlados que `save` resolve por chave (lista fixa; nunca vem de entrada). */
-type Vocabulary = 'genre' | 'mechanic' | 'store';
+type Vocabulary = "genre" | "mechanic" | "store";
 
 export class PgGamesDriver implements GamesDriver {
   private sql: Sql;
@@ -48,12 +48,12 @@ export class PgGamesDriver implements GamesDriver {
     const pageSize = Math.max(1, query.pageSize);
     const offset = (page - 1) * pageSize;
 
-    const qPattern = query.q ? '%' + query.q.replace(/[\\%_]/g, '\\$&') + '%' : null;
+    const qPattern = query.q ? "%" + query.q.replace(/[\\%_]/g, "\\$&") + "%" : null;
     const dbStatus = query.status ? (statusCode[query.status as GameStatus] ?? query.status) : null;
     const statusValid = dbStatus ? Object.values(statusCode).includes(dbStatus) : false;
 
     const orderClause =
-      query.sort === 'desire'
+      query.sort === "desire"
         ? sql`ORDER BY rd.sort_order, lower(g.name)`
         : sql`ORDER BY lower(g.name), g.code`;
 
@@ -95,7 +95,7 @@ export class PgGamesDriver implements GamesDriver {
   /** Search only the owner's library; treat wildcard characters literally. */
   async searchByName(owner: string, query: string, excludeId?: string): Promise<Game[]> {
     const sql = this.sql;
-    const pattern = '%' + query.replace(/[\\%_]/g, '\\$&') + '%';
+    const pattern = "%" + query.replace(/[\\%_]/g, "\\$&") + "%";
     const rows = await sql<{ game: RawGame }[]>`
       SELECT ${gameJson(sql)} AS game
         FROM ${gameFrom(sql)}
@@ -153,8 +153,8 @@ export class PgGamesDriver implements GamesDriver {
                 WHERE e.user_id = ${owner} AND g.code = ${game.id}),
              v AS (
                SELECT ${game.name}::text AS name,
-                      ${vocabId('genre', game.primaryGenre)} AS primary_genre_id,
-                      ${vocabId('mechanic', game.mechanic)} AS mechanic_id,
+                      ${vocabId("genre", game.primaryGenre)} AS primary_genre_id,
+                      ${vocabId("mechanic", game.mechanic)} AS mechanic_id,
                       ${game.pace}::text AS pace, ${game.structure}::text AS structure,
                       ${game.coop}::text AS coop, ${game.size}::text AS size_label,
                       ${game.mainHours}::numeric AS main_hours, ${game.extraHours}::numeric AS extra_hours,
@@ -187,7 +187,7 @@ export class PgGamesDriver implements GamesDriver {
                UPDATE library_entry e
                   SET status = ${statusCode[game.status]}::game_status,
                       desire = ${desireCode[game.desire]}::desire_level,
-                      store_id = ${vocabId('store', game.store)},
+                      store_id = ${vocabId("store", game.store)},
                       platform = ${game.platform}::text,
                       actual_hours = ${game.actualHours}::numeric,
                       purchased_at = CASE WHEN ${game.status === GameStatus.Wishlist}::boolean THEN NULL ELSE coalesce(e.purchased_at, ${game.purchasedAt ?? null}::timestamptz) END,

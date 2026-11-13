@@ -1,9 +1,9 @@
 // Contexto por requisição (AsyncLocalStorage): qualquer função chamada durante a
 // requisição — serviço, repositório — lê o usuário com getContext(), sem precisar
 // receber userId/token como parâmetro em toda a cadeia.
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { randomUUID } from 'node:crypto';
-import type { Role } from '../../../../packages/core/src/authorization.ts';
+import { AsyncLocalStorage } from "node:async_hooks";
+import { randomUUID } from "node:crypto";
+import type { Role } from "../../../../packages/core/src/authorization.ts";
 
 export interface RequestContext {
   requestId: string;

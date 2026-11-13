@@ -1,6 +1,6 @@
 // Application owners link to local authentication identities.
-import type { Sql } from '../../db.ts';
-import type { AppUserDriver } from '../types.ts';
+import type { Sql } from "../../db.ts";
+import type { AppUserDriver } from "../types.ts";
 
 export class PgAppUserDriver implements AppUserDriver {
   private sql: Sql;

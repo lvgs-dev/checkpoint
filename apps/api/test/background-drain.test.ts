@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { runInBackground, pendingCount, drainPending } from '../src/routes/background.ts';
+import { describe, it, expect } from "vitest";
+import { runInBackground, pendingCount, drainPending } from "../src/routes/background.ts";
 
-describe('background promise tracking', () => {
-  it('tracks a promise while pending and removes it after resolving', async () => {
+describe("background promise tracking", () => {
+  it("tracks a promise while pending and removes it after resolving", async () => {
     let resolveTask!: () => void;
     const task = new Promise<void>((resolve) => {
       resolveTask = resolve;
@@ -18,7 +18,7 @@ describe('background promise tracking', () => {
     expect(pendingCount()).toBe(before);
   });
 
-  it('catches rejection without throwing and removes the promise', async () => {
+  it("catches rejection without throwing and removes the promise", async () => {
     let rejectTask!: (err: unknown) => void;
     const task = new Promise<void>((_, reject) => {
       rejectTask = reject;
@@ -28,13 +28,13 @@ describe('background promise tracking', () => {
     runInBackground(task);
     expect(pendingCount()).toBe(before + 1);
 
-    rejectTask(new Error('background test failure'));
+    rejectTask(new Error("background test failure"));
     await drainPending(500);
 
     expect(pendingCount()).toBe(before);
   });
 
-  it('drainPending resolves after the tracked promise resolves', async () => {
+  it("drainPending resolves after the tracked promise resolves", async () => {
     let resolved = false;
     const task = new Promise<void>((resolve) => {
       setTimeout(() => {
@@ -50,7 +50,7 @@ describe('background promise tracking', () => {
     expect(pendingCount()).toBe(0);
   });
 
-  it('drainPending resolves after timeout when the promise never resolves', async () => {
+  it("drainPending resolves after timeout when the promise never resolves", async () => {
     const neverEnding = new Promise<void>(() => {});
 
     runInBackground(neverEnding);

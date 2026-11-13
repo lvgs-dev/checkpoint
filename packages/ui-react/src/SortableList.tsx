@@ -8,15 +8,15 @@ import {
   type Announcements,
   type DragEndEvent,
   type ScreenReaderInstructions,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { HTMLAttributes, ReactNode } from 'react';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { HTMLAttributes, ReactNode } from "react";
 
 export interface MoveIntent {
   id: string;
@@ -34,7 +34,7 @@ export interface SortableItemState {
 /** pt-BR screen-reader texts; pass your own `accessibility` copy to localize differently. */
 const instructions: ScreenReaderInstructions = {
   draggable:
-    'Para reordenar, pressione espaço ou Enter. Use as setas para mover, espaço para soltar e Esc para cancelar.',
+    "Para reordenar, pressione espaço ou Enter. Use as setas para mover, espaço para soltar e Esc para cancelar.",
 };
 const announcements: Announcements = {
   onDragStart: ({ active }) => `Item ${active.id} selecionado.`,
@@ -56,8 +56,8 @@ interface Props<T> {
   onMoveIntent(intent: MoveIntent): void;
   disabled?: boolean;
   className?: string;
-  'aria-label'?: string;
-  'data-testid'?: string;
+  "aria-label"?: string;
+  "data-testid"?: string;
 }
 
 /** Vertical sortable list with pointer (mouse and touch via the handle's touch-action: none) and keyboard (Space, arrows) sensors. */
@@ -68,8 +68,8 @@ export function SortableList<T>({
   onMoveIntent,
   disabled,
   className,
-  'aria-label': label,
-  'data-testid': testId,
+  "aria-label": label,
+  "data-testid": testId,
 }: Props<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -96,7 +96,7 @@ export function SortableList<T>({
           data-testid={testId}
           className={className}
           aria-label={label}
-          style={{ listStyle: 'none', margin: 0, padding: 0 }}
+          style={{ listStyle: "none", margin: 0, padding: 0 }}
         >
           {items.map((item, index) => (
             <Row
@@ -134,7 +134,7 @@ function Row({
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        position: 'relative',
+        position: "relative",
         zIndex: isDragging ? 1 : undefined,
         opacity: isDragging ? 0.85 : undefined,
       }}
@@ -145,7 +145,7 @@ function Row({
         handleProps: {
           ...attributes,
           ...listeners,
-          style: { touchAction: 'none', cursor: disabled ? undefined : 'grab' },
+          style: { touchAction: "none", cursor: disabled ? undefined : "grab" },
         },
       })}
     </li>

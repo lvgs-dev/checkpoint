@@ -1,32 +1,32 @@
-import { expect, it } from 'vitest';
-import { createRateLimiter } from '../src/auth/rate-limit.ts';
-import { SteamClient, parseSteamProfile } from '../src/integrations/steam/client.ts';
-import { redact } from '../src/observability/logger.ts';
-import { SafeSink } from '../src/observability/sinks.ts';
-import type { LogEvent } from '../../../packages/core/src/observability.ts';
+import { expect, it } from "vitest";
+import { createRateLimiter } from "../src/auth/rate-limit.ts";
+import { SteamClient, parseSteamProfile } from "../src/integrations/steam/client.ts";
+import { redact } from "../src/observability/logger.ts";
+import { SafeSink } from "../src/observability/sinks.ts";
+import type { LogEvent } from "../../../packages/core/src/observability.ts";
 
 const event = (name: string): LogEvent => ({
   event: name,
   time: new Date().toISOString(),
-  level: 'info',
+  level: "info",
   fields: {},
 });
 
-it('rate limiter rejects new identities at capacity and recovers expired windows', () => {
+it("rate limiter rejects new identities at capacity and recovers expired windows", () => {
   const allow = createRateLimiter(2, 100, 2);
-  expect(allow('a', 0)).toBe(true);
-  expect(allow('b', 0)).toBe(true);
-  expect(allow('c', 0)).toBe(false);
-  expect(allow('a', 0)).toBe(true);
-  expect(allow('a', 0)).toBe(false);
-  expect(allow('c', 100)).toBe(true);
+  expect(allow("a", 0)).toBe(true);
+  expect(allow("b", 0)).toBe(true);
+  expect(allow("c", 0)).toBe(false);
+  expect(allow("a", 0)).toBe(true);
+  expect(allow("a", 0)).toBe(false);
+  expect(allow("c", 100)).toBe(true);
 });
 
-it('Steam profile rejects query injection and malformed profile IDs', async () => {
-  expect(parseSteamProfile('https://steamcommunity.com/profiles/123&other=value')).toBe(null);
-  expect(parseSteamProfile('https://steamcommunity.com/profiles/123')).toBe(null);
-  expect(parseSteamProfile('https://steamcommunity.com/profiles/76561198000000000')).toStrictEqual({
-    steamId: '76561198000000000',
+it("Steam profile rejects query injection and malformed profile IDs", async () => {
+  expect(parseSteamProfile("https://steamcommunity.com/profiles/123&other=value")).toBe(null);
+  expect(parseSteamProfile("https://steamcommunity.com/profiles/123")).toBe(null);
+  expect(parseSteamProfile("https://steamcommunity.com/profiles/76561198000000000")).toStrictEqual({
+    steamId: "76561198000000000",
   });
   let calls = 0;
   const client = new SteamClient({
@@ -35,18 +35,18 @@ it('Steam profile rejects query injection and malformed profile IDs', async () =
       return Response.json({});
     },
   });
-  await expect(client.wishlist('123&key=secret')).rejects.toThrow(/inválido/);
+  await expect(client.wishlist("123&key=secret")).rejects.toThrow(/inválido/);
   expect(calls).toBe(0);
 });
 
-it('log redaction masks Steam query keys in messages and errors', () => {
-  expect(redact('https://steam/x?key=secret&x=1')).toBe('https://steam/x?key=[redacted]&x=1');
-  expect((redact(new Error('request ?KEY=secret')) as { message: string }).message).toBe(
-    'request ?KEY=[redacted]',
+it("log redaction masks Steam query keys in messages and errors", () => {
+  expect(redact("https://steam/x?key=secret&x=1")).toBe("https://steam/x?key=[redacted]&x=1");
+  expect((redact(new Error("request ?KEY=secret")) as { message: string }).message).toBe(
+    "request ?KEY=[redacted]",
   );
 });
 
-it('SafeSink resumes after an empty flush', async () => {
+it("SafeSink resumes after an empty flush", async () => {
   const seen: string[] = [];
   const sink = new SafeSink({
     write(e) {
@@ -54,12 +54,12 @@ it('SafeSink resumes after an empty flush', async () => {
     },
   });
   await sink.flush();
-  sink.write(event('later'));
+  sink.write(event("later"));
   await sink.flush();
-  expect(seen).toStrictEqual(['later']);
+  expect(seen).toStrictEqual(["later"]);
 });
 
-it('SafeSink drops the oldest waiting event without dropping the next event on completion', async () => {
+it("SafeSink drops the oldest waiting event without dropping the next event on completion", async () => {
   const seen: string[] = [];
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
@@ -69,56 +69,56 @@ it('SafeSink drops the oldest waiting event without dropping the next event on c
     {
       async write(e) {
         seen.push(e.event);
-        if (e.event === 'a') await gate;
+        if (e.event === "a") await gate;
       },
     },
     2,
   );
-  sink.write(event('a'));
+  sink.write(event("a"));
   await Promise.resolve();
-  sink.write(event('b'));
-  sink.write(event('c'));
-  sink.write(event('d'));
+  sink.write(event("b"));
+  sink.write(event("c"));
+  sink.write(event("d"));
   release();
   await sink.flush();
-  expect(seen).toStrictEqual(['a', 'c', 'd']);
+  expect(seen).toStrictEqual(["a", "c", "d"]);
   expect(sink.dropped).toBe(1);
 });
 
-const { assertPrivateStores, createRequestGuard } = await import('../src/shared/request-guard.ts');
+const { assertPrivateStores, createRequestGuard } = await import("../src/shared/request-guard.ts");
 
-it('authenticated startup refuses every private JSON override and mixed identities', () => {
-  const names = ['GAMES_STORE', 'LISTS_STORE', 'PINS_STORE', 'SCORING_STORE', 'APP_USERS_STORE'];
-  const pg = Object.fromEntries(names.map((name) => [name, 'pg' as const]));
+it("authenticated startup refuses every private JSON override and mixed identities", () => {
+  const names = ["GAMES_STORE", "LISTS_STORE", "PINS_STORE", "SCORING_STORE", "APP_USERS_STORE"];
+  const pg = Object.fromEntries(names.map((name) => [name, "pg" as const]));
   expect(() => assertPrivateStores(pg, true)).not.toThrow();
   for (const name of names)
-    expect(() => assertPrivateStores({ ...pg, [name]: 'json' }, true)).toThrow();
-  const json = Object.fromEntries(names.map((name) => [name, 'json' as const]));
+    expect(() => assertPrivateStores({ ...pg, [name]: "json" }, true)).toThrow();
+  const json = Object.fromEntries(names.map((name) => [name, "json" as const]));
   expect(() => assertPrivateStores(json, true)).toThrow();
   expect(() => assertPrivateStores(json, false)).not.toThrow();
-  expect(() => assertPrivateStores({ ...pg, LISTS_STORE: 'json' }, false)).toThrow();
+  expect(() => assertPrivateStores({ ...pg, LISTS_STORE: "json" }, false)).toThrow();
 });
 
-it('expensive operations reject overlapping calls and release failed work', async () => {
+it("expensive operations reject overlapping calls and release failed work", async () => {
   const run = createRequestGuard(10, 60_000);
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  const first = run('a', () => gate);
-  await expect(run('a', async () => 1)).rejects.toMatchObject({ code: 429 });
-  expect(await run('b', async () => 2)).toBe(2);
+  const first = run("a", () => gate);
+  await expect(run("a", async () => 1)).rejects.toMatchObject({ code: 429 });
+  expect(await run("b", async () => 2)).toBe(2);
   release();
   await first;
   await expect(
-    run('a', async () => {
-      throw new Error('work failed');
+    run("a", async () => {
+      throw new Error("work failed");
     }),
   ).rejects.toThrow(/work failed/);
-  expect(await run('a', async () => 3)).toBe(3);
+  expect(await run("a", async () => 3)).toBe(3);
 });
 
-it('expensive operations coalesce concurrent GET calls for identical key', async () => {
+it("expensive operations coalesce concurrent GET calls for identical key", async () => {
   const run = createRequestGuard(10, 60_000, 1);
   let calls = 0;
   let release!: () => void;
@@ -128,87 +128,87 @@ it('expensive operations coalesce concurrent GET calls for identical key', async
   const work = async () => {
     calls++;
     await gate;
-    return 'result';
+    return "result";
   };
 
-  const first = run('k', work, true);
-  const second = run('k', work, true);
+  const first = run("k", work, true);
+  const second = run("k", work, true);
 
   release();
   const [res1, res2] = await Promise.all([first, second]);
-  expect(res1).toBe('result');
-  expect(res2).toBe('result');
+  expect(res1).toBe("result");
+  expect(res2).toBe("result");
   expect(calls).toBe(1);
 
   const third = await run(
-    'k',
+    "k",
     async () => {
       calls++;
-      return 'fresh';
+      return "fresh";
     },
     true,
   );
-  expect(third).toBe('fresh');
+  expect(third).toBe("fresh");
   expect(calls).toBe(2);
 });
 
-it('coalesced in-flight promises propagate errors to all callers and clean up', async () => {
+it("coalesced in-flight promises propagate errors to all callers and clean up", async () => {
   const run = createRequestGuard(10, 60_000, 1);
   let release!: (err: Error) => void;
   const gate = new Promise<void>((_, reject) => {
     release = reject;
   });
-  const first = run('err-key', () => gate, true);
-  const second = run('err-key', () => gate, true);
-  release(new Error('boom'));
+  const first = run("err-key", () => gate, true);
+  const second = run("err-key", () => gate, true);
+  release(new Error("boom"));
   await expect(first).rejects.toThrow(/boom/);
   await expect(second).rejects.toThrow(/boom/);
 
-  expect(await run('err-key', async () => 'ok', true)).toBe('ok');
+  expect(await run("err-key", async () => "ok", true)).toBe("ok");
 });
 
-it('request admission releases only once and counts requests after completion', async () => {
-  const { createRequestAdmission } = await import('../src/shared/request-guard.ts');
+it("request admission releases only once and counts requests after completion", async () => {
+  const { createRequestAdmission } = await import("../src/shared/request-guard.ts");
   const acquire = createRequestAdmission(2, 60_000);
-  const release = acquire('user');
+  const release = acquire("user");
   release();
   release();
-  const second = acquire('user');
+  const second = acquire("user");
   second();
-  expect(() => acquire('user')).toThrow(expect.objectContaining({ code: 429 }));
+  expect(() => acquire("user")).toThrow(expect.objectContaining({ code: 429 }));
 });
 
-it('SafeSink retries failed writes and bounds final failure attempts', async () => {
+it("SafeSink retries failed writes and bounds final failure attempts", async () => {
   let attempts = 0;
   const sink = new SafeSink({
     write() {
       attempts++;
-      throw new Error('unavailable');
+      throw new Error("unavailable");
     },
   });
-  sink.write(event('failed'));
+  sink.write(event("failed"));
   await sink.flush();
   expect(attempts).toBe(3);
   expect(sink.dropped).toBe(1);
 });
 
-it('createData applies the private-store guard before opening storage', async () => {
-  const { createData } = await import('../src/main/data.ts');
-  const { closeDb } = await import('../src/data/db.ts');
-  const names = ['GAMES_STORE', 'LISTS_STORE', 'PINS_STORE', 'SCORING_STORE', 'APP_USERS_STORE'];
-  const auth = { NODE_ENV: 'production' };
+it("createData applies the private-store guard before opening storage", async () => {
+  const { createData } = await import("../src/main/data.ts");
+  const { closeDb } = await import("../src/data/db.ts");
+  const names = ["GAMES_STORE", "LISTS_STORE", "PINS_STORE", "SCORING_STORE", "APP_USERS_STORE"];
+  const auth = { NODE_ENV: "production" };
   try {
     await expect(
-      createData({ dataDir: '/unavailable-security-test-path', env: auth }),
+      createData({ dataDir: "/unavailable-security-test-path", env: auth }),
     ).rejects.toThrow(/PostgreSQL/);
     for (const name of names)
       await expect(
         createData({
-          dataDir: '/unavailable-security-test-path',
+          dataDir: "/unavailable-security-test-path",
           env: {
             ...auth,
-            DATABASE_URL: 'postgres://postgres@127.0.0.1:54329/checkpoint_security_unused',
-            [name]: 'json',
+            DATABASE_URL: "postgres://postgres@127.0.0.1:54329/checkpoint_security_unused",
+            [name]: "json",
           },
         }),
       ).rejects.toThrow(/Private stores|PostgreSQL/);

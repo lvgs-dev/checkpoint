@@ -1,9 +1,9 @@
-import { testIdKey, testIdValue } from '@/components/ui/test-id';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ConfirmDialog } from '@checkpoint/ui-react';
-import { useMemo, useState } from 'react';
-import { useForm, useWatch, type FieldPath, type Resolver } from 'react-hook-form';
-import { Link } from 'react-router';
+import { testIdKey, testIdValue } from "@/components/ui/test-id";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ConfirmDialog } from "@checkpoint/ui-react";
+import { useMemo, useState } from "react";
+import { useForm, useWatch, type FieldPath, type Resolver } from "react-hook-form";
+import { Link } from "react-router";
 import type {
   Desire,
   QueueFilters,
@@ -11,12 +11,12 @@ import type {
   ScoringFactor,
   ScoringSettings,
   ScoringSection,
-} from '../../../../../packages/core/src/models';
-import { errorMessage } from '../../query/errors';
-import { ListPicker, RouteListState, useRouteListId } from '../lists';
-import { AppLoader } from '../loader/AppLoader';
-import { useResetScoringSettings, useSaveScoringSettings, useScoringSettings } from '../scoring';
-import { FormulaPanel } from './FormulaPanel';
+} from "../../../../../packages/core/src/models";
+import { errorMessage } from "../../query/errors";
+import { ListPicker, RouteListState, useRouteListId } from "../lists";
+import { AppLoader } from "../loader/AppLoader";
+import { useResetScoringSettings, useSaveScoringSettings, useScoringSettings } from "../scoring";
+import { FormulaPanel } from "./FormulaPanel";
 import {
   SECTIONS,
   desireRemoved,
@@ -25,15 +25,15 @@ import {
   hoursRemoved,
   num,
   scoringSchema,
-} from './settingsForm';
-import './settings.css';
-import { CatalogSettings } from './CatalogSettings';
+} from "./settingsForm";
+import "./settings.css";
+import { CatalogSettings } from "./CatalogSettings";
 
-type ListFilter = 'excludedGenres' | 'excludedTags' | 'stores' | 'paces';
+type ListFilter = "excludedGenres" | "excludedTags" | "stores" | "paces";
 
 /** Per-list scoring configuration: weights, rules and content filters, saved as one config. */
 export function SettingsScreen() {
-  const route = useRouteListId('/configuracoes');
+  const route = useRouteListId("/configuracoes");
   const { listId } = route;
   const query = useScoringSettings(listId);
   const settings = query.data;
@@ -76,8 +76,8 @@ export function SettingsScreen() {
 function SettingsForm({ listId, settings }: { listId: string; settings: ScoringSettings }) {
   const save = useSaveScoringSettings();
   const reset = useResetScoringSettings();
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const saving = save.isPending || reset.isPending;
 
@@ -90,23 +90,23 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
   const form = useForm<ScoringConfig>({
     defaultValues: settings.config,
     resolver,
-    mode: 'onChange',
+    mode: "onChange",
   });
   const { register, control, setValue, reset: resetForm, formState } = form;
   const { isDirty, errors } = formState;
-  const weights = useWatch({ control, name: 'weights' }) ?? settings.config.weights;
-  const filters = useWatch({ control, name: 'filters' }) ?? settings.config.filters;
-  const rules = useWatch({ control, name: 'rules' }) ?? settings.config.rules;
+  const weights = useWatch({ control, name: "weights" }) ?? settings.config.weights;
+  const filters = useWatch({ control, name: "filters" }) ?? settings.config.filters;
+  const rules = useWatch({ control, name: "rules" }) ?? settings.config.rules;
   const d = useMemo(() => ({ weights, filters, rules }), [weights, filters, rules]);
 
   const invalid = Object.keys(errors).length > 0;
   const o = settings.filterOptions;
   const rows = (section: ScoringSection) =>
-    settings.factors.filter((f) => f.section === section && f.id !== 'inProgress');
+    settings.factors.filter((f) => f.section === section && f.id !== "inProgress");
   const hoursInvalid = !!errors.filters;
   const activeFilters = JSON.stringify(filters) !== JSON.stringify(settings.defaults.filters);
   const setFilters = (patch: Partial<QueueFilters>) => {
-    setSuccess('');
+    setSuccess("");
     return (
       Object.entries(patch) as [keyof QueueFilters, QueueFilters[keyof QueueFilters]][]
     ).forEach(([key, value]) =>
@@ -120,16 +120,16 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
     setFilters({
       [key]: hasValue(filters[key], value)
         ? filters[key].filter(
-            (x) => x.toLocaleLowerCase('pt-BR') !== value.toLocaleLowerCase('pt-BR'),
+            (x) => x.toLocaleLowerCase("pt-BR") !== value.toLocaleLowerCase("pt-BR"),
           )
         : [...filters[key], value],
     });
-  const pick = (key: ListFilter, option: { value: string; count: number }, cls = '') => (
+  const pick = (key: ListFilter, option: { value: string; count: number }, cls = "") => (
     <button
       data-testid={`settings-filter-${testIdKey(key)}-${testIdValue(option.value)}`}
       key={option.value}
       type="button"
-      className={'pick ' + cls}
+      className={"pick " + cls}
       aria-pressed={hasValue(filters[key], option.value)}
       disabled={saving}
       onClick={() => toggleIn(key, option.value)}
@@ -139,28 +139,28 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
   );
 
   async function persist(run: () => Promise<ScoringSettings>, message: string) {
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     try {
       resetForm((await run()).config); // new baseline from the saved copy
       setSuccess(message);
     } catch (e) {
       setError(
-        'Não foi possível salvar' +
-          (e instanceof Error && e.message ? ': ' + errorMessage(e) : '.'),
+        "Não foi possível salvar" +
+          (e instanceof Error && e.message ? ": " + errorMessage(e) : "."),
       );
     }
   }
   const onSave = () =>
     persist(
       () => save.mutateAsync({ listId: listId, config: form.getValues() }),
-      'Configuração salva. A fila desta lista foi recalculada.',
+      "Configuração salva. A fila desta lista foi recalculada.",
     );
   const onReset = () => {
     setConfirmReset(false);
     return persist(
       () => reset.mutateAsync({ listId: listId }),
-      'Padrão restaurado. A fila desta lista foi recalculada.',
+      "Padrão restaurado. A fila desta lista foi recalculada.",
     );
   };
 
@@ -169,7 +169,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
     const bad = !!errors.weights?.[key];
     return (
       <>
-        <label className={'number' + (bad ? ' invalid' : '')}>
+        <label className={"number" + (bad ? " invalid" : "")}>
           <input
             data-testid={`settings-weight-${testIdKey(key)}`}
             type="number"
@@ -177,7 +177,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
             max={f.max}
             step={f.step}
             disabled={saving}
-            aria-label={'Peso: ' + f.label}
+            aria-label={"Peso: " + f.label}
             aria-invalid={bad}
             {...register(`weights.${key}`, { valueAsNumber: true })}
           />
@@ -192,8 +192,8 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
     );
   };
 
-  const hoursInput = (key: 'minHours' | 'maxHours', label: string, text: string) => (
-    <label className={'number' + (hoursInvalid ? ' invalid' : '')}>
+  const hoursInput = (key: "minHours" | "maxHours", label: string, text: string) => (
+    <label className={"number" + (hoursInvalid ? " invalid" : "")}>
       {text}
       <input
         data-testid={`settings-filter-${testIdKey(key)}`}
@@ -205,7 +205,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
         disabled={saving}
         aria-label={label}
         {...register(`filters.${key}`, {
-          setValueAs: (v) => (v === '' || v == null ? null : Number(v)),
+          setValueAs: (v) => (v === "" || v == null ? null : Number(v)),
         })}
       />
       <span>h</span>
@@ -214,7 +214,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
 
   return (
     // Any edit (bubbled change event, or setFilters) dismisses the success notice.
-    <div className="settings" onChange={() => setSuccess('')}>
+    <div className="settings" onChange={() => setSuccess("")}>
       <Heading />
       <CatalogSettings />
       <ListPicker base="/configuracoes" current={listId} />
@@ -226,7 +226,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
       {success && (
         <div className="reorder-notice" role="status">
           <span>
-            {success}{' '}
+            {success}{" "}
             <Link data-testid="settings-open-queue" to={`/ordem/${listId}`}>
               Ver a fila ↗
             </Link>
@@ -234,7 +234,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
           <button
             data-testid="settings-notice-close"
             type="button"
-            onClick={() => setSuccess('')}
+            onClick={() => setSuccess("")}
             aria-label="Fechar aviso"
           >
             ×
@@ -242,11 +242,11 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
         </div>
       )}
 
-      <FormulaPanel d={d} context={rows('context')} />
+      <FormulaPanel d={d} context={rows("context")} />
 
       {SECTIONS.map((s) => (
-        <section key={s.id} className="panel settings-section" aria-labelledby={'sec-' + s.id}>
-          <h2 id={'sec-' + s.id}>{s.title}</h2>
+        <section key={s.id} className="panel settings-section" aria-labelledby={"sec-" + s.id}>
+          <h2 id={"sec-" + s.id}>{s.title}</h2>
           <p className="muted">{s.hint}</p>
           <table className="factors">
             <thead>
@@ -261,7 +261,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
             </thead>
             <tbody>
               {rows(s.id).map((f) => (
-                <tr key={f.id} className={f.rule && !rules[f.rule] ? 'off' : undefined}>
+                <tr key={f.id} className={f.rule && !rules[f.rule] ? "off" : undefined}>
                   <th scope="row">{f.label}</th>
                   <td className="desc">{f.description}</td>
                   <td className="weight">
@@ -275,7 +275,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
                           type="checkbox"
                           role="switch"
                           disabled={saving}
-                          aria-label={'Regra ativa: ' + f.label}
+                          aria-label={"Regra ativa: " + f.label}
                           {...register(`rules.${f.rule}`)}
                         />
                         <span aria-hidden="true"></span>
@@ -294,7 +294,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
       <section className="panel settings-section" aria-labelledby="sec-content-filters">
         <h2 id="sec-content-filters">Filtros de conteúdo</h2>
         <p className="muted">
-          Recorte a fila para montar listas temáticas. Os números mostram quantos dos {o.total}{' '}
+          Recorte a fila para montar listas temáticas. Os números mostram quantos dos {o.total}{" "}
           candidatos cada escolha tira da fila.
           {activeFilters && (
             <button
@@ -311,20 +311,20 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
 
         <fieldset className="filter-group">
           <legend>Excluir gêneros</legend>
-          <div className="chips">{o.genres.map((g) => pick('excludedGenres', g, 'exclude'))}</div>
+          <div className="chips">{o.genres.map((g) => pick("excludedGenres", g, "exclude"))}</div>
         </fieldset>
 
         <fieldset className="filter-group">
           <legend>Duração (horas previstas)</legend>
           <div className="hours">
-            {hoursInput('minHours', 'Horas mínimas', 'mín.')}
-            {hoursInput('maxHours', 'Horas máximas', 'máx.')}
+            {hoursInput("minHours", "Horas mínimas", "mín.")}
+            {hoursInput("maxHours", "Horas máximas", "máx.")}
             <label className="check">
               <input
                 data-testid="settings-filter-exclude-unknown-hours"
                 type="checkbox"
                 disabled={saving}
-                {...register('filters.excludeUnknownHours')}
+                {...register("filters.excludeUnknownHours")}
               />
               Tirar jogos sem tempo estimado
             </label>
@@ -343,14 +343,14 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
           <legend>
             Só estas lojas <small>(nenhuma marcada = todas)</small>
           </legend>
-          <div className="chips">{o.stores.map((s) => pick('stores', s))}</div>
+          <div className="chips">{o.stores.map((s) => pick("stores", s))}</div>
         </fieldset>
 
         <fieldset className="filter-group">
           <legend>
             Só estes ritmos <small>(nenhum marcado = todos)</small>
           </legend>
-          <div className="chips">{o.paces.map((p) => pick('paces', p))}</div>
+          <div className="chips">{o.paces.map((p) => pick("paces", p))}</div>
         </fieldset>
 
         <fieldset className="filter-group inline">
@@ -360,7 +360,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
             <select
               data-testid="settings-filter-min-desire"
               disabled={saving}
-              {...register('filters.minDesire', {
+              {...register("filters.minDesire", {
                 setValueAs: (v) => (v || null) as Desire | null,
               })}
             >
@@ -378,7 +378,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
               data-testid="settings-filter-coop-only"
               type="checkbox"
               disabled={saving}
-              {...register('filters.coopOnly')}
+              {...register("filters.coopOnly")}
             />
             Só jogos com coop (local ou online) <small>{o.coop} jogos</small>
           </label>
@@ -388,7 +388,7 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
           <summary data-testid="settings-filter-tags">
             Excluir subgêneros/tags ({filters.excludedTags.length})
           </summary>
-          <div className="chips">{o.tags.map((t) => pick('excludedTags', t, 'exclude'))}</div>
+          <div className="chips">{o.tags.map((t) => pick("excludedTags", t, "exclude"))}</div>
         </details>
       </section>
 
@@ -397,11 +397,11 @@ function SettingsForm({ listId, settings }: { listId: string; settings: ScoringS
           {saving ? (
             <AppLoader layout="inline" size="sm" label="Salvando…" />
           ) : invalid ? (
-            'Corrija os valores destacados.'
+            "Corrija os valores destacados."
           ) : isDirty ? (
-            'Alterações não salvas.'
+            "Alterações não salvas."
           ) : (
-            `Versão ${settings.version} salva${settings.updatedAt ? ' em ' + formatDate(settings.updatedAt) : ' (padrão)'}.`
+            `Versão ${settings.version} salva${settings.updatedAt ? " em " + formatDate(settings.updatedAt) : " (padrão)"}.`
           )}
         </span>
         <div className="actions">

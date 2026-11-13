@@ -84,10 +84,10 @@
   .theme-preview i:last-child {
     background: #0e1412;
   }
-  .theme-preview[data-preview='light'] i:last-child {
+  .theme-preview[data-preview="light"] i:last-child {
     background: #ffffff;
   }
-  .theme-preview[data-preview='dark'] i:first-child {
+  .theme-preview[data-preview="dark"] i:first-child {
     background: #151d1a;
   }
   .swatch .dot {
@@ -147,7 +147,7 @@
     outline: 3px solid var(--accent-bright);
     outline-offset: 3px;
   }
-  .upload input[type='file'] {
+  .upload input[type="file"] {
     width: 1px;
     height: 1px;
     padding: 0;

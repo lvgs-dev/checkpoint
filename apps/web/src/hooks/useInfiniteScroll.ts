@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export interface UseInfiniteScrollOptions {
   /** Callback fired when the sentinel element enters the viewport. */
@@ -27,7 +27,7 @@ export function useInfiniteScroll<T extends HTMLElement = HTMLDivElement>({
   onLoadMore,
   hasMore,
   isLoading,
-  rootMargin = '100px',
+  rootMargin = "100px",
   threshold = 0,
   root = null,
   enabled = true,
@@ -42,7 +42,7 @@ export function useInfiniteScroll<T extends HTMLElement = HTMLDivElement>({
 
   useEffect(() => {
     if (!enabled || !hasMore || isLoading) return;
-    if (typeof IntersectionObserver === 'undefined') return;
+    if (typeof IntersectionObserver === "undefined") return;
 
     const el = sentinelRef.current;
     if (!el) return;

@@ -1,25 +1,25 @@
-import ky, { isHTTPError, isTimeoutError, type Options } from 'ky';
-import { authSession } from '../auth/session';
-import { ApiError, toApiError } from './errors';
-import { clickToSendMs, computeTiming, recordTiming } from './timing';
+import ky, { isHTTPError, isTimeoutError, type Options } from "ky";
+import { authSession } from "../auth/session";
+import { ApiError, toApiError } from "./errors";
+import { clickToSendMs, computeTiming, recordTiming } from "./timing";
 
-export { ApiError, isApiError } from './errors';
+export { ApiError, isApiError } from "./errors";
 
-const API_BASE = '/api/v1';
+const API_BASE = "/api/v1";
 const TIMEOUT_MS = 20_000;
 
 function isTimeout(error: unknown): boolean {
   return (
     isTimeoutError(error) ||
-    (error instanceof Error && error.name === 'TimeoutError') ||
-    (error instanceof DOMException && error.name === 'TimeoutError')
+    (error instanceof Error && error.name === "TimeoutError") ||
+    (error instanceof DOMException && error.name === "TimeoutError")
   );
 }
 
 function isAbort(error: unknown): boolean {
   return (
-    (error instanceof DOMException && error.name === 'AbortError') ||
-    (error instanceof Error && error.name === 'AbortError')
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (error instanceof Error && error.name === "AbortError")
   );
 }
 
@@ -28,15 +28,15 @@ const client = ky.create({
   prefix: API_BASE,
   retry: 0,
   timeout: TIMEOUT_MS,
-  credentials: 'include',
+  credentials: "include",
 });
 
-type RequestOptions = Pick<Options, 'searchParams' | 'json' | 'signal' | 'timeout'>;
+type RequestOptions = Pick<Options, "searchParams" | "json" | "signal" | "timeout">;
 
 /** API paths stay on the application origin. */
 function assertRelative(path: string) {
   if (/^([a-z][a-z0-9+.-]*:|\/)/i.test(path))
-    throw new Error('API paths must be relative: ' + path);
+    throw new Error("API paths must be relative: " + path);
 }
 
 async function attempt(
@@ -48,10 +48,10 @@ async function attempt(
 ) {
   // Each request carries tracing headers.
   const headers: Record<string, string> = {
-    'X-Request-Id': requestId,
-    'X-Client-Sent-At': String(sentAt),
+    "X-Request-Id": requestId,
+    "X-Client-Sent-At": String(sentAt),
   };
-  if (import.meta.env.DEV) headers['X-Timing-Detail'] = '1'; // server still requires an authenticated caller
+  if (import.meta.env.DEV) headers["X-Timing-Detail"] = "1"; // server still requires an authenticated caller
   return client(path, { ...options, method, headers });
 }
 
@@ -62,7 +62,7 @@ async function normalize(error: unknown, requestId: string): Promise<ApiError> {
     return toApiError(
       error.response.status,
       body,
-      error.response.headers.get('x-request-id') ?? requestId,
+      error.response.headers.get("x-request-id") ?? requestId,
     );
   }
   if (isTimeout(error)) return toApiError(408, undefined, requestId);
@@ -87,7 +87,7 @@ async function send(method: string, path: string, options: RequestOptions): Prom
         status,
         totalMs: performance.now() - started,
         clickToSendMs: clicked,
-        serverTiming: response?.headers.get('server-timing') ?? null,
+        serverTiming: response?.headers.get("server-timing") ?? null,
       }),
     );
   try {
@@ -114,18 +114,18 @@ async function json<T>(method: string, path: string, options: RequestOptions = {
     return (await response.json()) as T;
   } catch {
     // A 2xx with a malformed body is a server fault, not a parse crash in the caller.
-    throw toApiError(502, undefined, response.headers.get('x-request-id') ?? undefined);
+    throw toApiError(502, undefined, response.headers.get("x-request-id") ?? undefined);
   }
 }
 
 /** Typed JSON helpers; every failure is an ApiError. Pass `signal` from the Query context. */
 export const api = {
-  get: <T>(path: string, options?: RequestOptions) => json<T>('GET', path, options),
-  post: <T>(path: string, options?: RequestOptions) => json<T>('POST', path, options),
-  put: <T>(path: string, options?: RequestOptions) => json<T>('PUT', path, options),
-  patch: <T>(path: string, options?: RequestOptions) => json<T>('PATCH', path, options),
-  delete: <T>(path: string, options?: RequestOptions) => json<T>('DELETE', path, options),
+  get: <T>(path: string, options?: RequestOptions) => json<T>("GET", path, options),
+  post: <T>(path: string, options?: RequestOptions) => json<T>("POST", path, options),
+  put: <T>(path: string, options?: RequestOptions) => json<T>("PUT", path, options),
+  patch: <T>(path: string, options?: RequestOptions) => json<T>("PATCH", path, options),
+  delete: <T>(path: string, options?: RequestOptions) => json<T>("DELETE", path, options),
 };
 
 /** Prefix of a list's routes, e.g. `lists/abc/queue`. */
-export const listPath = (listId: string) => 'lists/' + encodeURIComponent(listId);
+export const listPath = (listId: string) => "lists/" + encodeURIComponent(listId);

@@ -1,25 +1,25 @@
-import { ConfirmDialog, SortableList } from '@checkpoint/ui-react';
-import { CircleDollarSign, GripVertical, PinOff } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Link } from 'react-router';
-import type { Desire, QueueEntry, ScoredGame } from '../../../../../packages/core/src/models';
-import { Button } from '@/components/ui/button';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { FinishDialog, FinishIcon } from '../finish-dialog';
-import { ImmediateButton } from '../immediate';
-import { ListPicker } from '../lists';
-import { MetadataBadge } from '../metadata';
-import { PlayingButton, useGameWriter } from '../playing';
-import { AppLoader } from '../loader/AppLoader';
-import { GameDetailModal } from '../details';
-import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
-import { fold, PAGE_SIZE, displayDate, excludedReasons } from './queue-model';
-import { useQueue } from './useQueue';
-import './queue.css';
+import { ConfirmDialog, SortableList } from "@checkpoint/ui-react";
+import { CircleDollarSign, GripVertical, PinOff } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { Link } from "react-router";
+import type { Desire, QueueEntry, ScoredGame } from "../../../../../packages/core/src/models";
+import { Button } from "@/components/ui/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { FinishDialog, FinishIcon } from "../finish-dialog";
+import { ImmediateButton } from "../immediate";
+import { ListPicker } from "../lists";
+import { MetadataBadge } from "../metadata";
+import { PlayingButton, useGameWriter } from "../playing";
+import { AppLoader } from "../loader/AppLoader";
+import { GameDetailModal } from "../details";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
+import { fold, PAGE_SIZE, displayDate, excludedReasons } from "./queue-model";
+import { useQueue } from "./useQueue";
+import "./queue.css";
 
-const DETAIL_STATE = '?from=ordem';
+const DETAIL_STATE = "?from=ordem";
 
 function Cover({ game, lazy = true }: { game: ScoredGame; lazy?: boolean }) {
   return (
@@ -28,9 +28,9 @@ function Cover({ game, lazy = true }: { game: ScoredGame; lazy?: boolean }) {
         <img
           src={game.coverUrl}
           alt=""
-          loading={lazy ? 'lazy' : undefined}
+          loading={lazy ? "lazy" : undefined}
           draggable={false}
-          onError={(e) => (e.currentTarget.style.display = 'none')}
+          onError={(e) => (e.currentTarget.style.display = "none")}
         />
       )}
       <span>{game.name.slice(0, 1)}</span>
@@ -133,8 +133,8 @@ export function PlayingRow({
           </div>
           <p className="muted">
             {game.startedAt
-              ? 'Iniciado em ' + displayDate(game.startedAt)
-              : 'Data de início não informada'}
+              ? "Iniciado em " + displayDate(game.startedAt)
+              : "Data de início não informada"}
           </p>
         </div>
       </Link>
@@ -171,7 +171,7 @@ export function QueueView({ listId }: { listId: string }) {
   });
   const writer = useGameWriter();
   const { data, busyId } = q;
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [finishing, setFinishing] = useState<ScoredGame | null>(null);
   const [purchasingGame, setPurchasingGame] = useState<ScoredGame | null>(null);
@@ -198,7 +198,7 @@ export function QueueView({ listId }: { listId: string }) {
       const g = item.game;
       cache.set(
         g.id,
-        fold([g.name, g.primaryGenre, ...g.secondaryTags, g.mechanic, g.pace].join(' ')),
+        fold([g.name, g.primaryGenre, ...g.secondaryTags, g.mechanic, g.pace].join(" ")),
       );
     }
     return cache;
@@ -214,7 +214,7 @@ export function QueueView({ listId }: { listId: string }) {
     const result: { item: QueueEntry; index: number }[] = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i]!;
-      const hay = haystacks.get(item.game.id) ?? '';
+      const hay = haystacks.get(item.game.id) ?? "";
       if (words.every((w) => hay.includes(w))) {
         result.push({ item, index: i });
         if (result.length >= 100) break;
@@ -323,7 +323,7 @@ export function QueueView({ listId }: { listId: string }) {
             )}
           </section>
           <p className="stats-line">
-            <b>{data.total}</b> jogos · <b>{data.estimatedHours}</b> h · ritmo{' '}
+            <b>{data.total}</b> jogos · <b>{data.estimatedHours}</b> h · ritmo{" "}
             <b>{data.timeFactor.toFixed(2)}×</b>
           </p>
           <div className="stats">
@@ -366,7 +366,7 @@ export function QueueView({ listId }: { listId: string }) {
                 data-testid="queue-search-clear"
                 type="button"
                 variant="outline"
-                onClick={() => setSearch('')}
+                onClick={() => setSearch("")}
               >
                 Limpar
               </Button>
@@ -376,7 +376,7 @@ export function QueueView({ listId }: { listId: string }) {
             {searching ? (
               <>
                 <span role="status">
-                  {rows.length} de {data.total} jogos{' '}
+                  {rows.length} de {data.total} jogos{" "}
                   <span className="muted">· posições reais da fila</span>
                 </span>
                 <span className="muted">Limpe a busca para arrastar</span>
@@ -409,7 +409,7 @@ export function QueueView({ listId }: { listId: string }) {
             </div>
           )}
           <div
-            className={cn('queue-list', busyId !== null && 'is-busy', searching && 'is-searching')}
+            className={cn("queue-list", busyId !== null && "is-busy", searching && "is-searching")}
           >
             <SortableList
               data-testid="queue-sortable-list"
@@ -575,10 +575,10 @@ function NextGame({
         </div>
         <p>
           {first.game.plannedHours === null
-            ? 'Tempo a confirmar'
-            : first.game.plannedHours + ' horas estimadas'}{' '}
+            ? "Tempo a confirmar"
+            : first.game.plannedHours + " horas estimadas"}{" "}
           · {first.score} pontos
-          {first.pinnedPosition ? ' · posição fixada por você' : ''}
+          {first.pinnedPosition ? " · posição fixada por você" : ""}
         </p>
         <span className="button primary">Ver jogo e avaliar ↗</span>
       </div>
@@ -652,7 +652,7 @@ export const QueueRow = memo(function QueueRow({
   onUnpurchase,
 }: RowProps) {
   const { game } = item;
-  const isPurchased = game.status !== 'Desejado';
+  const isPurchased = game.status !== "Desejado";
   const primaryTag = game.primaryGenre || game.secondaryTags[0];
   const otherTags = game.primaryGenre ? game.secondaryTags : game.secondaryTags.slice(1);
   const release = (e: MouseEvent) => {
@@ -663,11 +663,11 @@ export const QueueRow = memo(function QueueRow({
   return (
     <div
       className={cn(
-        'queue-row select-none',
-        isNextGame && 'is-next-game',
-        busy && 'saving',
-        flash && 'just-moved',
-        isDragging && 'lifted',
+        "queue-row select-none",
+        isNextGame && "is-next-game",
+        busy && "saving",
+        flash && "just-moved",
+        isDragging && "lifted",
       )}
       data-id={game.id}
       data-testid={`queue-row-${game.id.toLowerCase()}`}
@@ -713,7 +713,7 @@ export const QueueRow = memo(function QueueRow({
           </span>
         )}
         <span className="rank">
-          {String(i + 1).padStart(2, '0')}{' '}
+          {String(i + 1).padStart(2, "0")}{" "}
           {item.pinnedPosition && (
             <>
               <span className="pin-mark" title="Posição fixada por você" aria-hidden="true">
@@ -739,10 +739,10 @@ export const QueueRow = memo(function QueueRow({
             <MetadataBadge kind="status" value={game.status} />
             <MetadataBadge kind="desire" value={game.desire} />
           </div>
-          <p>{item.reasons.join(' · ')}</p>
+          <p>{item.reasons.join(" · ")}</p>
         </div>
         <div className="queue-time">
-          {game.plannedHours === null ? '—' : game.plannedHours + ' h'}
+          {game.plannedHours === null ? "—" : game.plannedHours + " h"}
           <small>estimadas</small>
         </div>
         <div className="score">
@@ -755,7 +755,7 @@ export const QueueRow = memo(function QueueRow({
         <div className="queue-mobile-tags flex items-center gap-1 min-w-0 mr-auto sm:hidden pl-2">
           {primaryTag && (
             <MetadataBadge
-              kind={game.primaryGenre ? 'genre' : 'tag'}
+              kind={game.primaryGenre ? "genre" : "tag"}
               value={primaryTag}
               className="truncate max-w-[90px] whitespace-nowrap [&>span]:truncate [&>span]:break-normal"
             />
@@ -801,11 +801,11 @@ export const QueueRow = memo(function QueueRow({
         ) : (
           item.pinnedPosition && (
             <span
-              className={cn('manual-chip', item.pinnedBeforePrerequisite && 'neg')}
+              className={cn("manual-chip", item.pinnedBeforePrerequisite && "neg")}
               title={
                 item.pinnedBeforePrerequisite
-                  ? 'Fixado antes do jogo anterior da série'
-                  : 'Posição fixada por você ao arrastar'
+                  ? "Fixado antes do jogo anterior da série"
+                  : "Posição fixada por você ao arrastar"
               }
             >
               {item.pinnedBeforePrerequisite && (
@@ -863,10 +863,10 @@ export const QueueRow = memo(function QueueRow({
           }
           type="button"
           className={cn(
-            'icon-button',
+            "icon-button",
             isPurchased
-              ? 'text-emerald-400 hover:text-emerald-300'
-              : 'text-muted-foreground hover:text-foreground',
+              ? "text-emerald-400 hover:text-emerald-300"
+              : "text-muted-foreground hover:text-foreground",
           )}
           aria-label={
             isPurchased
@@ -875,8 +875,8 @@ export const QueueRow = memo(function QueueRow({
           }
           title={
             isPurchased
-              ? 'Marcar como não comprado (devolver à lista de desejos)'
-              : 'Marcar como comprado'
+              ? "Marcar como não comprado (devolver à lista de desejos)"
+              : "Marcar como comprado"
           }
           onClick={(e) => {
             e.preventDefault();

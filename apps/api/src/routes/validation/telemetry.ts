@@ -1,18 +1,18 @@
 // Esquemas Zod estritos para a rota de telemetria (/api/v1/telemetry).
-import { z } from 'zod';
+import { z } from "zod";
 
 const eventName = z
   .string()
-  .regex(/^[A-Za-z][\w.:-]{0,79}$/, 'eventName inválido')
+  .regex(/^[A-Za-z][\w.:-]{0,79}$/, "eventName inválido")
   .optional();
 
 const attributes = z.record(z.string().max(64), z.unknown()).optional();
 
 export const telemetryLogEventSchema = z
   .object({
-    type: z.literal('log'),
+    type: z.literal("log"),
     eventName,
-    level: z.enum(['debug', 'info', 'warn', 'error']),
+    level: z.enum(["debug", "info", "warn", "error"]),
     message: z.string().max(500),
     attributes,
   })
@@ -20,7 +20,7 @@ export const telemetryLogEventSchema = z
 
 export const telemetryErrorEventSchema = z
   .object({
-    type: z.literal('error'),
+    type: z.literal("error"),
     eventName,
     message: z.string().max(500),
     stack: z.string().max(4000).optional(),
@@ -30,15 +30,15 @@ export const telemetryErrorEventSchema = z
 
 export const telemetryMetricEventSchema = z
   .object({
-    type: z.literal('metric'),
+    type: z.literal("metric"),
     eventName,
-    name: z.string().regex(/^[A-Za-z][\w.:-]{0,79}$/, 'name da métrica inválido'),
+    name: z.string().regex(/^[A-Za-z][\w.:-]{0,79}$/, "name da métrica inválido"),
     value: z.number().finite(),
     attributes,
   })
   .strict();
 
-export const telemetryEventSchema = z.discriminatedUnion('type', [
+export const telemetryEventSchema = z.discriminatedUnion("type", [
   telemetryLogEventSchema,
   telemetryErrorEventSchema,
   telemetryMetricEventSchema,
@@ -48,8 +48,8 @@ export const telemetryBatchSchema = z
   .object({
     events: z
       .array(telemetryEventSchema)
-      .min(1, 'Envie ao menos um evento')
-      .max(20, 'Máximo de 20 eventos por lote'),
+      .min(1, "Envie ao menos um evento")
+      .max(20, "Máximo de 20 eventos por lote"),
   })
   .strict();
 

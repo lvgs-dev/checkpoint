@@ -1,10 +1,10 @@
 // Resolve deployment registration, matching commit, then package/Git fallback. Cache database evidence.
-import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import type { ReleaseStore } from '../data/ports.ts';
-import { logger } from '../observability/logger.ts';
+import { execFileSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import type { ReleaseStore } from "../data/ports.ts";
+import { logger } from "../observability/logger.ts";
 
 export interface VersionInfo {
   version: string;
@@ -16,7 +16,7 @@ export interface VersionInfo {
   deployedAt: string | null;
 }
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = fileURLToPath(new URL("../../", import.meta.url));
 let cached: VersionInfo | null = null;
 
 async function fromDb(releases: ReleaseStore | null): Promise<VersionInfo | null> {
@@ -25,21 +25,21 @@ async function fromDb(releases: ReleaseStore | null): Promise<VersionInfo | null
   return releases.deployed(
     env.VERCEL_DEPLOYMENT_ID ?? null,
     env.VERCEL_GIT_COMMIT_SHA?.trim().toLowerCase() ?? null,
-    env.VERCEL_ENV ?? 'development',
+    env.VERCEL_ENV ?? "development",
   );
 }
 
 async function fallback(): Promise<VersionInfo> {
-  let version = '0.0.0';
+  let version = "0.0.0";
   try {
-    version = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8')).version ?? version;
+    version = JSON.parse(await readFile(resolve(root, "package.json"), "utf8")).version ?? version;
   } catch {
     /* Package metadata unavailable. */
   }
   let gitSha = process.env.VERCEL_GIT_COMMIT_SHA?.trim().toLowerCase() || null;
   if (!gitSha) {
     try {
-      gitSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+      gitSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
     } catch {
       /* Git unavailable. */
     }
@@ -49,7 +49,7 @@ async function fallback(): Promise<VersionInfo> {
     name: null,
     description: null,
     gitSha,
-    environment: process.env.VERCEL_ENV || 'development',
+    environment: process.env.VERCEL_ENV || "development",
     deployedAt: null,
   };
 }
@@ -60,7 +60,7 @@ export async function currentVersion(releases: ReleaseStore | null): Promise<Ver
   try {
     info = await fromDb(releases);
   } catch (err) {
-    logger.error('version.read_failed', { error: err });
+    logger.error("version.read_failed", { error: err });
   }
   if (info) return (cached = info);
   const fb = await fallback();

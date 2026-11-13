@@ -1,8 +1,8 @@
-import { createHash } from 'node:crypto';
-import { readdir, readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import postgres from 'postgres';
+import { createHash } from "node:crypto";
+import { readdir, readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import postgres from "postgres";
 
 export interface MigrationClient {
   query(sql: string, parameters?: string[]): Promise<{ version: string; checksum: string }[]>;
@@ -14,7 +14,7 @@ interface Migration {
   sql: string;
 }
 
-const folder = fileURLToPath(new URL('../../db/migrations/', import.meta.url));
+const folder = fileURLToPath(new URL("../../db/migrations/", import.meta.url));
 const LOCK = 724916031;
 
 /** Apply an immutable, forward-only history on one reserved connection. */
@@ -27,13 +27,13 @@ export async function applyMigrations(client: MigrationClient, files: Migration[
       applied_at timestamptz NOT NULL DEFAULT now()
     )`);
     const applied = await client.query(
-      'SELECT version, checksum FROM public.schema_migration ORDER BY version',
+      "SELECT version, checksum FROM public.schema_migration ORDER BY version",
     );
     const ordered = [...files].sort((a, b) => a.version.localeCompare(b.version));
     const checksums = new Map(
-      ordered.map((file) => [file.version, createHash('sha256').update(file.sql).digest('hex')]),
+      ordered.map((file) => [file.version, createHash("sha256").update(file.sql).digest("hex")]),
     );
-    if (checksums.size !== files.length) throw new Error('Duplicate migration version');
+    if (checksums.size !== files.length) throw new Error("Duplicate migration version");
     for (const row of applied) {
       if (!checksums.has(row.version)) throw new Error(`Applied migration missing: ${row.version}`);
       if (checksums.get(row.version) !== row.checksum)
@@ -46,11 +46,11 @@ export async function applyMigrations(client: MigrationClient, files: Migration[
       .at(-1);
     const pending = ordered.filter((file) => !known.has(file.version));
     if (latest && pending.some((file) => file.version <= latest))
-      throw new Error('Migrations must move forward');
+      throw new Error("Migrations must move forward");
     for (const file of pending) {
       await client.transaction(async (tx) => {
         await tx.query(file.sql);
-        await tx.query('INSERT INTO public.schema_migration (version, checksum) VALUES ($1, $2)', [
+        await tx.query("INSERT INTO public.schema_migration (version, checksum) VALUES ($1, $2)", [
           file.version,
           checksums.get(file.version)!,
         ]);
@@ -62,13 +62,13 @@ export async function applyMigrations(client: MigrationClient, files: Migration[
 }
 
 export async function migrate(url = process.env.DATABASE_URL): Promise<void> {
-  if (!url) throw new Error('DATABASE_URL is required for migrations');
+  if (!url) throw new Error("DATABASE_URL is required for migrations");
   const files = await Promise.all(
     (await readdir(folder))
-      .filter((name) => name.endsWith('.sql'))
+      .filter((name) => name.endsWith(".sql"))
       .map(async (version) => ({
         version,
-        sql: await readFile(resolve(folder, version), 'utf8'),
+        sql: await readFile(resolve(folder, version), "utf8"),
       })),
   );
   const pool = postgres(url, { max: 1, prepare: false, onnotice: () => {} });
@@ -82,12 +82,12 @@ export async function migrate(url = process.env.DATABASE_URL): Promise<void> {
           ];
         },
         async transaction(run) {
-          await connection.unsafe('BEGIN');
+          await connection.unsafe("BEGIN");
           try {
             await run(client);
-            await connection.unsafe('COMMIT');
+            await connection.unsafe("COMMIT");
           } catch (error) {
-            await connection.unsafe('ROLLBACK');
+            await connection.unsafe("ROLLBACK");
             throw error;
           }
         },

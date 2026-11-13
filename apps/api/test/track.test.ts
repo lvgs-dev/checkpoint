@@ -1,12 +1,12 @@
 // Vitest: testes de integração do coletor de tracking (POST /api/v1/track) com Postgres local.
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { Role } from '../../../packages/core/src/authorization.ts';
-import { startTestServer, testFetch, type TestServerContext } from './security/helper.ts';
-import { db, type Sql } from '../src/data/db.ts';
-import { resetTrackRateLimiter } from '../src/routes/track.ts';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { Role } from "../../../packages/core/src/authorization.ts";
+import { startTestServer, testFetch, type TestServerContext } from "./security/helper.ts";
+import { db, type Sql } from "../src/data/db.ts";
+import { resetTrackRateLimiter } from "../src/routes/track.ts";
 
-const USER1_ID = '00000000-0000-4000-a000-000000000010';
-const USER2_ID = '00000000-0000-4000-a000-000000000020';
+const USER1_ID = "00000000-0000-4000-a000-000000000010";
+const USER2_ID = "00000000-0000-4000-a000-000000000020";
 
 async function waitFor(
   predicate: () => Promise<boolean>,
@@ -21,25 +21,25 @@ async function waitFor(
   throw new Error(`waitFor timed out after ${timeoutMs}ms`);
 }
 
-describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /api/v1/track', () => {
+describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)("Tracking API: POST /api/v1/track", () => {
   let ctx: TestServerContext;
   let sql: Sql;
 
   const user1Headers = {
-    Authorization: 'Bearer token-user-1',
-    'Content-Type': 'application/json',
+    Authorization: "Bearer token-user-1",
+    "Content-Type": "application/json",
   };
 
   const user2Headers = {
-    Authorization: 'Bearer token-user-2',
-    'Content-Type': 'application/json',
+    Authorization: "Bearer token-user-2",
+    "Content-Type": "application/json",
   };
 
   beforeAll(async () => {
     ctx = await startTestServer({
       initialUsers: {
-        'token-user-1': { id: USER1_ID, role: Role.User },
-        'token-user-2': { id: USER2_ID, role: Role.User },
+        "token-user-1": { id: USER1_ID, role: Role.User },
+        "token-user-2": { id: USER2_ID, role: Role.User },
       },
     });
     sql = db(process.env.SECURITY_TEST_DATABASE_URL!);
@@ -55,17 +55,17 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     await sql`DELETE FROM public.page_track WHERE created_by IN (${USER1_ID}::uuid, ${USER2_ID}::uuid)`;
   });
 
-  it('rejeita requisições anônimas com status 401', async () => {
-    const res = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+  it("rejeita requisições anônimas com status 401", async () => {
+    const res = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        sessionId: 'anon-session',
+        sessionId: "anon-session",
         automated: false,
         events: [
           {
-            kind: 'page_view',
-            screen: '/biblioteca',
+            kind: "page_view",
+            screen: "/biblioteca",
             occurredAt: new Date().toISOString(),
           },
         ],
@@ -75,10 +75,10 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(res.status).toBe(401);
   });
 
-  it('rejeita payload inválido com status 400', async () => {
+  it("rejeita payload inválido com status 400", async () => {
     // Falta sessionId e automated
-    const resMissing = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const resMissing = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify({
         events: [],
@@ -87,16 +87,16 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(resMissing.status).toBe(400);
 
     // Tela com caracteres inválidos
-    const resBadScreen = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const resBadScreen = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify({
-        sessionId: 'session-invalid-screen',
+        sessionId: "session-invalid-screen",
         automated: false,
         events: [
           {
-            kind: 'page_view',
-            screen: 'invalid-screen-without-leading-slash',
+            kind: "page_view",
+            screen: "invalid-screen-without-leading-slash",
             occurredAt: new Date().toISOString(),
           },
         ],
@@ -105,17 +105,17 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(resBadScreen.status).toBe(400);
 
     // Elemento com caracteres proibidos (ex: espaços ou tags HTML)
-    const resBadElement = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const resBadElement = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify({
-        sessionId: 'session-invalid-element',
+        sessionId: "session-invalid-element",
         automated: false,
         events: [
           {
-            kind: 'click',
-            screen: '/biblioteca',
-            element: 'button with spaces',
+            kind: "click",
+            screen: "/biblioteca",
+            element: "button with spaces",
             occurredAt: new Date().toISOString(),
           },
         ],
@@ -124,16 +124,16 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(resBadElement.status).toBe(400);
 
     // Kind inválido
-    const resBadKind = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const resBadKind = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify({
-        sessionId: 'session-invalid-kind',
+        sessionId: "session-invalid-kind",
         automated: false,
         events: [
           {
-            kind: 'scroll',
-            screen: '/biblioteca',
+            kind: "scroll",
+            screen: "/biblioteca",
             occurredAt: new Date().toISOString(),
           },
         ],
@@ -142,35 +142,35 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(resBadKind.status).toBe(400);
   });
 
-  it('processa lote de eventos de forma assíncrona e grava em user_track (< 5ms de handler)', async () => {
+  it("processa lote de eventos de forma assíncrona e grava em user_track (< 5ms de handler)", async () => {
     const now = new Date();
     const payload = {
-      sessionId: 'session-batch-test-1',
+      sessionId: "session-batch-test-1",
       automated: false,
       events: [
         {
-          kind: 'page_view' as const,
-          screen: '/biblioteca',
+          kind: "page_view" as const,
+          screen: "/biblioteca",
           occurredAt: new Date(now.getTime() - 60_000).toISOString(),
         },
         {
-          kind: 'click' as const,
-          screen: '/biblioteca',
-          element: 'filter-genre-action',
+          kind: "click" as const,
+          screen: "/biblioteca",
+          element: "filter-genre-action",
           occurredAt: new Date(now.getTime() - 40_000).toISOString(),
         },
         {
-          kind: 'click' as const,
-          screen: '/biblioteca',
-          element: 'game-card-start',
+          kind: "click" as const,
+          screen: "/biblioteca",
+          element: "game-card-start",
           occurredAt: new Date(now.getTime() - 20_000).toISOString(),
         },
       ],
     };
 
     const t0 = performance.now();
-    const res = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const res = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify(payload),
     });
@@ -178,7 +178,7 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
 
     expect(res.status).toBe(202);
     const data = await res.json();
-    expect(data).toEqual({ status: 'accepted' });
+    expect(data).toEqual({ status: "accepted" });
 
     // O handler retorna imediatamente; a persistência ocorre em segundo plano.
     expect(durationMs).toBeLessThan(100);
@@ -209,59 +209,59 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
 
     expect(records).toHaveLength(3);
     expect(records[0]).toMatchObject({
-      kind: 'page_view',
-      screen: '/biblioteca',
+      kind: "page_view",
+      screen: "/biblioteca",
       element: null,
       automated: false,
       created_by: USER1_ID,
     });
     expect(records[1]).toMatchObject({
-      kind: 'click',
-      screen: '/biblioteca',
-      element: 'filter-genre-action',
+      kind: "click",
+      screen: "/biblioteca",
+      element: "filter-genre-action",
       automated: false,
       created_by: USER1_ID,
     });
     expect(records[2]).toMatchObject({
-      kind: 'click',
-      screen: '/biblioteca',
-      element: 'game-card-start',
+      kind: "click",
+      screen: "/biblioteca",
+      element: "game-card-start",
       automated: false,
       created_by: USER1_ID,
     });
   });
 
-  it('consolida contagens em page_track acumulando após dois lotes (upsert atômico)', async () => {
+  it("consolida contagens em page_track acumulando após dois lotes (upsert atômico)", async () => {
     const now = new Date();
     const today = now.toISOString().slice(0, 10);
 
     // Lote 1: 1 page_view + 2 clicks
     const batch1 = {
-      sessionId: 'session-accumulate-1',
+      sessionId: "session-accumulate-1",
       automated: false,
       events: [
         {
-          kind: 'page_view' as const,
-          screen: '/jogos/:id',
+          kind: "page_view" as const,
+          screen: "/jogos/:id",
           occurredAt: new Date(now.getTime() - 30_000).toISOString(),
         },
         {
-          kind: 'click' as const,
-          screen: '/jogos/:id',
-          element: 'detail-play-toggle',
+          kind: "click" as const,
+          screen: "/jogos/:id",
+          element: "detail-play-toggle",
           occurredAt: new Date(now.getTime() - 20_000).toISOString(),
         },
         {
-          kind: 'click' as const,
-          screen: '/jogos/:id',
-          element: 'detail-close',
+          kind: "click" as const,
+          screen: "/jogos/:id",
+          element: "detail-close",
           occurredAt: new Date(now.getTime() - 10_000).toISOString(),
         },
       ],
     };
 
-    const res1 = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const res1 = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify(batch1),
     });
@@ -279,25 +279,25 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
 
     // Lote 2: 1 page_view + 1 click
     const batch2 = {
-      sessionId: 'session-accumulate-2',
+      sessionId: "session-accumulate-2",
       automated: false,
       events: [
         {
-          kind: 'page_view' as const,
-          screen: '/jogos/:id',
+          kind: "page_view" as const,
+          screen: "/jogos/:id",
           occurredAt: now.toISOString(),
         },
         {
-          kind: 'click' as const,
-          screen: '/jogos/:id',
-          element: 'detail-rate-game',
+          kind: "click" as const,
+          screen: "/jogos/:id",
+          element: "detail-rate-game",
           occurredAt: now.toISOString(),
         },
       ],
     };
 
-    const res2 = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const res2 = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify(batch2),
     });
@@ -325,22 +325,22 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(summary.last_access_at).not.toBeNull();
   });
 
-  it('limita occurredAt para o tempo do servidor quando o desvio do cliente excede 24h', async () => {
+  it("limita occurredAt para o tempo do servidor quando o desvio do cliente excede 24h", async () => {
     const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
     const payload = {
-      sessionId: 'session-drift-test',
+      sessionId: "session-drift-test",
       automated: false,
       events: [
         {
-          kind: 'page_view' as const,
-          screen: '/configuracoes',
+          kind: "page_view" as const,
+          screen: "/configuracoes",
           occurredAt: fiveDaysAgo,
         },
       ],
     };
 
-    const res = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const res = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: JSON.stringify(payload),
     });
@@ -364,7 +364,7 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     expect(diffMs).toBeLessThan(10_000);
   });
 
-  it('aplica limite de taxa próprio (30 req/min por usuário, 31ª retorna 429)', async () => {
+  it("aplica limite de taxa próprio (30 req/min por usuário, 31ª retorna 429)", async () => {
     resetTrackRateLimiter();
 
     const makeBody = (i: number) =>
@@ -373,9 +373,9 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
         automated: false,
         events: [
           {
-            kind: 'click',
-            screen: '/biblioteca',
-            element: 'btn-ping',
+            kind: "click",
+            screen: "/biblioteca",
+            element: "btn-ping",
             occurredAt: new Date().toISOString(),
           },
         ],
@@ -383,8 +383,8 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
 
     // Dispara 30 requisições para USER1: todas devem retornar 202
     for (let i = 1; i <= 30; i++) {
-      const res = await testFetch(ctx.baseUrl, '/api/v1/track', {
-        method: 'POST',
+      const res = await testFetch(ctx.baseUrl, "/api/v1/track", {
+        method: "POST",
         headers: user1Headers,
         body: makeBody(i),
       });
@@ -392,17 +392,17 @@ describe.skipIf(!process.env.SECURITY_TEST_DATABASE_URL)('Tracking API: POST /ap
     }
 
     // 31ª requisição do USER1: deve retornar 429 com Retry-After: 60
-    const res31 = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const res31 = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user1Headers,
       body: makeBody(31),
     });
     expect(res31.status).toBe(429);
-    expect(res31.headers.get('retry-after')).toBe('60');
+    expect(res31.headers.get("retry-after")).toBe("60");
 
     // USER2 não deve ser afetado (limite é isolado por usuário)
-    const resUser2 = await testFetch(ctx.baseUrl, '/api/v1/track', {
-      method: 'POST',
+    const resUser2 = await testFetch(ctx.baseUrl, "/api/v1/track", {
+      method: "POST",
       headers: user2Headers,
       body: makeBody(99),
     });

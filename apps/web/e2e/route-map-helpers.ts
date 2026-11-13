@@ -1,7 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import type { Page } from '@playwright/test';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import type { Page } from "@playwright/test";
 
 export interface FileCredentials {
   email?: string;
@@ -16,7 +16,7 @@ export interface FileCredentials {
 export function readFileCredentials(): FileCredentials {
   try {
     return JSON.parse(
-      fs.readFileSync(new URL('../../../playwrite-credentials.json', import.meta.url), 'utf8'),
+      fs.readFileSync(new URL("../../../playwrite-credentials.json", import.meta.url), "utf8"),
     );
   } catch {
     return {};
@@ -45,15 +45,15 @@ export function isLocalhost(urlStr?: string): boolean {
     const parsed = new URL(urlStr);
     const host = parsed.hostname.toLowerCase();
     return (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === '0.0.0.0' ||
-      host === '::1' ||
-      host === '[::1]'
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      host === "::1" ||
+      host === "[::1]"
     );
   } catch {
     const lower = urlStr.toLowerCase();
-    return lower.includes('localhost') || lower.includes('127.0.0.1');
+    return lower.includes("localhost") || lower.includes("127.0.0.1");
   }
 }
 
@@ -69,8 +69,8 @@ export function getBypassHeaders(
     return undefined;
   }
   return {
-    'x-vercel-protection-bypass': bypassSecret,
-    'x-vercel-set-bypass-cookie': 'true',
+    "x-vercel-protection-bypass": bypassSecret,
+    "x-vercel-set-bypass-cookie": "true",
   };
 }
 
@@ -127,13 +127,13 @@ export class TimingCollector {
 
     console.log(`\n=== [TIMING] Step: ${stepId} (${route}) ===`);
     if (newTimings.length === 0) {
-      console.log('No new API timings recorded.');
+      console.log("No new API timings recorded.");
     } else {
       const tableData = newTimings.map((t) => ({
-        'route/call': `${t.method} ${t.path} (${t.status})`,
+        "route/call": `${t.method} ${t.path} (${t.status})`,
         totalMs: t.totalMs,
-        handlerMs: t.handlerMs ?? '—',
-        networkMs: t.networkMs ?? '—',
+        handlerMs: t.handlerMs ?? "—",
+        networkMs: t.networkMs ?? "—",
       }));
       console.table(tableData);
     }
@@ -147,14 +147,14 @@ export class TimingCollector {
   save(targetPath?: string): void {
     const dest =
       targetPath ||
-      fileURLToPath(new URL('../test-results/route-map-timings.json', import.meta.url));
+      fileURLToPath(new URL("../test-results/route-map-timings.json", import.meta.url));
 
     const dir = path.dirname(dest);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    fs.writeFileSync(dest, JSON.stringify(this.records, null, 2), 'utf8');
+    fs.writeFileSync(dest, JSON.stringify(this.records, null, 2), "utf8");
     console.log(`\nSaved ${this.records.length} step timing records to ${dest}`);
   }
 
@@ -174,17 +174,17 @@ export class TimingCollector {
     }
 
     if (summary) {
-      console.log('\n=== [TIMING SUMMARY] window.__timingSummary() ===');
+      console.log("\n=== [TIMING SUMMARY] window.__timingSummary() ===");
       console.table(summary);
 
       const dest =
         targetPath ||
-        fileURLToPath(new URL('../test-results/route-map-summary.json', import.meta.url));
+        fileURLToPath(new URL("../test-results/route-map-summary.json", import.meta.url));
       const dir = path.dirname(dest);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(dest, JSON.stringify(summary, null, 2), 'utf8');
+      fs.writeFileSync(dest, JSON.stringify(summary, null, 2), "utf8");
       console.log(`Saved timing summary to ${dest}`);
     }
     return summary;

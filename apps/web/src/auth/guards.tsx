@@ -1,6 +1,6 @@
-import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
-import { useAuth } from './AuthProvider';
-import { safeRedirect } from './safeRedirect';
+import { Navigate, Outlet, useLocation, useSearchParams } from "react-router";
+import { useAuth } from "./AuthProvider";
+import { safeRedirect } from "./safeRedirect";
 
 /** Protects the app screens: no session -> /login?redirect=<original route>. */
 export function RequireAuth() {
@@ -8,7 +8,7 @@ export function RequireAuth() {
   const { pathname, search, hash } = useLocation();
   if (!enabled || session) return <Outlet />;
   return (
-    <Navigate replace to={'/login?redirect=' + encodeURIComponent(pathname + search + hash)} />
+    <Navigate replace to={"/login?redirect=" + encodeURIComponent(pathname + search + hash)} />
   );
 }
 
@@ -19,6 +19,6 @@ export function GuestOnly() {
   return enabled && !session ? (
     <Outlet />
   ) : (
-    <Navigate replace to={safeRedirect(params.get('redirect'))} />
+    <Navigate replace to={safeRedirect(params.get("redirect"))} />
   );
 }

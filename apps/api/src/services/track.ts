@@ -1,5 +1,5 @@
 // Serviço de domínio para rastreamento de eventos de navegação e cliques.
-import type { TrackBatchRecord, TrackDriver } from '../data/drivers/types.ts';
+import type { TrackBatchRecord, TrackDriver } from "../data/drivers/types.ts";
 
 export class TrackService {
   private driver: TrackDriver;

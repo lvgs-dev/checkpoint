@@ -1,10 +1,10 @@
-import type { Desire } from '../../../../../packages/core/src/models';
+import type { Desire } from "../../../../../packages/core/src/models";
 
 /** Previous desire of each game marked "Imediata" (for undo); same localStorage key as the Angular app. */
-const PREV_KEY = 'checkpoint:previous-desire';
+const PREV_KEY = "checkpoint:previous-desire";
 const read = (): Record<string, Desire> => {
   try {
-    return JSON.parse(localStorage.getItem(PREV_KEY) ?? '{}') as Record<string, Desire>;
+    return JSON.parse(localStorage.getItem(PREV_KEY) ?? "{}") as Record<string, Desire>;
   } catch {
     return {};
   }
@@ -20,5 +20,5 @@ export function rememberDesire(id: string, desire: Desire) {
 
 export function previousDesire(id: string): Desire {
   const d = read()[id];
-  return d && d !== 'Imediata' ? d : 'Muito Alta';
+  return d && d !== "Imediata" ? d : "Muito Alta";
 }

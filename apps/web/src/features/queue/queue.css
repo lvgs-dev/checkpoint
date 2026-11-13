@@ -64,11 +64,11 @@
   background: var(--surface-2);
 }
 .queue-cover:not(:has(img)),
-.queue-cover:has(img[style*='none']) {
+.queue-cover:has(img[style*="none"]) {
   background: var(--cover-a);
 }
 .next-cover:not(:has(img)),
-.next-cover:has(img[style*='none']) {
+.next-cover:has(img[style*="none"]) {
   background: linear-gradient(135deg, var(--cover-a), var(--cover-b));
 }
 .queue-cover img,
@@ -94,6 +94,6 @@
 }
 
 .drag-handle,
-[data-testid^='queue-drag-handle-'] {
+[data-testid^="queue-drag-handle-"] {
   touch-action: none;
 }

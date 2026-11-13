@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import type { ScoredGame } from '../../../../../packages/core/src/models';
-import { isApiError } from '../../api/http';
-import { localToday } from '@/lib/utils';
-import { AppLoader } from '../loader/AppLoader';
-import { useGameWriter } from '../playing/gameWriter';
-import './finish-dialog.css';
+import { useEffect, useRef, useState } from "react";
+import type { ScoredGame } from "../../../../../packages/core/src/models";
+import { isApiError } from "../../api/http";
+import { localToday } from "@/lib/utils";
+import { AppLoader } from "../loader/AppLoader";
+import { useGameWriter } from "../playing/gameWriter";
+import "./finish-dialog.css";
 
-export type FinishGame = Pick<ScoredGame, 'id' | 'name' | 'actualHours' | 'rating' | 'notes'>;
+export type FinishGame = Pick<ScoredGame, "id" | "name" | "actualHours" | "rating" | "notes">;
 
 /** Ratings from 1 to 5 in half-point steps. */
 const STEPS = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
@@ -32,26 +32,26 @@ export function FinishDialog({
   const [rating, setRating] = useState<number | null>(
     STEPS.includes(game.rating ?? 0) ? game.rating : null,
   );
-  const [hours, setHours] = useState(game.actualHours === null ? '' : String(game.actualHours));
-  const [notes, setNotes] = useState(game.notes ?? '');
+  const [hours, setHours] = useState(game.actualHours === null ? "" : String(game.actualHours));
+  const [notes, setNotes] = useState(game.notes ?? "");
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const parsed =
-    hours.trim().replace(',', '.') === '' ? null : Number(hours.trim().replace(',', '.'));
+    hours.trim().replace(",", ".") === "" ? null : Number(hours.trim().replace(",", "."));
   const hoursInvalid =
     parsed !== null && (!Number.isFinite(parsed) || parsed < 0 || parsed > 100000);
   const canSave = !saving && STEPS.includes(rating ?? 0) && !hoursInvalid;
-  const todayLabel = new Date().toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
+  const todayLabel = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
 
   useEffect(() => {
     const el = dialog.current!;
     const overflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overflow = "hidden";
     el.showModal();
     return () => {
       document.documentElement.style.overflow = overflow;
@@ -61,14 +61,14 @@ export function FinishDialog({
 
   const close = (saved: boolean) => onClose(saved);
   const fill = (n: number) =>
-    rating !== null && rating >= n ? '100%' : rating !== null && rating >= n - 0.5 ? '50%' : '0%';
+    rating !== null && rating >= n ? "100%" : rating !== null && rating >= n - 0.5 ? "50%" : "0%";
 
   function dragMove(e: React.PointerEvent) {
     const d = drag.current;
     if (!d || e.pointerId !== d.id) return;
     d.dy = Math.max(0, e.clientY - d.y);
     const el = dialog.current!;
-    el.style.transition = 'none';
+    el.style.transition = "none";
     el.style.transform = `translateY(${d.dy}px)`;
   }
   function dragEnd() {
@@ -76,24 +76,24 @@ export function FinishDialog({
     drag.current = null;
     if (!d) return;
     const el = dialog.current!;
-    el.style.transition = 'transform 160ms ease-out';
+    el.style.transition = "transform 160ms ease-out";
     if (d.dy > CLOSE_DRAG_PX && !saving) {
-      el.style.transform = 'translateY(100%)';
+      el.style.transform = "translateY(100%)";
       setTimeout(() => close(false), 160);
-    } else el.style.transform = '';
+    } else el.style.transform = "";
   }
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (!canSave) return;
     setSaving(true);
-    setError('');
+    setError("");
     try {
       await writer.save(game.id, {
         rating,
         actualHours: parsed,
         notes: notes.trim(),
-        status: 'Finalizado',
+        status: "Finalizado",
         finishedAt: today,
       });
       close(true);
@@ -101,8 +101,8 @@ export function FinishDialog({
       setSaving(false);
       setError(
         isApiError(e) && e.status >= 400 && e.status < 500 && e.status !== 408
-          ? 'Não foi possível salvar: ' + e.message + '. Corrija e tente de novo.'
-          : 'Não foi possível salvar. Verifique a conexão e tente de novo.',
+          ? "Não foi possível salvar: " + e.message + ". Corrija e tente de novo."
+          : "Não foi possível salvar. Verifique a conexão e tente de novo.",
       );
     }
   }
@@ -141,14 +141,14 @@ export function FinishDialog({
 
         <fieldset className="finish-field">
           <legend>
-            Nota <span className="finish-value">{rating === null ? '—' : rating + ' / 5'}</span>
+            Nota <span className="finish-value">{rating === null ? "—" : rating + " / 5"}</span>
           </legend>
           <div className="finish-stars">
             {STARS.map((n) => (
               <span
                 key={n}
                 className="finish-star"
-                style={{ '--fill': fill(n) } as React.CSSProperties}
+                style={{ "--fill": fill(n) } as React.CSSProperties}
               >
                 ★
                 {n === 1 ? (
@@ -166,12 +166,12 @@ export function FinishDialog({
                   <>
                     <label className="half left">
                       <input
-                        data-testid={`dialog-finish-rating-${String(n - 0.5).replace('.', '-')}`}
+                        data-testid={`dialog-finish-rating-${String(n - 0.5).replace(".", "-")}`}
                         type="radio"
                         name="finish-rating"
                         checked={rating === n - 0.5}
                         onChange={() => setRating(n - 0.5)}
-                        aria-label={n - 0.5 + ' estrelas'}
+                        aria-label={n - 0.5 + " estrelas"}
                       />
                     </label>
                     <label className="half right">
@@ -181,7 +181,7 @@ export function FinishDialog({
                         name="finish-rating"
                         checked={rating === n}
                         onChange={() => setRating(n)}
-                        aria-label={n + ' estrelas'}
+                        aria-label={n + " estrelas"}
                       />
                     </label>
                   </>
@@ -251,7 +251,7 @@ export function FinishDialog({
             className="button primary"
             disabled={!canSave}
           >
-            {saving ? <AppLoader layout="inline" size="sm" label="Salvando…" /> : 'Finalizar'}
+            {saving ? <AppLoader layout="inline" size="sm" label="Salvando…" /> : "Finalizar"}
           </button>
         </div>
       </form>

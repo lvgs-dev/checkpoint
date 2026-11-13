@@ -1,6 +1,6 @@
 // Vendor-neutral observability contracts. Implementations live in the apps; nothing here
 // may import a vendor SDK.
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 export type Attributes = Record<string, unknown>;
 
 export interface Logger {
@@ -26,7 +26,7 @@ export interface Tracer {
 }
 
 /** Built-in destinations. Registering a new one adds its name here and a factory in the API registry. */
-export type SinkKind = 'console' | 'file' | 'memory' | 'noop' | 'fanout';
+export type SinkKind = "console" | "file" | "memory" | "noop" | "fanout";
 
 /** A structured event, already redacted when a sink receives it. */
 export interface LogEvent {

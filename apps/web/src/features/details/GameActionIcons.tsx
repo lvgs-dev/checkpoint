@@ -1,11 +1,11 @@
-import { CircleDollarSign } from 'lucide-react';
-import { useState } from 'react';
-import { ConfirmDialog } from '@checkpoint/ui-react';
-import type { ScoredGame } from '../../../../../packages/core/src/models';
-import { cn } from '@/lib/utils';
-import { FinishIcon } from '../finish-dialog';
-import { ImmediateButton } from '../immediate';
-import { PlayingButton, useGameWriter } from '../playing';
+import { CircleDollarSign } from "lucide-react";
+import { useState } from "react";
+import { ConfirmDialog } from "@checkpoint/ui-react";
+import type { ScoredGame } from "../../../../../packages/core/src/models";
+import { cn } from "@/lib/utils";
+import { FinishIcon } from "../finish-dialog";
+import { ImmediateButton } from "../immediate";
+import { PlayingButton, useGameWriter } from "../playing";
 
 export interface GameActionIconsProps {
   game: ScoredGame;
@@ -21,22 +21,22 @@ export function GameActionIcons({
   onFinish,
   onPurchaseSuccess,
   onUnpurchaseSuccess,
-  testIdPrefix = 'detail',
-  className = '',
+  testIdPrefix = "detail",
+  className = "",
 }: GameActionIconsProps) {
   const writer = useGameWriter();
-  const [confirmAction, setConfirmAction] = useState<'purchase' | 'unpurchase' | null>(null);
-  const isPurchased = game.status !== 'Desejado';
+  const [confirmAction, setConfirmAction] = useState<"purchase" | "unpurchase" | null>(null);
+  const isPurchased = game.status !== "Desejado";
 
   return (
     <>
       <div
-        className={cn('grid grid-cols-4 items-center justify-items-center w-full my-3', className)}
+        className={cn("grid grid-cols-4 items-center justify-items-center w-full my-3", className)}
       >
         <ImmediateButton data-testid={`${testIdPrefix}-immediate`} game={game} />
         <PlayingButton data-testid={`${testIdPrefix}-playing`} game={game} />
         <button
-          data-testid={testIdPrefix === 'modal' ? 'modal-finish' : `${testIdPrefix}-finish`}
+          data-testid={testIdPrefix === "modal" ? "modal-finish" : `${testIdPrefix}-finish`}
           type="button"
           className="icon-button finish-btn"
           aria-label={`Finalizar ${game.name}`}
@@ -49,10 +49,10 @@ export function GameActionIcons({
           data-testid={`${testIdPrefix}-purchase`}
           type="button"
           className={cn(
-            'icon-button',
+            "icon-button",
             isPurchased
-              ? 'text-emerald-400 hover:text-emerald-300'
-              : 'text-muted-foreground hover:text-foreground',
+              ? "text-emerald-400 hover:text-emerald-300"
+              : "text-muted-foreground hover:text-foreground",
           )}
           aria-label={
             isPurchased
@@ -61,10 +61,10 @@ export function GameActionIcons({
           }
           title={
             isPurchased
-              ? 'Marcar como não comprado (devolver à lista de desejos)'
-              : 'Marcar como comprado'
+              ? "Marcar como não comprado (devolver à lista de desejos)"
+              : "Marcar como comprado"
           }
-          onClick={() => setConfirmAction(isPurchased ? 'unpurchase' : 'purchase')}
+          onClick={() => setConfirmAction(isPurchased ? "unpurchase" : "purchase")}
         >
           <CircleDollarSign className="size-5" />
         </button>
@@ -72,7 +72,7 @@ export function GameActionIcons({
 
       <ConfirmDialog
         data-testid="dialog-purchase"
-        open={confirmAction === 'purchase'}
+        open={confirmAction === "purchase"}
         title="Você comprou o jogo?"
         confirmLabel="Sim"
         cancelLabel="Não"
@@ -90,7 +90,7 @@ export function GameActionIcons({
 
       <ConfirmDialog
         data-testid="dialog-unpurchase"
-        open={confirmAction === 'unpurchase'}
+        open={confirmAction === "unpurchase"}
         title="Deseja marcar o jogo como não comprado?"
         confirmLabel="Sim"
         cancelLabel="Não"

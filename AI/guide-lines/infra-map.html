@@ -37,12 +37,12 @@
         --bad: #b42318;
         --bad-bg: #fbe4e1;
         --code-bg: #eaf0ee;
-        --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
-        --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-        --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+        --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+        --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
       }
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme='light']) {
+        :root:not([data-theme="light"]) {
           --bg: #0c1413;
           --surface: #121d1c;
           --ink: #e3eeec;
@@ -71,7 +71,7 @@
           color-scheme: dark;
         }
       }
-      :root[data-theme='dark'] {
+      :root[data-theme="dark"] {
         --bg: #0c1413;
         --surface: #121d1c;
         --ink: #e3eeec;
@@ -195,7 +195,7 @@
         scrollbar-width: thin;
       }
       body::before {
-        content: '';
+        content: "";
         position: fixed;
         inset: 0 0 auto;
         height: env(safe-area-inset-top, 0px);
@@ -215,7 +215,7 @@
         cursor: pointer;
         white-space: nowrap;
       }
-      nav.tabs button[aria-selected='true'] {
+      nav.tabs button[aria-selected="true"] {
         color: var(--ink);
         background: var(--surface);
         border-color: var(--line);
@@ -537,7 +537,7 @@
         align-items: center;
         margin: 8px 0;
       }
-      input[type='search'],
+      input[type="search"],
       select {
         font: inherit;
         font-size: 14px;
@@ -549,7 +549,7 @@
         min-width: 0;
         max-width: 100%;
       }
-      input[type='search'] {
+      input[type="search"] {
         flex: 1 1 240px;
       }
       ol.steps {
@@ -2263,59 +2263,59 @@
 
     <script>
       (function () {
-        var panels = [].slice.call(document.querySelectorAll('section.panel'));
-        var nav = document.getElementById('tabs');
+        var panels = [].slice.call(document.querySelectorAll("section.panel"));
+        var nav = document.getElementById("tabs");
         var ids = panels.map(function (p) {
           return p.dataset.name;
         });
         function show(id) {
           if (ids.indexOf(id) < 0) id = ids[0];
           panels.forEach(function (p) {
-            p.classList.toggle('on', p.dataset.name === id);
+            p.classList.toggle("on", p.dataset.name === id);
           });
           [].forEach.call(nav.children, function (b) {
-            b.setAttribute('aria-selected', b.dataset.id === id ? 'true' : 'false');
+            b.setAttribute("aria-selected", b.dataset.id === id ? "true" : "false");
           });
           try {
-            if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+            if (location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
           } catch (e) {}
           window.scrollTo(0, 0);
         }
         panels.forEach(function (p) {
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.setAttribute('role', 'tab');
+          var b = document.createElement("button");
+          b.type = "button";
+          b.setAttribute("role", "tab");
           b.dataset.id = p.dataset.name;
           b.textContent = p.dataset.title;
-          b.addEventListener('click', function () {
+          b.addEventListener("click", function () {
             show(p.dataset.name);
           });
           nav.appendChild(b);
         });
-        document.documentElement.classList.add('js');
-        window.addEventListener('hashchange', function () {
+        document.documentElement.classList.add("js");
+        window.addEventListener("hashchange", function () {
           show(location.hash.slice(1));
         });
         show(location.hash.slice(1));
 
-        var theme = document.getElementById('theme');
-        theme.addEventListener('click', function () {
+        var theme = document.getElementById("theme");
+        theme.addEventListener("click", function () {
           var r = document.documentElement,
-            cur = r.getAttribute('data-theme');
+            cur = r.getAttribute("data-theme");
           var dark = cur
-            ? cur === 'dark'
-            : window.matchMedia('(prefers-color-scheme: dark)').matches;
-          r.setAttribute('data-theme', dark ? 'light' : 'dark');
+            ? cur === "dark"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          r.setAttribute("data-theme", dark ? "light" : "dark");
         });
 
-        [].forEach.call(document.querySelectorAll('.copy'), function (btn) {
-          btn.addEventListener('click', function () {
-            var code = btn.parentNode.querySelector('code');
+        [].forEach.call(document.querySelectorAll(".copy"), function (btn) {
+          btn.addEventListener("click", function () {
+            var code = btn.parentNode.querySelector("code");
             var text = code.textContent;
             function done(ok) {
-              btn.textContent = ok ? 'Copiado' : 'Selecione e copie';
+              btn.textContent = ok ? "Copiado" : "Selecione e copie";
               setTimeout(function () {
-                btn.textContent = 'Copiar';
+                btn.textContent = "Copiar";
               }, 1600);
             }
             try {
@@ -2342,22 +2342,22 @@
           s.addRange(r);
         }
 
-        var q = document.getElementById('q'),
-          who = document.getElementById('who'),
-          rows = [].slice.call(document.querySelectorAll('#perm tbody tr'));
+        var q = document.getElementById("q"),
+          who = document.getElementById("who"),
+          rows = [].slice.call(document.querySelectorAll("#perm tbody tr"));
         function filter() {
-          var t = (q.value || '').toLowerCase(),
+          var t = (q.value || "").toLowerCase(),
             w = who.value;
           rows.forEach(function (tr) {
             var ok = tr.textContent.toLowerCase().indexOf(t) >= 0;
             tr.hidden = !ok;
             [].forEach.call(tr.children, function (td, i) {
-              td.style.background = w && i == w ? 'var(--accent-bg)' : '';
+              td.style.background = w && i == w ? "var(--accent-bg)" : "";
             });
           });
         }
-        q.addEventListener('input', filter);
-        who.addEventListener('change', filter);
+        q.addEventListener("input", filter);
+        who.addEventListener("change", filter);
       })();
     </script>
   </body>

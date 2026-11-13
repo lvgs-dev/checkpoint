@@ -1,6 +1,6 @@
 // Esquemas Zod para a lista de desejos e integração com Steam (/api/v1/steam/*, /api/v1/wishlist/*).
-import { z } from 'zod';
-import { Desire } from '../../../../../packages/core/src/models.ts';
+import { z } from "zod";
+import { Desire } from "../../../../../packages/core/src/models.ts";
 
 const desireValues = Object.values(Desire) as [Desire, ...Desire[]];
 
@@ -9,8 +9,8 @@ export const steamSearchQuerySchema = z
     q: z
       .string()
       .trim()
-      .min(1, 'Informe o nome (1 a 100 caracteres)')
-      .max(100, 'Informe o nome (1 a 100 caracteres)'),
+      .min(1, "Informe o nome (1 a 100 caracteres)")
+      .max(100, "Informe o nome (1 a 100 caracteres)"),
   })
   .strict();
 
@@ -18,9 +18,9 @@ export const steamAppParamSchema = z
   .object({
     appId: z.coerce
       .number()
-      .int('appId inválido')
-      .min(1, 'appId inválido')
-      .max(2147483647, 'appId inválido'),
+      .int("appId inválido")
+      .min(1, "appId inválido")
+      .max(2147483647, "appId inválido"),
   })
   .strict();
 
@@ -28,16 +28,16 @@ export const addWishlistSteamBodySchema = z
   .object({
     appId: z
       .number()
-      .int('appId inválido')
-      .min(1, 'appId inválido')
-      .max(2147483647, 'appId inválido'),
-    desire: z.enum(desireValues, { message: 'Vontade inválida' }).optional(),
+      .int("appId inválido")
+      .min(1, "appId inválido")
+      .max(2147483647, "appId inválido"),
+    desire: z.enum(desireValues, { message: "Vontade inválida" }).optional(),
   })
   .strict();
 
 export const addWishlistManualBodySchema = z
   .object({
-    name: z.string().trim().min(1, 'Informe o nome do jogo').max(300, 'Informe o nome do jogo'),
+    name: z.string().trim().min(1, "Informe o nome do jogo").max(300, "Informe o nome do jogo"),
     primaryGenre: z.string().max(10000).optional(),
     store: z.string().max(10000).optional(),
     platform: z.string().max(10000).optional(),
@@ -49,28 +49,28 @@ export const addWishlistManualBodySchema = z
     mechanic: z.string().max(10000).optional(),
     mainHours: z
       .number()
-      .min(0, 'Horas inválidas')
-      .max(100000, 'Horas inválidas')
+      .min(0, "Horas inválidas")
+      .max(100000, "Horas inválidas")
       .nullable()
       .optional(),
     extraHours: z
       .number()
-      .min(0, 'Horas inválidas')
-      .max(100000, 'Horas inválidas')
+      .min(0, "Horas inválidas")
+      .max(100000, "Horas inválidas")
       .nullable()
       .optional(),
     completionistHours: z
       .number()
-      .min(0, 'Horas inválidas')
-      .max(100000, 'Horas inválidas')
+      .min(0, "Horas inválidas")
+      .max(100000, "Horas inválidas")
       .nullable()
       .optional(),
-    desire: z.enum(desireValues, { message: 'Vontade inválida' }).optional(),
+    desire: z.enum(desireValues, { message: "Vontade inválida" }).optional(),
     secondaryTags: z
       .array(z.string().trim().min(1).max(80))
-      .max(3, 'Use até três tags secundárias')
+      .max(3, "Use até três tags secundárias")
       .optional(),
-    steamAppId: z.number().int('appId inválido').min(1).max(2147483647).nullable().optional(),
+    steamAppId: z.number().int("appId inválido").min(1).max(2147483647).nullable().optional(),
   })
   .strict();
 

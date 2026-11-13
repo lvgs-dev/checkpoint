@@ -1,7 +1,7 @@
-import type { ScoringConfig, ScoringFactor } from '../../../../../packages/core/src/models';
-import { BONUS, OVERLAP, num, queueRule } from './settingsForm';
+import type { ScoringConfig, ScoringFactor } from "../../../../../packages/core/src/models";
+import { BONUS, OVERLAP, num, queueRule } from "./settingsForm";
 
-const off = (on: boolean) => (on ? undefined : 'off');
+const off = (on: boolean) => (on ? undefined : "off");
 
 /** Live explanation of the formula with the weights being edited (greyed out when a rule is off). */
 export function FormulaPanel({ d, context }: { d: ScoringConfig; context: ScoringFactor[] }) {
@@ -15,23 +15,23 @@ export function FormulaPanel({ d, context }: { d: ScoringConfig; context: Scorin
           <var>score</var> = <var>base</var> + <span className="op">Σ</span> ajustes ativos
         </p>
         <p className="eq">
-          <var>base</var> ={' '}
+          <var>base</var> ={" "}
           <span className={off(d.rules.desire)}>
             <b>{num(w.desire)}</b>·<var>D</var>
-          </span>{' '}
-          +{' '}
+          </span>{" "}
+          +{" "}
           <span className={off(d.rules.affinity)}>
             <b>{num(w.affinity)}</b>·<var>A</var>
-          </span>{' '}
-          +{' '}
+          </span>{" "}
+          +{" "}
           <span className={off(d.rules.duration)}>
             <b>{num(w.duration)}</b>·<var>T</var>
-          </span>{' '}
+          </span>{" "}
           + <b>{num(w.recentPurchase)}</b>·<var>C</var>
         </p>
-        <p className={'eq ' + (off(d.rules.affinity) ?? '')}>
+        <p className={"eq " + (off(d.rules.affinity) ?? "")}>
           <var>A</var> = (A<sub>gênero</sub> + A<sub>ritmo</sub> + A<sub>mecânica</sub>) ÷ 3, &nbsp;
-          A<sub>x</sub> ={' '}
+          A<sub>x</sub> ={" "}
           <span className="frac">
             <span>
               <b>{num(w.priorStrength)}</b>·<b>{num(w.neutralAffinity)}</b> + Σ 25·(nota − 1)
@@ -42,8 +42,8 @@ export function FormulaPanel({ d, context }: { d: ScoringConfig; context: Scorin
             </span>
           </span>
         </p>
-        <p className={'eq ' + (off(d.rules.duration) ?? '')}>
-          <var>T</var> = limite<sub>0–100</sub>(100 + <b>{num(w.freeDurationHours)}</b> −{' '}
+        <p className={"eq " + (off(d.rules.duration) ?? "")}>
+          <var>T</var> = limite<sub>0–100</sub>(100 + <b>{num(w.freeDurationHours)}</b> −{" "}
           <var>H</var>) &nbsp;<small>(sem tempo conhecido: T = 50)</small>
         </p>
         <p className="eq">
@@ -68,16 +68,16 @@ export function FormulaPanel({ d, context }: { d: ScoringConfig; context: Scorin
           )}
         </p>
         <p className="eq adjustments">
-          <span className="op">Σ</span> ajustes ={' '}
+          <span className="op">Σ</span> ajustes ={" "}
           {context.map((f) => (
             <span
               key={f.id}
-              className={['chip', !d.rules[f.rule!] && 'off', BONUS.has(f.id) && 'bonus']
+              className={["chip", !d.rules[f.rule!] && "off", BONUS.has(f.id) && "bonus"]
                 .filter(Boolean)
-                .join(' ')}
+                .join(" ")}
             >
-              {BONUS.has(f.id) ? '+' : '−'} {num(w[f.weight!])}
-              {OVERLAP.has(f.id) && ' · sobreposição'} · [{f.label.toLowerCase()}]
+              {BONUS.has(f.id) ? "+" : "−"} {num(w[f.weight!])}
+              {OVERLAP.has(f.id) && " · sobreposição"} · [{f.label.toLowerCase()}]
             </span>
           ))}
         </p>
@@ -91,7 +91,7 @@ export function FormulaPanel({ d, context }: { d: ScoringConfig; context: Scorin
           Muito Baixa 0. Jogos com vontade Imediata vão para o topo da fila, entre si pelo score.
         </li>
         <li>
-          <var>A</var> - afinidade bayesiana: média das suas notas (1–5 viram 0–100) nos{' '}
+          <var>A</var> - afinidade bayesiana: média das suas notas (1–5 viram 0–100) nos{" "}
           <var>n</var>
           <sub>x</sub> jogos avaliados com o mesmo gênero, ritmo ou mecânica, puxada para a
           afinidade neutra com força <var>k</var> = {num(w.priorStrength)}.

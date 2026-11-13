@@ -1,7 +1,7 @@
 // The one place that reads and writes the local JSON files used by the json drivers.
 // Writes are serialized (one at a time, in call order) and atomic (temp file + rename).
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 
 export class JsonFile {
   private path: string | null;
@@ -14,9 +14,9 @@ export class JsonFile {
   async read(): Promise<unknown> {
     if (!this.path) return undefined;
     try {
-      return JSON.parse(await readFile(this.path, 'utf8'));
+      return JSON.parse(await readFile(this.path, "utf8"));
     } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e;
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
       return undefined;
     }
   }
@@ -29,8 +29,8 @@ export class JsonFile {
       .catch(() => {})
       .then(async () => {
         await mkdir(dirname(path), { recursive: true });
-        await writeFile(path + '.tmp', snapshot);
-        await rename(path + '.tmp', path);
+        await writeFile(path + ".tmp", snapshot);
+        await rename(path + ".tmp", path);
       });
     await this.queue;
   }

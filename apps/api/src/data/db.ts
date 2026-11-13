@@ -1,6 +1,6 @@
 // Process-local PostgreSQL connection pool.
-import postgres from 'postgres';
-import { timed } from '../observability/timing.ts';
+import postgres from "postgres";
+import { timed } from "../observability/timing.ts";
 
 export type Sql = postgres.Sql;
 
@@ -8,7 +8,7 @@ let client: Sql | null = null;
 
 export function db(url = process.env.DATABASE_URL): Sql {
   if (client) return client;
-  if (!url) throw new Error('DATABASE_URL não definida');
+  if (!url) throw new Error("DATABASE_URL não definida");
   client = timed(
     postgres(url, {
       prepare: false,
@@ -18,7 +18,7 @@ export function db(url = process.env.DATABASE_URL): Sql {
       max_lifetime: 60 * 30,
       // `undefined` vira NULL em vez de lançar (campos opcionais vindos da API).
       transform: { undefined: null },
-      connection: { application_name: 'checkpoint-api' },
+      connection: { application_name: "checkpoint-api" },
       onnotice: () => {},
     }),
   );

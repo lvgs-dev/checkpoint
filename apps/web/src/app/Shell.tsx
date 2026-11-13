@@ -1,26 +1,26 @@
-import { useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
-import { useAppearance } from '../appearance/AppearanceProvider';
-import { useAuth } from '../auth/AuthProvider';
-import { authSession } from '../auth/session';
-import { useUnhandledErrors } from '../query/errors';
-import { startTracking, useTrackPageViews } from '../track';
-import { Toaster } from '@/components/ui/sonner';
-import { Logo } from './Logo';
+import { useCallback, useEffect } from "react";
+import { toast } from "sonner";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { useAppearance } from "../appearance/AppearanceProvider";
+import { useAuth } from "../auth/AuthProvider";
+import { authSession } from "../auth/session";
+import { useUnhandledErrors } from "../query/errors";
+import { startTracking, useTrackPageViews } from "../track";
+import { Toaster } from "@/components/ui/sonner";
+import { Logo } from "./Logo";
 
 /** Navigation targets (sidebar on desktop, tab bar on mobile). */
 const NAV = [
-  { id: 'library', path: '/jogos', icon: '▦', label: 'Lista de jogos', short: 'Jogos' },
-  { id: 'wishlist', path: '/desejos', icon: '♡', label: 'Lista de desejos', short: 'Desejos' },
-  { id: 'queue', path: '/ordem', icon: '≋', label: 'Ordem de jogos', short: 'Ordem' },
-  { id: 'settings', path: '/configuracoes', icon: '⚙', label: 'Regras da fila', short: 'Regras' },
+  { id: "library", path: "/jogos", icon: "▦", label: "Lista de jogos", short: "Jogos" },
+  { id: "wishlist", path: "/desejos", icon: "♡", label: "Lista de desejos", short: "Desejos" },
+  { id: "queue", path: "/ordem", icon: "≋", label: "Ordem de jogos", short: "Ordem" },
+  { id: "settings", path: "/configuracoes", icon: "⚙", label: "Regras da fila", short: "Regras" },
   {
-    id: 'appearance',
-    path: '/aparencia',
-    icon: '◐',
-    label: 'Aparência e conta',
-    short: 'Aparência',
+    id: "appearance",
+    path: "/aparencia",
+    icon: "◐",
+    label: "Aparência e conta",
+    short: "Aparência",
   },
 ];
 
@@ -34,10 +34,10 @@ function useAuthNavigation() {
   useEffect(
     () =>
       authSession.onEvent((event) => {
-        if (event === 'PASSWORD_RECOVERY') void navigate('/redefinir-senha');
-        if (event === 'SIGNED_OUT' && !location.pathname.startsWith('/login'))
+        if (event === "PASSWORD_RECOVERY") void navigate("/redefinir-senha");
+        if (event === "SIGNED_OUT" && !location.pathname.startsWith("/login"))
           void navigate(
-            '/login?redirect=' + encodeURIComponent(location.pathname + location.search),
+            "/login?redirect=" + encodeURIComponent(location.pathname + location.search),
             { replace: true },
           );
       }),
@@ -54,13 +54,13 @@ export function Shell() {
   useEffect(() => startTracking(), []);
   useUnhandledErrors(useCallback((message: string) => void toast.error(message), []));
 
-  const links = (key: 'label' | 'short', icons: boolean) =>
+  const links = (key: "label" | "short", icons: boolean) =>
     NAV.map((n) => (
       <NavLink
-        data-testid={`nav-${icons ? 'desktop' : 'mobile'}-${n.id}`}
+        data-testid={`nav-${icons ? "desktop" : "mobile"}-${n.id}`}
         key={n.path}
         to={n.path}
-        className={({ isActive }) => (isActive ? 'active' : undefined)}
+        className={({ isActive }) => (isActive ? "active" : undefined)}
       >
         {icons && <span aria-hidden="true">{n.icon} </span>}
         {!icons && <span aria-hidden="true">{n.icon}</span>}
@@ -73,7 +73,7 @@ export function Shell() {
       <a data-testid="nav-skip-content" className="skip-link" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <div className={bare ? 'shell bare' : 'shell'}>
+      <div className={bare ? "shell bare" : "shell"}>
         {!bare && (
           <aside className="sidebar">
             <Link data-testid="nav-brand-desktop" className="brand" to="/ordem">
@@ -82,10 +82,10 @@ export function Shell() {
                 checkpoint<small>SUA BIBLIOTECA, SEU RITMO</small>
               </span>
             </Link>
-            <nav aria-label="Principal">{links('label', true)}</nav>
+            <nav aria-label="Principal">{links("label", true)}</nav>
             {user && (
               <div className="sidebar-note">
-                <span className="account-email" title={user.email ?? ''}>
+                <span className="account-email" title={user.email ?? ""}>
                   {user.email}
                 </span>
                 <button
@@ -100,7 +100,7 @@ export function Shell() {
             )}
           </aside>
         )}
-        <div className="main" style={bare ? { marginLeft: 0, width: '100%' } : undefined}>
+        <div className="main" style={bare ? { marginLeft: 0, width: "100%" } : undefined}>
           {!bare && (
             <header className="topbar">
               <Link
@@ -117,17 +117,17 @@ export function Shell() {
                 data-testid="nav-theme-toggle"
                 type="button"
                 className="icon-button theme-toggle"
-                onClick={() => update({ theme: resolved === 'dark' ? 'light' : 'dark' })}
-                aria-label={resolved === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+                onClick={() => update({ theme: resolved === "dark" ? "light" : "dark" })}
+                aria-label={resolved === "dark" ? "Usar tema claro" : "Usar tema escuro"}
               >
-                <span aria-hidden="true">{resolved === 'dark' ? '☀' : '☾'}</span>
+                <span aria-hidden="true">{resolved === "dark" ? "☀" : "☾"}</span>
               </button>
             </header>
           )}
           <main
             id="conteudo"
             tabIndex={-1}
-            style={bare ? { padding: 0, maxWidth: 'none' } : undefined}
+            style={bare ? { padding: 0, maxWidth: "none" } : undefined}
           >
             <Outlet />
           </main>
@@ -137,7 +137,7 @@ export function Shell() {
                 Checkpoint <span>Feito para jogar no seu ritmo.</span>
               </footer>
               <nav className="tabbar" aria-label="Principal">
-                {links('short', false)}
+                {links("short", false)}
               </nav>
             </>
           )}

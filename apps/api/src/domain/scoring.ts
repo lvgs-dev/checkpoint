@@ -11,7 +11,7 @@ import {
   type QueueEntry,
   Desire,
   GameStatus,
-} from '../../../../packages/core/src/models.ts';
+} from "../../../../packages/core/src/models.ts";
 
 export const defaultWeights: ScoreWeights = {
   desire: 0.5,
@@ -82,7 +82,7 @@ export const defaultConfig: ScoringConfig = {
 const round = (n: number, places = 1) =>
   Math.round((n + Number.EPSILON) * 10 ** places) / 10 ** places;
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
-const validHours = (n: number | null) => typeof n === 'number' && Number.isFinite(n) && n > 0;
+const validHours = (n: number | null) => typeof n === "number" && Number.isFinite(n) && n > 0;
 const estimate = (g: Game) =>
   [g.extraHours, g.mainHours, g.previousEstimatedHours].find(validHours) ?? null;
 const median = (ns: number[]) => {
@@ -91,14 +91,14 @@ const median = (ns: number[]) => {
   return sorted.length % 2 ? sorted[m] : (sorted[m - 1] + sorted[m]) / 2;
 };
 const normalCache = new Map<string, string>();
-const ptBrCollator = new Intl.Collator('pt-BR');
+const ptBrCollator = new Intl.Collator("pt-BR");
 const defaultCollator = new Intl.Collator();
 const normal = (s: string) => {
   let n = normalCache.get(s);
   if (n === undefined) {
     n = s
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .trim()
       .toLowerCase();
     if (normalCache.size > 50000) normalCache.clear();
@@ -106,10 +106,10 @@ const normal = (s: string) => {
   }
   return n;
 };
-const finiteCampaign = (g: Game) => normal(g.structure) !== 'sem fim definido';
+const finiteCampaign = (g: Game) => normal(g.structure) !== "sem fim definido";
 /** Competitivo/online: não há campo próprio nos dados, então usa gênero e mecânica. */
-const competitiveGenres = new Set(['luta', 'esporte', 'mmorpg']);
-const competitiveMechanics = new Set(['esporte', 'progressao online']);
+const competitiveGenres = new Set(["luta", "esporte", "mmorpg"]);
+const competitiveMechanics = new Set(["esporte", "progressao online"]);
 export const isCompetitive = (g: Game) =>
   competitiveGenres.has(normal(g.primaryGenre)) || competitiveMechanics.has(normal(g.mechanic));
 /** Ainda por jogar (não finalizado), conforme as regras de elegibilidade de status/fim. */
@@ -133,7 +133,7 @@ const desireRank = (d: string) => {
   return i < 0 ? Object.keys(desires).indexOf(Desire.Medium) : i;
 };
 /** Coop: qualquer valor preenchido diferente de "Não". */
-const hasCoop = (g: Game) => !!g.coop?.trim() && normal(g.coop) !== 'nao';
+const hasCoop = (g: Game) => !!g.coop?.trim() && normal(g.coop) !== "nao";
 const normalSet = (values: string[]) => new Set(values.map(normal));
 
 /**
@@ -148,16 +148,16 @@ export function contentFilter(f: QueueFilters): (g: ScoredGame) => string | null
     paces = normalSet(f.paces);
   const minDesire = f.minDesire === null ? null : desireRank(f.minDesire);
   return (g) => {
-    if (genres.has(normal(g.primaryGenre))) return 'Filtro: gênero ' + g.primaryGenre;
+    if (genres.has(normal(g.primaryGenre))) return "Filtro: gênero " + g.primaryGenre;
     const tag = g.secondaryTags.find((t) => tags.has(normal(t)));
-    if (tag) return 'Filtro: tag ' + tag;
-    if (stores.size && !stores.has(normal(g.store))) return 'Filtro: loja ' + (g.store || '—');
-    if (paces.size && !paces.has(normal(g.pace))) return 'Filtro: ritmo ' + (g.pace || '—');
-    if (f.coopOnly && !hasCoop(g)) return 'Filtro: sem coop';
+    if (tag) return "Filtro: tag " + tag;
+    if (stores.size && !stores.has(normal(g.store))) return "Filtro: loja " + (g.store || "—");
+    if (paces.size && !paces.has(normal(g.pace))) return "Filtro: ritmo " + (g.pace || "—");
+    if (f.coopOnly && !hasCoop(g)) return "Filtro: sem coop";
     if (minDesire !== null && desireRank(g.desire) > minDesire)
-      return 'Filtro: vontade ' + g.desire;
+      return "Filtro: vontade " + g.desire;
     const h = g.plannedHours;
-    if (h === null) return f.excludeUnknownHours ? 'Filtro: sem tempo estimado' : null;
+    if (h === null) return f.excludeUnknownHours ? "Filtro: sem tempo estimado" : null;
     if (f.minHours !== null && h < f.minHours) return `Filtro: menos de ${f.minHours} h`;
     if (f.maxHours !== null && h > f.maxHours) return `Filtro: mais de ${f.maxHours} h`;
     return null;
@@ -188,7 +188,7 @@ export function scoreGames(
     mechanic: new Map<string, { sum: number; count: number }>(),
   };
   for (const g of games) {
-    if (typeof g.rating === 'number' && g.rating >= 1 && g.rating <= 5) {
+    if (typeof g.rating === "number" && g.rating >= 1 && g.rating <= 5) {
       const pts = 25 * (g.rating - 1);
       if (g.primaryGenre) {
         const n = normal(g.primaryGenre);
@@ -217,7 +217,7 @@ export function scoreGames(
     }
   }
   const prefCache = new Map<string, number>();
-  const preference = (value: string, key: 'primaryGenre' | 'pace' | 'mechanic') => {
+  const preference = (value: string, key: "primaryGenre" | "pace" | "mechanic") => {
     if (!value) return w.neutralAffinity;
     const n = normal(value);
     const ck = `${key}:${n}`;
@@ -242,9 +242,9 @@ export function scoreGames(
             ? round(base * timeFactor)
             : base;
       const affinity = round(
-        (preference(g.primaryGenre, 'primaryGenre') +
-          preference(g.pace, 'pace') +
-          preference(g.mechanic, 'mechanic')) /
+        (preference(g.primaryGenre, "primaryGenre") +
+          preference(g.pace, "pace") +
+          preference(g.mechanic, "mechanic")) /
           3,
       );
       const duration =
@@ -303,38 +303,38 @@ function contextual(
   const prev = history.at(-1),
     twoBack = history.at(-2);
   if (r.inProgress && game.status === GameStatus.Playing)
-    add('Concluir o que já começou', w.inProgress);
+    add("Concluir o que já começou", w.inProgress);
   if (prev) {
     if (
       r.repeatGenre &&
       game.primaryGenre &&
       normal(game.primaryGenre) === normal(prev.primaryGenre)
     )
-      add('Gênero repetido', -w.repeatGenre);
+      add("Gênero repetido", -w.repeatGenre);
     if (r.repeatMechanic && game.mechanic && normal(game.mechanic) === normal(prev.mechanic))
-      add('Mesma mecânica', -w.repeatMechanic);
-    if (r.repeatTag) add('Subgêneros repetidos', -w.repeatTag * tagOverlap(game, prev));
+      add("Mesma mecânica", -w.repeatMechanic);
+    if (r.repeatTag) add("Subgêneros repetidos", -w.repeatTag * tagOverlap(game, prev));
     if (
       r.consecutiveLong &&
       (game.plannedHours ?? 0) >= w.longHours &&
       contextHours(prev) >= w.longHours
     )
-      add('Duas campanhas longas seguidas', -w.consecutiveLong);
+      add("Duas campanhas longas seguidas", -w.consecutiveLong);
     if (r.repeatPace && game.pace && normal(game.pace) === normal(prev.pace))
-      add('Mesmo ritmo', -w.repeatPace);
+      add("Mesmo ritmo", -w.repeatPace);
     if (
       r.contrastingPace &&
-      ((game.pace === 'Calmo' && prev.pace === 'Frenético') ||
-        (game.pace === 'Frenético' && prev.pace === 'Calmo'))
+      ((game.pace === "Calmo" && prev.pace === "Frenético") ||
+        (game.pace === "Frenético" && prev.pace === "Calmo"))
     )
-      add('Contraste de ritmo', w.contrastingPace);
+      add("Contraste de ritmo", w.contrastingPace);
     if (
       r.shortAfterLong &&
       contextHours(prev) >= w.longHours &&
       game.plannedHours !== null &&
       game.plannedHours <= w.shortHours
     )
-      add('Respiro curto depois de um longo', w.shortAfterLong);
+      add("Respiro curto depois de um longo", w.shortAfterLong);
   }
   if (twoBack) {
     if (
@@ -342,16 +342,16 @@ function contextual(
       game.primaryGenre &&
       normal(game.primaryGenre) === normal(twoBack.primaryGenre)
     )
-      add('Gênero repetido há duas posições', -w.repeatGenreTwoBack);
+      add("Gênero repetido há duas posições", -w.repeatGenreTwoBack);
     if (r.repeatTagTwoBack)
-      add('Subgêneros de duas posições atrás', -w.repeatTagTwoBack * tagOverlap(game, twoBack));
+      add("Subgêneros de duas posições atrás", -w.repeatTagTwoBack * tagOverlap(game, twoBack));
   }
   if (
     r.longAfterHeavy &&
     (game.plannedHours ?? 0) >= w.longHours &&
     history.slice(-3).reduce((s, g) => s + contextHours(g), 0) >= w.recentHours
   )
-    add('Campanha longa após carga recente alta', -w.longAfterHeavy);
+    add("Campanha longa após carga recente alta", -w.longAfterHeavy);
   return {
     score: round(game.baseScore + adjustments.reduce((s, a) => s + a.points, 0)),
     adjustments,
@@ -400,11 +400,11 @@ export function recommendGames(
     .filter((g) => g.status === GameStatus.Playing)
     .sort(
       (a, b) =>
-        defaultCollator.compare(a.startedAt ?? '9999', b.startedAt ?? '9999') ||
+        defaultCollator.compare(a.startedAt ?? "9999", b.startedAt ?? "9999") ||
         ptBrCollator.compare(a.name, b.name) ||
         defaultCollator.compare(a.id, b.id),
     );
-  const filtered: Recommendations['excluded'] = [];
+  const filtered: Recommendations["excluded"] = [];
   const reasonOf = contentFilter(config.filters);
   const inQueue: ScoredGame[] = [];
   for (const g of scored.games.filter((g) => eligible(g, r))) {
@@ -440,7 +440,7 @@ export function recommendGames(
     played = top3;
   }
   const selected = new Set<string>();
-  type Pick = { game: ScoredGame; score: number; adjustments: QueueEntry['adjustments'] };
+  type Pick = { game: ScoredGame; score: number; adjustments: QueueEntry["adjustments"] };
   const picks: (Pick & { pinned: boolean })[] = [];
   const available = (g: Game) => {
     if (!r.prerequisites) return true;
@@ -517,15 +517,15 @@ export function recommendGames(
       pinnedPosition: pinned ? i + 1 : null,
       pinnedBeforePrerequisite: early,
       reasons: [
-        ...(pinned ? ['Posição fixada por você'] : []),
-        ...(early ? ['Antes do jogo anterior da série'] : []),
-        ...(pick.game.desire === Desire.Immediate && !pinned ? ['Vontade imediata'] : []),
+        ...(pinned ? ["Posição fixada por você"] : []),
+        ...(early ? ["Antes do jogo anterior da série"] : []),
+        ...(pick.game.desire === Desire.Immediate && !pinned ? ["Vontade imediata"] : []),
         ...(pick.adjustments.length
           ? pick.adjustments.map((a) => a.label)
           : pinned || pick.game.desire === Desire.Immediate
             ? []
-            : ['Maior prioridade disponível']),
-        ...(pick.game.plannedHours === null ? ['Tempo a confirmar'] : []),
+            : ["Maior prioridade disponível"]),
+        ...(pick.game.plannedHours === null ? ["Tempo a confirmar"] : []),
       ],
     };
   });
@@ -542,7 +542,7 @@ export function recommendGames(
     excluded: [
       ...[...remaining.keys()].map((gameId) => ({
         gameId,
-        reason: 'Dependência circular ou predecessor indisponível',
+        reason: "Dependência circular ou predecessor indisponível",
       })),
       ...filtered,
     ],
@@ -603,7 +603,7 @@ export interface MovePlan {
 export function planMove(queue: Recommendations, gameId: string, toPosition: number): MovePlan {
   const order = queue.items.map((i) => i.game.id);
   const from = order.indexOf(gameId);
-  if (from < 0) throw new RangeError('O jogo não está na fila');
+  if (from < 0) throw new RangeError("O jogo não está na fila");
   if (!Number.isInteger(toPosition) || toPosition < 1 || toPosition > order.length)
     throw new RangeError(`toPosition deve estar entre 1 e ${order.length}`);
   order.splice(from, 1);

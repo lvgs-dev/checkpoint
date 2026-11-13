@@ -1,8 +1,8 @@
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { AppError } from '../shared/errors.ts';
-import { createRateLimiter } from './rate-limit.ts';
-import { hashPassword, verifyPassword } from './password.ts';
-import type { AuthRepository, Identity, TokenKind } from './repository.ts';
+import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { AppError } from "../shared/errors.ts";
+import { createRateLimiter } from "./rate-limit.ts";
+import { hashPassword, verifyPassword } from "./password.ts";
+import type { AuthRepository, Identity, TokenKind } from "./repository.ts";
 
 export interface AuthMail {
   email: string;
@@ -12,22 +12,22 @@ export interface AuthMail {
 export interface MailSender {
   send(message: AuthMail): Promise<void>;
 }
-export const tokenHash = (token: string) => createHash('sha256').update(token).digest();
-export const newToken = () => randomBytes(32).toString('base64url');
+export const tokenHash = (token: string) => createHash("sha256").update(token).digest();
+export const newToken = () => randomBytes(32).toString("base64url");
 const HOUR = 60 * 60_000;
 export const SESSION_MS = 30 * 24 * HOUR;
-const invalid = () => new AppError('Invalid credentials or expired session', 401);
+const invalid = () => new AppError("Invalid credentials or expired session", 401);
 
 export function normalizeLogin(input: string): string {
   const value = input.trim().toLowerCase();
-  const email = value.includes('@') ? value : `${value}@gps.dev.br`;
+  const email = value.includes("@") ? value : `${value}@gps.dev.br`;
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    throw new AppError('Invalid email', 400);
+    throw new AppError("Invalid email", 400);
   return email;
 }
 function checkPassword(password: string) {
   if (password.length < 8 || Buffer.byteLength(password) > 1024)
-    throw new AppError('Password must contain at least 8 characters and at most 1024 bytes', 400);
+    throw new AppError("Password must contain at least 8 characters and at most 1024 bytes", 400);
 }
 export class AuthService {
   private accountLimit = createRateLimiter(10, 15 * 60_000);
@@ -44,19 +44,19 @@ export class AuthService {
   async register(login: string, password: string): Promise<void> {
     const email = normalizeLogin(login);
     checkPassword(password);
-    if (!this.mailLimit('register:' + email, this.now()))
-      throw new AppError('Too many requests', 429);
+    if (!this.mailLimit("register:" + email, this.now()))
+      throw new AppError("Too many requests", 429);
     const identity: Identity = {
       id: randomUUID(),
       email,
       emailVerified: false,
       passwordHash: await hashPassword(password),
-      role: 'user',
+      role: "user",
       disabledAt: null,
     };
     // Duplicate addresses receive the same public response.
     if (await this.repository.createIdentity(identity))
-      await this.sendToken(identity, 'verify_email');
+      await this.sendToken(identity, "verify_email");
   }
   private async sendToken(identity: Identity, kind: TokenKind) {
     if (!identity.email) return;
@@ -72,15 +72,15 @@ export class AuthService {
   }
   async verifyEmail(token: string): Promise<void> {
     if (
-      !(await this.repository.consumeToken(tokenHash(token), 'verify_email', new Date(this.now())))
+      !(await this.repository.consumeToken(tokenHash(token), "verify_email", new Date(this.now())))
     )
-      throw new AppError('Invalid or expired verification link', 400);
+      throw new AppError("Invalid or expired verification link", 400);
   }
   async requestReset(login: string): Promise<void> {
     const email = normalizeLogin(login);
-    if (!this.mailLimit('reset:' + email, this.now())) return;
+    if (!this.mailLimit("reset:" + email, this.now())) return;
     const identity = await this.repository.findEmail(email);
-    if (identity && !identity.disabledAt) await this.sendToken(identity, 'reset_password');
+    if (identity && !identity.disabledAt) await this.sendToken(identity, "reset_password");
   }
   async resetPassword(token: string, password: string): Promise<void> {
     checkPassword(password);
@@ -88,27 +88,27 @@ export class AuthService {
     if (
       !(await this.repository.consumeToken(
         tokenHash(token),
-        'reset_password',
+        "reset_password",
         new Date(this.now()),
         hash,
       ))
     )
-      throw new AppError('Invalid or expired recovery link', 400);
+      throw new AppError("Invalid or expired recovery link", 400);
   }
-  async login(login: string, password: string, address: string, previous?: string, userAgent = '') {
+  async login(login: string, password: string, address: string, previous?: string, userAgent = "") {
     const email = normalizeLogin(login);
-    const accountAllowed = this.accountLimit(tokenHash(email).toString('hex'), this.now());
+    const accountAllowed = this.accountLimit(tokenHash(email).toString("hex"), this.now());
     const addressAllowed = this.addressLimit(address, this.now());
-    if (!accountAllowed || !addressAllowed) throw new AppError('Too many login attempts', 429);
+    if (!accountAllowed || !addressAllowed) throw new AppError("Too many login attempts", 429);
     if (Buffer.byteLength(password) > 1024) throw invalid();
     const identity = await this.repository.findEmail(email);
     // Perform the same password work for missing accounts.
-    const dummy = 'scrypt$32768$8$1$' + '00'.repeat(16) + '$' + '00'.repeat(64);
+    const dummy = "scrypt$32768$8$1$" + "00".repeat(16) + "$" + "00".repeat(64);
     const valid = await verifyPassword(password, identity?.passwordHash ?? dummy);
     if (!valid || !identity || identity.disabledAt || !identity.emailVerified) throw invalid();
     return this.issueSession(identity, previous, userAgent);
   }
-  async issueSession(identity: Identity, previous?: string, userAgent = '') {
+  async issueSession(identity: Identity, previous?: string, userAgent = "") {
     if (identity.disabledAt) throw invalid();
     const token = newToken();
     const expiresAt = new Date(this.now() + SESSION_MS);

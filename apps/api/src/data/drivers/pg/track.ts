@@ -1,6 +1,6 @@
 // Postgres: registro de eventos de navegação e cliques (user_track e page_track).
-import type { Sql } from '../../db.ts';
-import type { TrackBatchRecord, TrackDriver } from '../types.ts';
+import type { Sql } from "../../db.ts";
+import type { TrackBatchRecord, TrackDriver } from "../types.ts";
 
 export class PgTrackDriver implements TrackDriver {
   private sql: Sql;

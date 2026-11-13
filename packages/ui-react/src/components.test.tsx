@@ -1,11 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { renderToString } from 'react-dom/server';
-import { ConfirmDialog } from './components';
+import { describe, expect, it } from "vitest";
+import { renderToString } from "react-dom/server";
+import { ConfirmDialog } from "./components";
 
 const html = (node: React.ReactNode) => renderToString(node);
 
-describe('ConfirmDialog', () => {
-  it('places autoFocus on confirm button when not destructive and defaultFocus is not set', () => {
+describe("ConfirmDialog", () => {
+  it("places autoFocus on confirm button when not destructive and defaultFocus is not set", () => {
     const out = html(
       <ConfirmDialog
         open={true}
@@ -19,7 +19,7 @@ describe('ConfirmDialog', () => {
     expect(out).not.toMatch(/data-testid="test-dialog-cancel"[^>]*autofocus/i);
   });
 
-  it('places autoFocus on cancel button when destructive and defaultFocus is not set', () => {
+  it("places autoFocus on cancel button when destructive and defaultFocus is not set", () => {
     const out = html(
       <ConfirmDialog
         open={true}

@@ -337,9 +337,9 @@ If only one app needs another look, choose another colour theme in its `lvgs.con
 
 ## Shared engine releases
 
-The latest engine release is the highest `v*` tag of `ci-workflows`. Follow [engine releases](ci-cd.md#engine-releases): the orchestrator prepares the release PR, the owner merges and runs `lvgs-access scripts/release-finalize.sh vX.Y.Z [--dry-run]`, then the orchestrator opens project pin PRs. See [mission status](../../ci-cd-review/mission.md) for production evidence and the remaining canary rehearsal.
+The latest engine release is the highest `v*` tag of `ci-workflows`. Follow [engine releases](ci-cd.md#engine-releases): the orchestrator prepares the release PR, the owner merges and runs `lvgs-access scripts/release-finalize.sh vX.Y.Z [--dry-run]`, then the orchestrator opens project pin PRs. See [mission status](https://github.com/lvgs-dev/subharness/blob/main/AI/ci-cd-review/mission.md) for production evidence and the remaining canary rehearsal.
 
-The guided bootstrap stores progress in `.git/lvgs-bootstrap-state.json`. Use `init`, `resume`, `status`, `verify`, and `doctor`. It pauses at owner-only gates. It uses per-environment tunnel IDs, requires the pinned reusable deploy workflow, supports projects without a database, and leaves absent optional secrets unset. Host-folder setup still assumes Atlas for both environments. Homolog belongs on its isolated VM. The canary rehearsal gate is not built. See [mission status](../../ci-cd-review/mission.md) for the next real bootstrap run.
+The guided bootstrap stores progress in `.git/lvgs-bootstrap-state.json`. Use `init`, `resume`, `status`, `verify`, and `doctor`. It pauses at owner-only gates. It uses per-environment tunnel IDs, requires the pinned reusable deploy workflow, supports projects without a database, and leaves absent optional secrets unset. Host-folder setup still assumes Atlas for both environments. Homolog belongs on its isolated VM. The canary rehearsal gate is not built. See [mission status](https://github.com/lvgs-dev/subharness/blob/main/AI/ci-cd-review/mission.md) for the next real bootstrap run.
 
 ## Starter prompt for the agent
 

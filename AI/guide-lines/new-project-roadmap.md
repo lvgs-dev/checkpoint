@@ -47,73 +47,73 @@ After the last phase, the project behaves as follows:
 
 ## Roles
 
-| Role | Who | What it does |
-| --- | --- | --- |
-| Owner | The human | Clicks in GitHub and Cloudflare. Runs `sudo` on the server. Approves the merge to `main`. |
-| Agent | An LLM acting as the bot `lvgs-agents` | Writes code, tests, scripts, and docs. Opens pull requests. Merges into `homolog` when every required check is green, with no approval. Keeps the `homolog` to `main` PR open. |
-| Oreon runner | Host Oreon, label `oreon` | Runs tests, builds the image, and publishes it. It never deploys. |
-| Atlas runner | Host Atlas, label `atlas-deploy`, user `github-deploy` | Runs the production deploy job only. It pulls the image and starts the containers. |
-| Homolog runner | A VM on Oreon, label `homolog-deploy`, see [homolog VM](homolog-vm.md) | Runs the homolog deploy job only. Has no route to production. |
+| Role           | Who                                                                    | What it does                                                                                                                                                                   |
+| -------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Owner          | The human                                                              | Clicks in GitHub and Cloudflare. Runs `sudo` on the server. Approves the merge to `main`.                                                                                      |
+| Agent          | An LLM acting as the bot `lvgs-agents`                                 | Writes code, tests, scripts, and docs. Opens pull requests. Merges into `homolog` when every required check is green, with no approval. Keeps the `homolog` to `main` PR open. |
+| Oreon runner   | Host Oreon, label `oreon`                                              | Runs tests, builds the image, and publishes it. It never deploys.                                                                                                              |
+| Atlas runner   | Host Atlas, label `atlas-deploy`, user `github-deploy`                 | Runs the production deploy job only. It pulls the image and starts the containers.                                                                                             |
+| Homolog runner | A VM on Oreon, label `homolog-deploy`, see [homolog VM](homolog-vm.md) | Runs the homolog deploy job only. Has no route to production.                                                                                                                  |
 
 ## Tools and names
 
-| Area | Tool or name | Use |
-| --- | --- | --- |
-| Source and CI | GitHub, GitHub Actions, GitHub Environments, rulesets | Branches, pipeline, per-environment settings, protection |
-| Images | GHCR (`ghcr.io/lvgs-dev/<project>`) | Stores the images. Production deploys by digest. |
-| Private npm packages | GitHub Packages (`@lvgs-dev/ui`) | Library for the frontend. CI reads it with `GITHUB_TOKEN`. |
-| Bot identity | GitHub App `lvgs-agents` | Short-lived tokens for agents. Replaces personal tokens. |
-| Build host | Oreon, Podman (rootless) | Builds and tests. |
-| Run hosts | Atlas and the homolog VM, Docker and Compose | Atlas runs production. The isolated VM on Oreon runs homolog when enabled. |
-| Public access | Cloudflare Tunnel `atlas`, DNS, Access | Hostnames, TLS, login. A reusable Access policy holds the allowed e-mail. |
-| Database | PostgreSQL 17, Alembic migrations | One database container per environment. |
-| Task tracking | Beads (`bd`) | One task per change. |
-| Server helpers | `lvgs-browser`, `lvgs-env-apply`, `lvgs-access` | Screenshots, Environment upload, owner access. See [the server guide](../../AGENTS.md). |
-| Checks of docs | `scripts/check-docs.py` | Validates Markdown links. |
+| Area                 | Tool or name                                          | Use                                                                                     |
+| -------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Source and CI        | GitHub, GitHub Actions, GitHub Environments, rulesets | Branches, pipeline, per-environment settings, protection                                |
+| Images               | GHCR (`ghcr.io/lvgs-dev/<project>`)                   | Stores the images. Production deploys by digest.                                        |
+| Private npm packages | GitHub Packages (`@lvgs-dev/ui`)                      | Library for the frontend. CI reads it with `GITHUB_TOKEN`.                              |
+| Bot identity         | GitHub App `lvgs-agents`                              | Short-lived tokens for agents. Replaces personal tokens.                                |
+| Build host           | Oreon, Podman (rootless)                              | Builds and tests.                                                                       |
+| Run hosts            | Atlas and the homolog VM, Docker and Compose          | Atlas runs production. The isolated VM on Oreon runs homolog when enabled.              |
+| Public access        | Cloudflare Tunnel `atlas`, DNS, Access                | Hostnames, TLS, login. A reusable Access policy holds the allowed e-mail.               |
+| Database             | PostgreSQL 17, Alembic migrations                     | One database container per environment.                                                 |
+| Task tracking        | Beads (`bd`)                                          | One task per change.                                                                    |
+| Server helpers       | `lvgs-browser`, `lvgs-env-apply`, `lvgs-access`       | Screenshots, Environment upload, owner access. See [the server guide](../../AGENTS.md). |
+| Checks of docs       | `scripts/check-docs.py`                               | Validates Markdown links.                                                               |
 
 ## Names, hostnames, and ports
 
 Pick these names in phase 0. Never change them later.
 
-| Item | Rule | Example (`server-supply`) |
-| --- | --- | --- |
-| Project name | Lowercase, dashes | `server-supply` |
-| Production hostname | `<project>.gps.dev.br` | `server-supply.gps.dev.br` |
-| Homolog hostname | `homolog-<project>.gps.dev.br` | `homolog-server-supply.gps.dev.br` |
-| Compose project, production | `<project>` | `server-supply` |
-| Compose project, homolog | `<project>-homolog` | `server-supply-homolog` |
-| Loopback port, production | Next free `80N0` | `8000` |
-| Loopback port, homolog | Production port plus one | `8001` |
-| State folder, production | `/var/lib/<project>-production` | `/var/lib/server-supply-production` |
-| State folder, homolog | `/var/lib/<project>-homolog` | `/var/lib/server-supply-homolog` |
-| Environment files | `<state folder>/env` | `/var/lib/server-supply-production/env` |
+| Item                        | Rule                            | Example (`server-supply`)               |
+| --------------------------- | ------------------------------- | --------------------------------------- |
+| Project name                | Lowercase, dashes               | `server-supply`                         |
+| Production hostname         | `<project>.gps.dev.br`          | `server-supply.gps.dev.br`              |
+| Homolog hostname            | `homolog-<project>.gps.dev.br`  | `homolog-server-supply.gps.dev.br`      |
+| Compose project, production | `<project>`                     | `server-supply`                         |
+| Compose project, homolog    | `<project>-homolog`             | `server-supply-homolog`                 |
+| Loopback port, production   | Next free `80N0`                | `8000`                                  |
+| Loopback port, homolog      | Production port plus one        | `8001`                                  |
+| State folder, production    | `/var/lib/<project>-production` | `/var/lib/server-supply-production`     |
+| State folder, homolog       | `/var/lib/<project>-homolog`    | `/var/lib/server-supply-homolog`        |
+| Environment files           | `<state folder>/env`            | `/var/lib/server-supply-production/env` |
 
 Two projects must never share a port. Keep this table current.
 
-| Project | Production port | Homolog port |
-| --- | --- | --- |
-| `server-supply` | 8000 | 8001 (homolog switched off for this project) |
-| next project | 8010 | 8011 |
+| Project         | Production port | Homolog port                                 |
+| --------------- | --------------- | -------------------------------------------- |
+| `server-supply` | 8000            | 8001 (homolog switched off for this project) |
+| next project    | 8010            | 8011                                         |
 
 ## The order at a glance
 
-| Phase | Title | Who | Done when |
-| --- | --- | --- | --- |
-| 0 | Decide names and ports | Owner | The table above is filled. |
-| 1 | Create the repository | Owner | Branches, App access, and settings exist. |
-| 2 | Check the server prerequisites | Owner | Runners are online and folders exist. |
-| 3 | Build the application skeleton | Agent | The app runs locally with a health route and tests. |
-| 4 | Write Dockerfile and Compose files | Agent | The image builds and passes its smoke test. |
-| 5 | Write the CI jobs | Agent | Three checks run on every pull request. |
-| 6 | Pin the publish workflow | Agent | A push to `homolog` publishes the tested digest. |
-| 7 | Configure the project contract and tests | Agent | Project delivery tests pass. |
-| 8 | Create the Environments and secrets | Owner | Both Environments hold every value. |
-| 9 | Prepare Cloudflare | Owner | The token, tunnel, and Access policy ids are known. |
-| 10 | Write the deploy jobs | Agent | The jobs pass review. |
-| 11 | Apply the branch protection | Owner | Both rulesets are active. |
-| 12 | First deploy of homolog | Agent and owner | The homolog hostname answers. |
-| 13 | First promotion to production | Owner and agent | The production hostname answers. |
-| 14 | Hand over | Agent | Docs, runbook, and acceptance list are complete. |
+| Phase | Title                                    | Who             | Done when                                           |
+| ----- | ---------------------------------------- | --------------- | --------------------------------------------------- |
+| 0     | Decide names and ports                   | Owner           | The table above is filled.                          |
+| 1     | Create the repository                    | Owner           | Branches, App access, and settings exist.           |
+| 2     | Check the server prerequisites           | Owner           | Runners are online and folders exist.               |
+| 3     | Build the application skeleton           | Agent           | The app runs locally with a health route and tests. |
+| 4     | Write Dockerfile and Compose files       | Agent           | The image builds and passes its smoke test.         |
+| 5     | Write the CI jobs                        | Agent           | Three checks run on every pull request.             |
+| 6     | Pin the publish workflow                 | Agent           | A push to `homolog` publishes the tested digest.    |
+| 7     | Configure the project contract and tests | Agent           | Project delivery tests pass.                        |
+| 8     | Create the Environments and secrets      | Owner           | Both Environments hold every value.                 |
+| 9     | Prepare Cloudflare                       | Owner           | The token, tunnel, and Access policy ids are known. |
+| 10    | Write the deploy jobs                    | Agent           | The jobs pass review.                               |
+| 11    | Apply the branch protection              | Owner           | Both rulesets are active.                           |
+| 12    | First deploy of homolog                  | Agent and owner | The homolog hostname answers.                       |
+| 13    | First promotion to production            | Owner and agent | The production hostname answers.                    |
+| 14    | Hand over                                | Agent           | Docs, runbook, and acceptance list are complete.    |
 
 Read [security and access](new-project-security-and-access.md) before phase 1. Do the phases in this order. Phases 3 to 7 can overlap, but phase 11 must wait for a green CI run (see the traps note).
 
@@ -311,14 +311,14 @@ Agent:
 
 ## Day-2 tasks
 
-| Task | How |
-| --- | --- |
-| Change a setting or secret | Edit the Environment. Re-run the deploy job. |
-| Roll back production | Run the pinned engine checkout's `deploy/rollback.sh` with the production overrides. It restores the recorded previous digest. |
-| Add a migration | Make it additive. A destructive migration aborts the deploy. The owner runs it by hand. |
-| Hotfix | Fix on a branch. Merge into `homolog`. Promote. Never change `main` directly. |
-| Switch the homolog deploy off or on | Set the repository variable `DEPLOY_HOMOLOG`. See [switches](new-project-workflow-and-scripts.md#switches). Stop the containers by hand when you switch off. |
-| Rotate the Cloudflare token | The owner creates a new token in the private shell or password manager. Never upload it to GitHub. Revoke the old token. |
+| Task                                                          | How                                                                                                                                                                                             |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Change a setting or secret                                    | Edit the Environment. Re-run the deploy job.                                                                                                                                                    |
+| Roll back production                                          | Run the pinned engine checkout's `deploy/rollback.sh` with the production overrides. It restores the recorded previous digest.                                                                  |
+| Add a migration                                               | Make it additive. A destructive migration aborts the deploy. The owner runs it by hand.                                                                                                         |
+| Hotfix                                                        | Fix on a branch. Merge into `homolog`. Promote. Never change `main` directly.                                                                                                                   |
+| Switch the homolog deploy off or on                           | Set the repository variable `DEPLOY_HOMOLOG`. See [switches](new-project-workflow-and-scripts.md#switches). Stop the containers by hand when you switch off.                                    |
+| Rotate the Cloudflare token                                   | The owner creates a new token in the private shell or password manager. Never upload it to GitHub. Revoke the old token.                                                                        |
 | Change something shared, for example a font in `@lvgs-dev/ui` | Change the library, update `CHANGELOG.md`, and raise the version. The owner pushes the tag `vX.Y.Z`. The publish workflow creates the package version. Then update each app by hand, see below. |
 
 ### Update a shared library in each app

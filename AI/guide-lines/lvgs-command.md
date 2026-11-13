@@ -22,24 +22,24 @@ bash scripts/lvgs --install    # links ~/.local/bin/lvgs to this checkout; never
 
 ## Flags
 
-| Flag | What it does |
-| --- | --- |
-| `--start-new-project` | Asks the path and the name, then runs the steps below in order. Asks "Publish the default project now?" before `--deploy`. |
-| `--git` | Runs `git init -b main` when the folder is not a repository. |
-| `--subharness` | Merges committed Subharness baseline files (`AGENTS.md`, `CLAUDE.md`, `AI/`, `.agents/`). Keeps project-only files. |
-| `--all` | Soft-syncs every configured project in order. Prints a summary table. |
-| `--all --hard` | Runs the same list with hard sync and backup. |
-| `--subharness-hard` | Replaces the whole `AI/` folder after confirmation and backup. Soft-merges the other baseline paths. Excluded from the setup flow. |
-| `--ci-workflow` | Calls `lvgs-bootstrap scaffold static-site` with the name, a free port, the hostname and the newest engine release. |
-| `--github` | Creates the private repository with owner access, adds `origin`, pushes `main` and creates `homolog`. |
-| `--environments` | Creates the `production` and `homolog` Environments with owner access. Each one accepts only its branch. |
-| `--host-folders` | Prints the sudo line for `/var/lib/<name>-production` and waits until the folders exist. |
-| `--cloudflare` | Asks for the missing Cloudflare ids and the hidden token. Runs the engine route script in `check` mode, asks, applies, and checks again. |
-| `--default-page` | Writes `public/index.html` ("Project <name> in progress"), `package.json` and `pnpm-lock.yaml`. |
-| `--deploy` | Opens the PR into `homolog`, waits for checks, merges, waits for the pipeline and opens the promotion PR. The owner approves it. |
-| `--status` | Shows each step and the saved facts. |
-| `--doctor` | Checks the local tools and the scaffold support. |
-| `--install` | Links the wrapper into `~/.local/bin`. |
+| Flag                  | What it does                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--start-new-project` | Asks the path and the name, then runs the steps below in order. Asks "Publish the default project now?" before `--deploy`.               |
+| `--git`               | Runs `git init -b main` when the folder is not a repository.                                                                             |
+| `--subharness`        | Merges committed Subharness baseline files (`AGENTS.md`, `CLAUDE.md`, `AI/`, `.agents/`). Keeps project-only files.                      |
+| `--all`               | Soft-syncs every configured project in order. Prints a summary table.                                                                    |
+| `--all --hard`        | Runs the same list with hard sync and backup.                                                                                            |
+| `--subharness-hard`   | Replaces the whole `AI/` folder after confirmation and backup. Soft-merges the other baseline paths. Excluded from the setup flow.       |
+| `--ci-workflow`       | Calls `lvgs-bootstrap scaffold static-site` with the name, a free port, the hostname and the newest engine release.                      |
+| `--github`            | Creates the private repository with owner access, adds `origin`, pushes `main` and creates `homolog`.                                    |
+| `--environments`      | Creates the `production` and `homolog` Environments with owner access. Each one accepts only its branch.                                 |
+| `--host-folders`      | Prints the sudo line for `/var/lib/<name>-production` and waits until the folders exist.                                                 |
+| `--cloudflare`        | Asks for the missing Cloudflare ids and the hidden token. Runs the engine route script in `check` mode, asks, applies, and checks again. |
+| `--default-page`      | Writes `public/index.html` ("Project <name> in progress"), `package.json` and `pnpm-lock.yaml`.                                          |
+| `--deploy`            | Opens the PR into `homolog`, waits for checks, merges, waits for the pipeline and opens the promotion PR. The owner approves it.         |
+| `--status`            | Shows each step and the saved facts.                                                                                                     |
+| `--doctor`            | Checks the local tools and the scaffold support.                                                                                         |
+| `--install`           | Links the wrapper into `~/.local/bin`.                                                                                                   |
 
 Common options: `--path`, `--name`, `--owner` (default `lvgs-dev`), `--domain` (default `gps.dev.br`), `--hostname`, `--port`, `--ci-workflows-ref`, `--engine`, `--cf-account-id`, `--cf-zone-id`, `--cf-tunnel-id`, `--cf-access-policy-id`, `--publish yes|no`, `--yes`, `--dry-run`, `--ref`, `--force`.
 `lvgs start-new-project` works too. The first word may drop the dashes.
@@ -68,7 +68,7 @@ The integration branch becomes `homolog`.
 The tracked project file `.subharness-sync.json` records the source and full upstream commit SHA:
 
 ```json
-{"source": "subharness", "ref": "0123456789abcdef0123456789abcdef01234567"}
+{ "source": "subharness", "ref": "0123456789abcdef0123456789abcdef01234567" }
 ```
 
 Commit this manifest with the synced files. The next run uses that commit as the merge base.

@@ -19,15 +19,15 @@ Start with [the roadmap](new-project-roadmap.md). Read this note in phases 1, 2,
 
 ## The identities
 
-| Identity | What it is | Where its secret lives | Lifetime | Used for |
-| --- | --- | --- | --- | --- |
-| Owner login | The human's GitHub account | The owner's computer. Optional `gh` login on the server. | Long | Settings, rulesets, Environments, approvals. |
-| Owner SSH key | A key on the owner's own machine | The owner's computer | Long | Personal pushes from that machine. |
-| Bot `lvgs-agents` | A GitHub App | Private key on Atlas, mode 600 | Tokens last 1 hour | Branches, pull requests, merges into `homolog`, reading CI. |
-| `GITHUB_TOKEN` | A token that GitHub creates for each job | Nowhere. It exists during the job. | The job | Registry login, package install, and read of the repository. |
-| Cloudflare API token | A token with three scopes | The owner's own shell or password manager. Never GitHub, never the agent home. | 90 days | Creating routes, by the owner, once per hostname. |
-| Runner user `github-deploy` | A Linux user without `sudo`, in the `docker` group | The server | Permanent | Runs deploy jobs. |
-| Database users | Postgres roles, one database per environment | A secret file per environment | Until rotated | The app and the migration. |
+| Identity                    | What it is                                         | Where its secret lives                                                         | Lifetime           | Used for                                                     |
+| --------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------ | ------------------------------------------------------------ |
+| Owner login                 | The human's GitHub account                         | The owner's computer. Optional `gh` login on the server.                       | Long               | Settings, rulesets, Environments, approvals.                 |
+| Owner SSH key               | A key on the owner's own machine                   | The owner's computer                                                           | Long               | Personal pushes from that machine.                           |
+| Bot `lvgs-agents`           | A GitHub App                                       | Private key on Atlas, mode 600                                                 | Tokens last 1 hour | Branches, pull requests, merges into `homolog`, reading CI.  |
+| `GITHUB_TOKEN`              | A token that GitHub creates for each job           | Nowhere. It exists during the job.                                             | The job            | Registry login, package install, and read of the repository. |
+| Cloudflare API token        | A token with three scopes                          | The owner's own shell or password manager. Never GitHub, never the agent home. | 90 days            | Creating routes, by the owner, once per hostname.            |
+| Runner user `github-deploy` | A Linux user without `sudo`, in the `docker` group | The server                                                                     | Permanent          | Runs deploy jobs.                                            |
+| Database users              | Postgres roles, one database per environment       | A secret file per environment                                                  | Until rotated      | The app and the migration.                                   |
 
 No personal access token (PAT) is part of the design. Delete any that you find.
 
@@ -37,14 +37,14 @@ An App is a robot account that the organization owns. It replaces a personal tok
 
 What it can do (repository permissions):
 
-| Permission | Level | Why |
-| --- | --- | --- |
-| Contents | Read and write | Push branches. |
-| Pull requests | Read and write | Open, update, and merge pull requests. |
-| Issues | Read and write | Comment and label. |
-| Workflows | Read and write | Edit files under `.github/workflows`. |
-| Actions, Checks, Commit statuses | Read | Read the CI result. |
-| Metadata | Read | Required by GitHub. |
+| Permission                       | Level          | Why                                    |
+| -------------------------------- | -------------- | -------------------------------------- |
+| Contents                         | Read and write | Push branches.                         |
+| Pull requests                    | Read and write | Open, update, and merge pull requests. |
+| Issues                           | Read and write | Comment and label.                     |
+| Workflows                        | Read and write | Edit files under `.github/workflows`.  |
+| Actions, Checks, Commit statuses | Read           | Read the CI result.                    |
+| Metadata                         | Read           | Required by GitHub.                    |
 
 What it cannot do, by design:
 
@@ -98,10 +98,10 @@ Rotate the App key:
 
 An Environment is a named set of secrets and variables. Only jobs that name it can read it. The branch policy limits which branch can name it.
 
-| Environment | Branch policy | Required reviewers |
-| --- | --- | --- |
-| `homolog` | `homolog` | none |
-| `production` | `main` | none. The approval happens on the pull request. |
+| Environment  | Branch policy | Required reviewers                              |
+| ------------ | ------------- | ----------------------------------------------- |
+| `homolog`    | `homolog`     | none                                            |
+| `production` | `main`        | none. The approval happens on the pull request. |
 
 Rules:
 
@@ -115,13 +115,13 @@ Rules:
 
 ## Files and modes on the server
 
-| Path | Owner | Mode | Why |
-| --- | --- | --- | --- |
-| `/var/lib/<project>-<env>/` | `github-deploy` | 700 | State, locks, backups. Only the runner user enters. |
-| `.../env/.env` | `github-deploy` | 600 | Settings that Compose reads on the host. |
-| `.../env/secrets/` | `github-deploy` | 700 | Keeps other users away from the secret files. |
-| `.../env/secrets/<name>` | `github-deploy` | 644 | The container user reads it through the bind mount. |
-| `~/.config/lvgs-agents/` | the agent user | 700 | The App key and value files. Cloudflare API credentials stay with the owner. |
+| Path                        | Owner           | Mode | Why                                                                          |
+| --------------------------- | --------------- | ---- | ---------------------------------------------------------------------------- |
+| `/var/lib/<project>-<env>/` | `github-deploy` | 700  | State, locks, backups. Only the runner user enters.                          |
+| `.../env/.env`              | `github-deploy` | 600  | Settings that Compose reads on the host.                                     |
+| `.../env/secrets/`          | `github-deploy` | 700  | Keeps other users away from the secret files.                                |
+| `.../env/secrets/<name>`    | `github-deploy` | 644  | The container user reads it through the bind mount.                          |
+| `~/.config/lvgs-agents/`    | the agent user  | 700  | The App key and value files. Cloudflare API credentials stay with the owner. |
 
 The folders with mode 700 are what protects the 644 files.
 The group `docker` is equal to administrator on the host. Keep that group small.
@@ -147,34 +147,34 @@ The group `docker` is equal to administrator on the host. Keep that group small.
 
 ## Branch protection
 
-| Branch | Pull request | Approvals | Merge method | Checks | Bypass |
-| --- | --- | --- | --- | --- | --- |
-| `homolog` | required | 0 | squash or merge | the three required checks | none |
-| `main` | required | 1 (the owner) | merge commit only | the three required checks | none |
+| Branch    | Pull request | Approvals     | Merge method      | Checks                    | Bypass |
+| --------- | ------------ | ------------- | ----------------- | ------------------------- | ------ |
+| `homolog` | required     | 0             | squash or merge   | the three required checks | none   |
+| `main`    | required     | 1 (the owner) | merge commit only | the three required checks | none   |
 
 Because the bot opens the pull requests, the owner can approve them.
 Do not add a bypass actor after the App exists.
 
 ## Who may do what
 
-| Action | Owner login | Bot | CI job token | Atlas runner |
-| --- | --- | --- | --- | --- |
-| Push a feature branch | yes | yes | no | no |
-| Open a pull request | yes | yes | no | no |
-| Merge into `homolog` | yes | yes (after review and green checks) | no | no |
-| Approve the merge into `main` | yes | no | no | no |
-| Merge into `main` | yes | no | no | no |
-| Create a tag | yes | no | no | no |
-| Change rulesets or settings | yes | no | no | no |
-| Create or change Environments and secrets | yes | no | no | no |
-| Re-run a workflow | yes | no (Actions is read-only) | no | no |
-| Publish an image | no | no | yes (`packages: write`, publish job) | no |
-| Install a private package in CI | no | no | yes (`packages: read`) | no |
-| Pull the image on the server | no | no | yes (same token) | yes |
-| Start or stop containers | `sudo` or `docker` group | no | no | yes |
-| Create a Cloudflare route | yes | no | no | no |
-| Read the production state folder | `sudo` | no | no | yes |
-| Delete a remote branch | yes | not by rule | no | no |
+| Action                                    | Owner login              | Bot                                 | CI job token                         | Atlas runner |
+| ----------------------------------------- | ------------------------ | ----------------------------------- | ------------------------------------ | ------------ |
+| Push a feature branch                     | yes                      | yes                                 | no                                   | no           |
+| Open a pull request                       | yes                      | yes                                 | no                                   | no           |
+| Merge into `homolog`                      | yes                      | yes (after review and green checks) | no                                   | no           |
+| Approve the merge into `main`             | yes                      | no                                  | no                                   | no           |
+| Merge into `main`                         | yes                      | no                                  | no                                   | no           |
+| Create a tag                              | yes                      | no                                  | no                                   | no           |
+| Change rulesets or settings               | yes                      | no                                  | no                                   | no           |
+| Create or change Environments and secrets | yes                      | no                                  | no                                   | no           |
+| Re-run a workflow                         | yes                      | no (Actions is read-only)           | no                                   | no           |
+| Publish an image                          | no                       | no                                  | yes (`packages: write`, publish job) | no           |
+| Install a private package in CI           | no                       | no                                  | yes (`packages: read`)               | no           |
+| Pull the image on the server              | no                       | no                                  | yes (same token)                     | yes          |
+| Start or stop containers                  | `sudo` or `docker` group | no                                  | no                                   | yes          |
+| Create a Cloudflare route                 | yes                      | no                                  | no                                   | no           |
+| Read the production state folder          | `sudo`                   | no                                  | no                                   | yes          |
+| Delete a remote branch                    | yes                      | not by rule                         | no                                   | no           |
 
 ## Respond to a leak
 

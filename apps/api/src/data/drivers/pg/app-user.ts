@@ -1,4 +1,4 @@
-// Postgres: contas (app_user) ligadas à identidade do Supabase Auth.
+// Application owners link to local authentication identities.
 import type { Sql } from '../../db.ts';
 import type { AppUserDriver } from '../types.ts';
 
@@ -11,16 +11,6 @@ export class PgAppUserDriver implements AppUserDriver {
     const [found] = await this.sql<{ id: string }[]>`
       SELECT id FROM app_user WHERE auth_identity_id = ${authId}`;
     return found?.id;
-  }
-  async claimSeed(seedId: string, authId: string, email: string, seedOwnerEmail: string) {
-    const [claimed] = await this.sql<{ id: string }[]>`
-      UPDATE app_user
-         SET auth_identity_id = ${authId}, email = coalesce(email, ${email})
-       WHERE id = ${seedId}
-         AND auth_identity_id IS NULL
-         AND (lower(email) = lower(${email}) OR lower(${email}) = lower(${seedOwnerEmail}))
-      RETURNING id`;
-    return claimed?.id;
   }
   async create(authId: string, email: string | null) {
     const [created] = await this.sql<{ id: string }[]>`

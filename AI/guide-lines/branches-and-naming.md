@@ -26,10 +26,10 @@ Good names: `feat/supplier-csv-import`, `ci/publish-homolog-tag`. Bad names: `fi
 
 ## Merge methods
 
-| PR | Target | Method |
-| --- | --- | --- |
-| Task PR | `homolog` | squash |
-| Promotion PR | `main` | merge commit |
+| PR                                         | Target    | Method                   |
+| ------------------------------------------ | --------- | ------------------------ |
+| Task PR                                    | `homolog` | squash                   |
+| Promotion PR                               | `main`    | merge commit             |
 | Resync PR `chore/resync-homolog-from-main` | `homolog` | merge commit (exception) |
 
 `Protect main` allows only the merge commit. `Protect homolog` allows squash and merge commit.

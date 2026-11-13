@@ -13,11 +13,11 @@ Start with [the roadmap](new-project-roadmap.md). Read this note once, when you 
 
 Any agent may merge into `homolog` when the checks pass. The `homolog` workflow and deploy scripts then run on a host. On Atlas they would run as the user that owns the production state and sits in the `docker` group (root-equivalent). So homolog runs on a separate host: a small VM on Oreon.
 
-| Host | Runs | Runner label | Runner group (workflow access) |
-| --- | --- | --- | --- |
-| Atlas | production only | `atlas-deploy` | `deploy`: `lvgs-dev/ci-workflows/.github/workflows/deploy.yml@<release SHA>` |
-| Homolog VM on Oreon | every homolog | `homolog-deploy` | `homolog`: the same reusable deploy workflow at its release SHA |
-| Oreon | CI and image builds | `oreon` | none |
+| Host                | Runs                | Runner label     | Runner group (workflow access)                                               |
+| ------------------- | ------------------- | ---------------- | ---------------------------------------------------------------------------- |
+| Atlas               | production only     | `atlas-deploy`   | `deploy`: `lvgs-dev/ci-workflows/.github/workflows/deploy.yml@<release SHA>` |
+| Homolog VM on Oreon | every homolog       | `homolog-deploy` | `homolog`: the same reusable deploy workflow at its release SHA              |
+| Oreon               | CI and image builds | `oreon`          | none                                                                         |
 
 The VM may die and be rebuilt at any time. It holds no production data, no production secret and no route to production.
 

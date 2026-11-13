@@ -56,17 +56,17 @@ Never make a silent exception.
 These needs require library work before an app can use them.
 Confirm the current release before opening duplicate tasks.
 
-| Need | Required library capability |
-| --- | --- |
-| Page container | Width, gutters and vertical rhythm. |
-| App shell | Top navigation. Navigation currently has sidebar and bottom presentations only. |
-| Global base styles | Ship body margin, font and background in the library stylesheet. |
-| Grid minimum size | Expose a closed prop. |
-| Label emphasis and tone | Strong emphasis and identity colour. |
-| Segmented and pagination controls | Expose `loading` and `disabled`. |
-| Cell hint | Provide a tooltip or info button. |
-| Icon and label spacing | Use equal gaps in rows and inline currency. |
-| Screen change | One hook that scrolls to the top and moves focus when the screen changes. |
+| Need                              | Required library capability                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| Page container                    | Width, gutters and vertical rhythm.                                             |
+| App shell                         | Top navigation. Navigation currently has sidebar and bottom presentations only. |
+| Global base styles                | Ship body margin, font and background in the library stylesheet.                |
+| Grid minimum size                 | Expose a closed prop.                                                           |
+| Label emphasis and tone           | Strong emphasis and identity colour.                                            |
+| Segmented and pagination controls | Expose `loading` and `disabled`.                                                |
+| Cell hint                         | Provide a tooltip or info button.                                               |
+| Icon and label spacing            | Use equal gaps in rows and inline currency.                                     |
+| Screen change                     | One hook that scrolls to the top and moves focus when the screen changes.       |
 
 ## Check the boundary
 
@@ -93,7 +93,7 @@ The default budget is zero for every count.
 An existing project can place `thin-frontend.budget.json` in the source directory:
 
 ```json
-{"tags": 0, "attributes": 0, "cssLines": 0}
+{ "tags": 0, "attributes": 0, "cssLines": 0 }
 ```
 
 A temporary budget can record existing debt.

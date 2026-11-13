@@ -8,7 +8,6 @@
 // are all `pg`. Releases exist only in `pg` (json means "no release registry").
 // To add a database: write its drivers under `drivers/<name>/`, then add a case here.
 import { join } from 'node:path';
-import { remoteEmailVerifier } from '../auth/auth.ts';
 import { db } from '../data/db.ts';
 import type { ReleaseStore } from '../data/ports.ts';
 import { PgReleaseDriver } from '../data/drivers/pg/releases.ts';
@@ -84,7 +83,7 @@ export async function createData({
   countryCode = env.STEAM_COUNTRY || 'BR',
 }: DataOptions): Promise<Data> {
   const kind = kinds(env);
-  assertPrivateStores(kind, env.NODE_ENV === 'production');
+  assertPrivateStores(kind, Boolean(env.DATABASE_URL) || env.NODE_ENV === 'production');
   const used = new Set(Object.values(kind));
   const sql = used.has('pg') ? db(env.DATABASE_URL) : null;
   const pg = used.has('pg') ? await import('../data/drivers/pg/index.ts') : null;
@@ -96,8 +95,6 @@ export async function createData({
     kind.APP_USERS_STORE === 'pg' ? new pg!.PgAppUserDriver(sql!) : new json!.JsonAppUserDriver();
   const user = createAppUserResolver(appUserDriver, {
     devAppUserId: kind.APP_USERS_STORE === 'json' ? (devAppUserId ?? 'local') : devAppUserId,
-    seedOwnerEmail: env.SEED_OWNER_EMAIL,
-    isEmailVerified: remoteEmailVerifier(env),
   });
 
   let gamesDriver;

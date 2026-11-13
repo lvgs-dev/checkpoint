@@ -16,27 +16,27 @@ Start with [AGENTS.md](../../AGENTS.md). Read this file when you change reposito
 
 ## Repository settings
 
-| Setting | Value | Why |
-| --- | --- | --- |
-| `allow_auto_merge` | false | The bot merges. No workflow enables auto-merge. |
-| `delete_branch_on_merge` | true | Merged task branches do not pile up. |
-| `allow_squash_merge` | true | Task PR method. |
-| `allow_merge_commit` | true | Promotion and resync PRs. |
-| `allow_rebase_merge` | false | Only two methods are used. |
+| Setting                  | Value | Why                                             |
+| ------------------------ | ----- | ----------------------------------------------- |
+| `allow_auto_merge`       | false | The bot merges. No workflow enables auto-merge. |
+| `delete_branch_on_merge` | true  | Merged task branches do not pile up.            |
+| `allow_squash_merge`     | true  | Task PR method.                                 |
+| `allow_merge_commit`     | true  | Promotion and resync PRs.                       |
+| `allow_rebase_merge`     | false | Only two methods are used.                      |
 
 ## Rules by branch
 
-| Rule | `Protect homolog` | `Protect main` |
-| --- | --- | --- |
-| Pull request required | yes | yes |
-| Approvals | 0 | 1 code owner (`CODEOWNERS`) |
-| Merge methods | squash, merge commit (resync PR only) | merge commit only |
-| Required checks | the PR job names of `ci.yml` | the same |
-| Strict (branch up to date) | no | no |
-| Dismiss stale approval on push | n/a | yes |
-| Last pusher cannot approve | n/a | no (single owner) |
-| Bypass actors | none | none |
-| Deletion and force push | blocked | blocked |
+| Rule                           | `Protect homolog`                     | `Protect main`              |
+| ------------------------------ | ------------------------------------- | --------------------------- |
+| Pull request required          | yes                                   | yes                         |
+| Approvals                      | 0                                     | 1 code owner (`CODEOWNERS`) |
+| Merge methods                  | squash, merge commit (resync PR only) | merge commit only           |
+| Required checks                | the PR job names of `ci.yml`          | the same                    |
+| Strict (branch up to date)     | no                                    | no                          |
+| Dismiss stale approval on push | n/a                                   | yes                         |
+| Last pusher cannot approve     | n/a                                   | no (single owner)           |
+| Bypass actors                  | none                                  | none                        |
+| Deletion and force push        | blocked                               | blocked                     |
 
 1. Do not add a bypass actor. The bot opens PRs, the owner approves.
 2. `require_last_push_approval` is off. With one owner it blocked the owner from approving the promotion PR even after a bot push (trap 19). The guarantee stays: one owner approval, required checks and no bypass.

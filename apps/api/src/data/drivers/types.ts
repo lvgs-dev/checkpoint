@@ -159,13 +159,6 @@ export interface ReleaseDriver {
 
 export interface AppUserDriver {
   findByAuthId(authId: string): Promise<string | undefined>;
-  /** Links the seed account to `authId` when it is still unclaimed and the e-mail matches. */
-  claimSeed(
-    seedId: string,
-    authId: string,
-    email: string,
-    seedOwnerEmail: string,
-  ): Promise<string | undefined>;
   /** Creates the account; undefined when the id belongs to another identity. */
   create(authId: string, email: string | null): Promise<string | undefined>;
 }

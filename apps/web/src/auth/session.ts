@@ -1,45 +1,36 @@
-import {
-  GoTrueClient,
-  type AuthChangeEvent,
-  type AuthError,
-  type Session,
-} from '@supabase/auth-js';
+import type { Role } from '../../../../packages/core/src/authorization';
 
-/** GET /api/v1/config response (URL + publishable key are public by design). */
-interface PublicConfig {
-  auth: {
-    supabaseUrl: string;
-    supabasePublishableKey: string;
-    providers: { github: boolean };
-  } | null;
+export interface AuthUser {
+  id: string;
+  email?: string;
+  role: Role;
+  emailVerified?: boolean;
 }
-
+export interface Session {
+  user: AuthUser;
+}
+export type AuthChangeEvent = 'SIGNED_IN' | 'SIGNED_OUT' | 'PASSWORD_RECOVERY';
 export type AuthResult = { ok: true; message?: string } | { ok: false; message: string };
-
 export interface AuthState {
-  /** True once init() settled (config loaded and session restored, or failed). */
+  recoveryAvailable?: boolean;
   ready: boolean;
-  /** False when the API runs without Supabase (local development without auth). */
   enabled: boolean;
   githubEnabled: boolean;
   session: Session | null;
   initError: string;
 }
+interface AuthResponse {
+  session?: Session | null;
+  message?: string;
+  detail?: string;
+}
 
-/** Email alias domain for provisioned username accounts. */
-const USERNAME_DOMAIN = 'gps.dev.br';
-
-/**
- * Framework-free Supabase session holder (port of the Angular AuthService). It lives outside React
- * so the HTTP client can read tokens without hooks; React subscribes via `subscribe/getState`.
- * supabase-js persists the session and refreshes access tokens itself.
- */
+/** Holds public identity data only. The browser sends the HttpOnly session cookie. */
 export class AuthSession {
-  private client?: GoTrueClient;
-  private refreshing?: Promise<string | null>;
   private initializing?: Promise<void>;
   private listeners = new Set<() => void>();
   private eventListeners = new Set<(event: AuthChangeEvent) => void>();
+  private recoveryToken?: string;
   private state: AuthState = {
     ready: false,
     enabled: true,
@@ -47,7 +38,6 @@ export class AuthSession {
     session: null,
     initError: '',
   };
-
   get enabled() {
     return this.state.enabled;
   }
@@ -56,187 +46,119 @@ export class AuthSession {
     this.listeners.add(listener);
     return () => void this.listeners.delete(listener);
   };
-  /** Raw auth events (PASSWORD_RECOVERY, SIGNED_OUT...) for navigation side effects. */
   onEvent(listener: (event: AuthChangeEvent) => void) {
     this.eventListeners.add(listener);
     return () => void this.eventListeners.delete(listener);
   }
   private set(patch: Partial<AuthState>) {
     this.state = { ...this.state, ...patch };
-    this.listeners.forEach((l) => l());
+    this.listeners.forEach((listener) => listener());
   }
-
-  /** Idempotent; call once at bootstrap before the first render of routes. */
+  private emit(event: AuthChangeEvent) {
+    this.eventListeners.forEach((listener) => listener(event));
+  }
   init(): Promise<void> {
     this.initializing ??= this.load().finally(() => this.set({ ready: true }));
     return this.initializing;
   }
-
   private async load() {
-    let config: PublicConfig;
     try {
-      // Raw fetch: the config endpoint must never go through the authenticated client.
-      const res = await fetch('/api/v1/config');
-      if (!res.ok) throw new Error(String(res.status));
-      config = await res.json();
-    } catch {
-      this.set({
-        initError: 'Não foi possível carregar a configuração. Verifique se a API está no ar.',
+      const response = await fetch('/api/v1/config', {
+        credentials: 'include',
+        signal: AbortSignal.timeout(10_000),
       });
+      if (!response.ok) throw new Error('Configuration unavailable');
+      const config = (await response.json()) as { auth: { providers: { github: boolean } } | null };
+      if (!config.auth) {
+        this.set({ enabled: false });
+        return;
+      }
+      this.set({ githubEnabled: config.auth.providers.github });
+      await this.restore();
+      if (typeof location !== 'undefined') {
+        const token = new URLSearchParams(location.hash.slice(1)).get('recovery_token');
+        if (token) {
+          this.recoveryToken = token;
+          this.set({ recoveryAvailable: true });
+          history.replaceState(null, '', location.pathname + location.search);
+          this.emit('PASSWORD_RECOVERY');
+        }
+      }
+    } catch {
+      this.set({ initError: 'Authentication configuration unavailable. Try again.' });
+    }
+  }
+  async restore(): Promise<void> {
+    const response = await fetch('/api/v1/auth/session', {
+      credentials: 'include',
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (response.status === 401) {
+      this.clear();
       return;
     }
-    if (!config.auth) return this.set({ enabled: false });
-    this.set({ githubEnabled: config.auth.providers.github });
-    const baseUrl = new URL(
-      config.auth.supabaseUrl.endsWith('/')
-        ? config.auth.supabaseUrl
-        : `${config.auth.supabaseUrl}/`,
-    );
-    const authUrl = new URL('auth/v1', baseUrl).href;
-    const storageKey = `sb-${baseUrl.hostname.split('.')[0]}-auth-token`;
-    this.client = new GoTrueClient({
-      url: authUrl,
-      headers: {
-        Authorization: `Bearer ${config.auth.supabasePublishableKey}`,
-        apikey: config.auth.supabasePublishableKey,
-      },
-      storageKey,
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      fetch: (input, init) => {
-        const signal = init?.signal ?? AbortSignal.timeout(10_000);
-        return fetch(input, { ...init, signal });
-      },
-    });
-    // Do not call other auth methods inside this callback (it can deadlock the lock).
-    this.client.onAuthStateChange((event, session) => {
-      this.set({ session });
-      this.eventListeners.forEach((l) => l(event));
-    });
-    const { data } = await this.client.getSession();
-    this.set({ session: data.session });
+    if (!response.ok) throw new Error('Session unavailable');
+    const data = (await response.json()) as AuthResponse;
+    this.set({ session: data.session ?? null });
   }
-
-  /** getSession() reads storage and renews an expired token before returning it. */
-  async accessToken(): Promise<string | null> {
-    if (!this.client) return null;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+  clear(): void {
+    this.set({ session: null });
+    this.emit('SIGNED_OUT');
+  }
+  private async post(path: string, body: Record<string, unknown>): Promise<AuthResult> {
+    if (!this.state.enabled) return { ok: false, message: 'Authentication unavailable.' };
     try {
-      const getSessionPromise = this.client.getSession();
-      const fallbackPromise = new Promise<{ data: { session: Session | null } }>((resolve) => {
-        timer = setTimeout(() => resolve({ data: { session: this.state.session } }), 2500);
+      const response = await fetch('/api/v1/auth/' + path, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10_000),
       });
-      const { data } = await Promise.race([getSessionPromise, fallbackPromise]);
-      return data.session?.access_token ?? null;
+      const data = (await response.json()) as AuthResponse;
+      if (!response.ok)
+        return { ok: false, message: data.detail ?? data.message ?? 'Authentication failed.' };
+      if ('session' in data) this.set({ session: data.session ?? null });
+      return data.message ? { ok: true, message: data.message } : { ok: true };
     } catch {
-      return this.state.session?.access_token ?? null;
-    } finally {
-      if (timer) clearTimeout(timer);
+      return { ok: false, message: 'Cannot connect to authentication server.' };
     }
   }
-
-  /** Forces a refresh after a 401; concurrent callers share one promise. */
-  refreshToken(): Promise<string | null> {
-    if (!this.client) return Promise.resolve(null);
-    if (this.refreshing) return this.refreshing;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeoutPromise = new Promise<{ data: { session: null }; error: boolean }>((resolve) => {
-      timer = setTimeout(() => resolve({ data: { session: null }, error: true }), 5000);
-    });
-    this.refreshing = Promise.race([this.client.refreshSession(), timeoutPromise])
-      .then(({ data, error }) => (error ? null : (data.session?.access_token ?? null)))
-      .catch(() => null)
-      .finally(() => {
-        if (timer) clearTimeout(timer);
-        this.refreshing = undefined;
-      });
-    return this.refreshing;
+  private email(login: string) {
+    const value = login.trim().toLowerCase();
+    return value.includes('@') ? value : value + '@gps.dev.br';
   }
-
-  /** Accepts an email or maps a username to its lowercase email alias. */
   async signIn(login: string, password: string): Promise<AuthResult> {
-    if (!this.client) return this.unavailable();
-    const id = login.trim();
-    const email = id.includes('@') ? id : id.toLowerCase() + '@' + USERNAME_DOMAIN;
-    const { error } = await this.client.signInWithPassword({ email, password });
-    return error ? { ok: false, message: translate(error) } : { ok: true };
+    const result = await this.post('login', { email: this.email(login), password });
+    if (result.ok) this.emit('SIGNED_IN');
+    return result;
   }
-
-  async signUp(email: string, password: string): Promise<AuthResult> {
-    if (!this.client) return this.unavailable();
-    const { data, error } = await this.client.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: location.origin + '/jogos' },
-    });
-    if (error) return { ok: false, message: translate(error) };
-    // With email confirmation on, Supabase returns no session until the user confirms.
-    return data.session
-      ? { ok: true }
-      : { ok: true, message: 'Conta criada! Confira seu e-mail para confirmar o cadastro.' };
+  signUp(email: string, password: string) {
+    return this.post('register', { email: this.email(email), password });
   }
-
-  async resetPassword(email: string): Promise<AuthResult> {
-    if (!this.client) return this.unavailable();
-    const { error } = await this.client.resetPasswordForEmail(email, {
-      redirectTo: location.origin + '/redefinir-senha',
-    });
-    return error
-      ? { ok: false, message: translate(error) }
-      : {
-          ok: true,
-          message: 'Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.',
-        };
+  resetPassword(email: string) {
+    return this.post('request-reset', { email: this.email(email) });
   }
-
   async updatePassword(password: string): Promise<AuthResult> {
-    if (!this.client) return this.unavailable();
-    const { error } = await this.client.updateUser({ password });
-    return error
-      ? { ok: false, message: translate(error) }
-      : { ok: true, message: 'Senha alterada.' };
+    if (!this.recoveryToken)
+      return { ok: false, message: 'Open the recovery link from your email.' };
+    const result = await this.post('reset-password', { token: this.recoveryToken, password });
+    if (result.ok) {
+      this.recoveryToken = undefined;
+      this.set({ recoveryAvailable: false });
+      this.clear();
+    }
+    return result;
   }
-
   async signInWithGitHub(redirect = '/jogos'): Promise<AuthResult> {
-    if (!this.client) return this.unavailable();
-    const { error } = await this.client.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: location.origin + redirect },
-    });
-    return error ? { ok: false, message: translate(error) } : { ok: true };
+    if (!this.state.githubEnabled) return { ok: false, message: 'GitHub login unavailable.' };
+    location.assign('/api/v1/auth/github?redirect=' + encodeURIComponent(redirect));
+    return { ok: true };
   }
-
-  /** The SIGNED_OUT event drives the redirect to /login and the query cache reset. */
   async signOut(scope: 'global' | 'local' = 'local'): Promise<void> {
-    await this.client?.signOut({ scope });
-  }
-
-  private unavailable(): AuthResult {
-    return { ok: false, message: this.state.initError || 'Autenticação indisponível.' };
+    const result = await this.post('logout', { all: scope === 'global' });
+    if (!result.ok) throw new Error(result.message);
+    this.clear();
   }
 }
-
 export const authSession = new AuthSession();
-
-const messages: Record<string, string> = {
-  invalid_credentials: 'E-mail ou senha incorretos.',
-  email_not_confirmed: 'Confirme seu e-mail antes de entrar (veja sua caixa de entrada).',
-  user_already_exists: 'Este e-mail já está cadastrado.',
-  email_exists: 'Este e-mail já está cadastrado.',
-  weak_password: 'Senha fraca: use pelo menos 8 caracteres, misturando letras e números.',
-  same_password: 'A nova senha precisa ser diferente da atual.',
-  over_email_send_rate_limit: 'Muitos e-mails enviados. Aguarde alguns minutos e tente de novo.',
-  over_request_rate_limit: 'Muitas tentativas. Aguarde um pouco e tente de novo.',
-  signup_disabled: 'Novos cadastros estão desativados.',
-  email_address_invalid: 'E-mail inválido.',
-};
-
-function translate(error: AuthError): string {
-  return (
-    (error.code && messages[error.code]) ||
-    (error.status === 0
-      ? 'Sem conexão com o servidor de autenticação.'
-      : 'Não foi possível concluir: ' + error.message)
-  );
-}

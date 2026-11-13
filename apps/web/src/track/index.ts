@@ -27,12 +27,12 @@ function sessionId(): string {
 
 /** Fire and forget: the queue retries once and swallows errors. Anonymous batches are dropped. */
 async function send(events: TrackEvent[]): Promise<void> {
-  const token = await authSession.accessToken();
-  if (!token) return;
+  if (!authSession.getState().session) return;
   const res = await fetch('/api/v1/track', {
     method: 'POST',
     keepalive: true,
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       sessionId: sessionId(),
       automated: navigator.webdriver === true,

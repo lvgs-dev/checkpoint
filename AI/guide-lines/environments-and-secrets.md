@@ -22,19 +22,19 @@ This file lists platform names and scopes. Each project declares all its own var
 
 ## Names
 
-| Name | Kind | Scope | Purpose |
-| --- | --- | --- | --- |
-| `DEPLOY_HOMOLOG` | variable | repository | `true` or `false`. Switches the homolog deploy job. |
-| `PUBLIC_HOSTNAME` | variable | Environment | Public name of the environment. |
-| `APP_HOST_PORT` | variable | Environment | Loopback host port. In `production` the job pins it as a literal. |
-| `COMPOSE_PROJECT_NAME` | variable | Environment | Unique project name. The engine derives it from the project and environment. |
-| `APP_ALIAS` | variable | Environment | Network alias on `edge`. The engine derives it from the project and environment. |
-| `TIMEZONE`, `LOG_LEVEL` | variable | Environment | Runtime settings. |
-| `HOMOLOG_SAFE_MODE` | variable | Environment | Only for a project with external side effects. `true` in `homolog`, `false` in `production`. Switches them off. |
-| Project settings | variable | Environment | Non-secret settings declared by the project. |
-| `DB_PASSWORD` | secret | Environment | Database password. A different value per Environment. |
-| Project secrets | secret | Environment | Mounted as files at `/run/secrets/<lowercase name>`. A different value per Environment. |
-| `CF_HEALTH_CLIENT_ID`, `CF_HEALTH_CLIENT_SECRET` | secret, optional | Environment | Read-only Access service token for the external health check. |
+| Name                                             | Kind             | Scope       | Purpose                                                                                                         |
+| ------------------------------------------------ | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| `DEPLOY_HOMOLOG`                                 | variable         | repository  | `true` or `false`. Switches the homolog deploy job.                                                             |
+| `PUBLIC_HOSTNAME`                                | variable         | Environment | Public name of the environment.                                                                                 |
+| `APP_HOST_PORT`                                  | variable         | Environment | Loopback host port. In `production` the job pins it as a literal.                                               |
+| `COMPOSE_PROJECT_NAME`                           | variable         | Environment | Unique project name. The engine derives it from the project and environment.                                    |
+| `APP_ALIAS`                                      | variable         | Environment | Network alias on `edge`. The engine derives it from the project and environment.                                |
+| `TIMEZONE`, `LOG_LEVEL`                          | variable         | Environment | Runtime settings.                                                                                               |
+| `HOMOLOG_SAFE_MODE`                              | variable         | Environment | Only for a project with external side effects. `true` in `homolog`, `false` in `production`. Switches them off. |
+| Project settings                                 | variable         | Environment | Non-secret settings declared by the project.                                                                    |
+| `DB_PASSWORD`                                    | secret           | Environment | Database password. A different value per Environment.                                                           |
+| Project secrets                                  | secret           | Environment | Mounted as files at `/run/secrets/<lowercase name>`. A different value per Environment.                         |
+| `CF_HEALTH_CLIENT_ID`, `CF_HEALTH_CLIENT_SECRET` | secret, optional | Environment | Read-only Access service token for the external health check.                                                   |
 
 1. The engine loads declared names from `deploy/env-manifest.json`. `render-env.sh` writes them and preflight checks required entries. `APP_REQUIRED_SETTING`, `APP_SECRET_KEY` and `app_secret_key` are application examples, not engine requirements. Replace examples in the manifest, Compose and app together.
 2. GitHub Packages and GHCR use `GITHUB_TOKEN`. There is no repository secret and no personal access token.

@@ -47,11 +47,11 @@ in its state. `verify` accepts that recorded named ref with a WARN. Production u
 
 ## Jobs
 
-| Job id | Required check name | Purpose |
-| --- | --- | --- |
-| `tests` | `Tests (Oreon)` | Run project tests and project delivery tests. |
-| `typecheck-build` | `Typecheck and build (Oreon)` | Check types and build the application. |
-| `image` | `Image build and smoke test (Oreon)` | Call the shared image-check action. |
+| Job id            | Required check name                  | Purpose                                       |
+| ----------------- | ------------------------------------ | --------------------------------------------- |
+| `tests`           | `Tests (Oreon)`                      | Run project tests and project delivery tests. |
+| `typecheck-build` | `Typecheck and build (Oreon)`        | Check types and build the application.        |
+| `image`           | `Image build and smoke test (Oreon)` | Call the shared image-check action.           |
 
 Keep these check names aligned with the rulesets. Generate changes with `scripts/generate-rulesets.py`.
 Fork and Dependabot PRs receive no package secrets. The test job rejects their promotion until the

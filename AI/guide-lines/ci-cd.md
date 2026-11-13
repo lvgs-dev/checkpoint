@@ -39,13 +39,13 @@ To start a new Atlas project with one guided command, use [the lvgs command](lvg
 
 ## Image tags
 
-| Tag | Pushed by | Read by |
-| --- | --- | --- |
-| `<sha>` | `homolog` and `main` | audit and rollback |
-| `tree-<tree>` | `homolog` | the `main` promotion |
-| `homolog` | `homolog` | humans only |
-| `approved-homolog-<sha>` | `homolog`, last | homolog deploy |
-| `approved-<sha>` | `main`, last | production deploy |
+| Tag                      | Pushed by            | Read by              |
+| ------------------------ | -------------------- | -------------------- |
+| `<sha>`                  | `homolog` and `main` | audit and rollback   |
+| `tree-<tree>`            | `homolog`            | the `main` promotion |
+| `homolog`                | `homolog`            | humans only          |
+| `approved-homolog-<sha>` | `homolog`, last      | homolog deploy       |
+| `approved-<sha>`         | `main`, last         | production deploy    |
 
 1. Production deploy reads only `approved-<40 hex>`.
 2. A `main` tree with no homolog image fails the promotion. This blocks a direct hotfix on `main`.

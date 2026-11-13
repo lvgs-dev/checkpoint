@@ -17,10 +17,10 @@ The target deployment uses local PostgreSQL, one application container, and the 
 
 ## Map
 
-| Path                | What it is              | Rule                                          |
-| ------------------- | ----------------------- | --------------------------------------------- |
-| `apps/api`          | Node API                |                                               |
-| `apps/web`          | React app               |                                               |
+| Path                | What it is              | Rule                                           |
+| ------------------- | ----------------------- | ---------------------------------------------- |
+| `apps/api`          | Node API                |                                                |
+| `apps/web`          | React app               |                                                |
 | `packages/core`     | Domain contracts        | Both apps must pass checks after changes here. |
 | `packages/ui-react` | Product-agnostic UI kit | Never import from `apps/*`.                    |
 

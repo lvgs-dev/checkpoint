@@ -142,7 +142,7 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
           </div>
         )}
 
-        {mode === 'reset' && !auth.session ? (
+        {mode === 'reset' && !auth.recoveryAvailable && !auth.session ? (
           <>
             <p className="error" role="alert">
               Link inválido ou expirado. Peça um novo link de redefinição.

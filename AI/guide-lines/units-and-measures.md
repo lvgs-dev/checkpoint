@@ -48,16 +48,16 @@ Choose the simplest option that works and meets performance needs. Record the re
 
 Name numeric fields with their canonical unit suffix. Use the same names in storage and API schemas.
 
-| Field | Stored unit |
-| --- | --- |
-| `cpu_freq_hz` | hertz |
-| `net_rx_bps` | bits per second |
-| `cpu_temp_k` | kelvin |
-| `ram_ratio` | dimensionless ratio |
-| `energy_j` | joule |
-| `power_w` | watt |
-| `voltage_v` | volt |
-| `duration_s` | second |
+| Field         | Stored unit         |
+| ------------- | ------------------- |
+| `cpu_freq_hz` | hertz               |
+| `net_rx_bps`  | bits per second     |
+| `cpu_temp_k`  | kelvin              |
+| `ram_ratio`   | dimensionless ratio |
+| `energy_j`    | joule               |
+| `power_w`     | watt                |
+| `voltage_v`   | volt                |
+| `duration_s`  | second              |
 
 ## Related
 

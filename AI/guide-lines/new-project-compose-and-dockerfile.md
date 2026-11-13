@@ -12,13 +12,13 @@ The examples come from `lvgs-dev/server-supply`. Replace `<PROJECT>` and `<PORT>
 
 ## How the files fit together
 
-| File | Used by | Purpose |
-| --- | --- | --- |
-| `Dockerfile` | CI and developers | Builds the one image that every environment runs. |
-| `compose.yaml` | Developers | Builds the image on the machine. Starts the database and the migration. |
-| `compose.prod.yaml` | Production and homolog | Runs an image by digest. Never builds. |
-| `compose.edge.yaml` | Homolog and production | Joins the shared `edge` network and pins the secrets folder. |
-| `compose.lan-db.yaml` | Production only, optional | Publishes the database on the local network. |
+| File                  | Used by                   | Purpose                                                                 |
+| --------------------- | ------------------------- | ----------------------------------------------------------------------- |
+| `Dockerfile`          | CI and developers         | Builds the one image that every environment runs.                       |
+| `compose.yaml`        | Developers                | Builds the image on the machine. Starts the database and the migration. |
+| `compose.prod.yaml`   | Production and homolog    | Runs an image by digest. Never builds.                                  |
+| `compose.edge.yaml`   | Homolog and production    | Joins the shared `edge` network and pins the secrets folder.            |
+| `compose.lan-db.yaml` | Production only, optional | Publishes the database on the local network.                            |
 
 Both environments list `compose.yaml` first, then `compose.prod.yaml`, then `compose.edge.yaml` last (production may add `compose.lan-db.yaml` before `compose.prod.yaml`).
 The later file overrides the earlier one.
@@ -94,14 +94,14 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://app@db:5432/app}
     secrets: [db_password]
-    ports: ["127.0.0.1:<PORT>:8000"]
+    ports: ['127.0.0.1:<PORT>:8000']
     networks: [internal]
 
   migrate:
     build: { context: ., secrets: [github_token] }
     image: <PROJECT>:latest
-    restart: "no"
-    command: ["python", "-m", "app.migrate"]
+    restart: 'no'
+    command: ['python', '-m', 'app.migrate']
     depends_on:
       db: { condition: service_healthy }
     environment:
@@ -119,12 +119,12 @@ services:
     secrets: [db_password]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      test: ['CMD-SHELL', 'pg_isready -U app -d app']
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 20s
-    networks: [internal]   # no published port
+    networks: [internal] # no published port
 
 networks:
   internal: {}
@@ -147,27 +147,33 @@ name: ${COMPOSE_PROJECT_NAME:-<PROJECT>}
 services:
   app:
     image: ${IMAGE_REF:?set IMAGE_REF to ghcr.io/lvgs-dev/<PROJECT>@sha256:<digest>}
-    build: !reset null            # production never builds
-    pull_policy: never            # the deploy script pulls the digest first
+    build: !reset null # production never builds
+    pull_policy: never # the deploy script pulls the digest first
     restart: unless-stopped
-    depends_on: !override         # the migration runs from the deploy script, not from Compose
+    depends_on: !override # the migration runs from the deploy script, not from Compose
       db: { condition: service_healthy }
     ports: !override
-      - "127.0.0.1:${APP_HOST_PORT:-<PORT>}:8000"
+      - '127.0.0.1:${APP_HOST_PORT:-<PORT>}:8000'
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status == 200 else 1)"]
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status == 200 else 1)",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
 
   migrate:
-    profiles: ["migrate"]         # started only by the deploy script
+    profiles: ['migrate'] # started only by the deploy script
     build: !reset null
     image: ${IMAGE_REF:?set IMAGE_REF}
     pull_policy: never
-    restart: "no"
-    command: ["python", "-m", "app.migrate"]
+    restart: 'no'
+    command: ['python', '-m', 'app.migrate']
     depends_on:
       db: { condition: service_healthy }
 ```
@@ -214,12 +220,12 @@ Keep secrets out of this file. Declare each secret name and destination in `depl
 
 The ci-workflows engine's `render-env.sh` writes these files for each environment, from environment variables:
 
-| Path | Mode | Content |
-| --- | --- | --- |
-| `<state folder>/env/` | 700 | The folder. Only the runner user enters it. |
-| `<state folder>/env/.env` | 600 | Settings and any manifest-declared environment secrets. Compose reads it on the host. |
-| `<state folder>/env/secrets/` | 700 | The secrets folder. |
-| `<state folder>/env/secrets/db_password` | 644 | The database password. |
+| Path                                     | Mode | Content                                                                               |
+| ---------------------------------------- | ---- | ------------------------------------------------------------------------------------- |
+| `<state folder>/env/`                    | 700  | The folder. Only the runner user enters it.                                           |
+| `<state folder>/env/.env`                | 600  | Settings and any manifest-declared environment secrets. Compose reads it on the host. |
+| `<state folder>/env/secrets/`            | 700  | The secrets folder.                                                                   |
+| `<state folder>/env/secrets/db_password` | 644  | The database password.                                                                |
 
 The secret files are 644 because the containers run as a non-root user.
 The 700 folder keeps other host users out. The Docker daemon runs as root and can mount the file.

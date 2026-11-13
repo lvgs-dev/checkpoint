@@ -1,12 +1,7 @@
 import { testIdValue } from '@/components/ui/test-id';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  can,
-  Permission,
-  Role,
-  roleFromAppMetadata,
-} from '../../../../../packages/core/src/authorization';
+import { can, Permission, Role } from '../../../../../packages/core/src/authorization';
 import {
   metadataFields,
   type MetadataCategory,
@@ -28,7 +23,7 @@ const labels: Record<MetadataCategory, string> = {
 };
 export function CatalogSettings() {
   const auth = useAuth();
-  const role = auth.enabled ? roleFromAppMetadata(auth.user?.app_metadata) : Role.Admin;
+  const role = auth.enabled ? (auth.user?.role ?? Role.User) : Role.Admin;
   return can(role, Permission.CatalogUpdate) ? <CatalogEditor userId={auth.userId} /> : null;
 }
 function CatalogEditor({ userId }: { userId: string }) {

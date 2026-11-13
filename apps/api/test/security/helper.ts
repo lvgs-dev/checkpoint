@@ -51,8 +51,6 @@ export function createMockAuthenticator(users: Record<string, MockUser> = {}): A
         id: user.id,
         email: user.email,
         role: user.role ?? Role.User,
-        accessToken: token,
-        claims: { sub: user.id },
       };
     },
   };
@@ -98,6 +96,8 @@ export async function startTestServer(
       await sql`DELETE FROM game WHERE name LIKE 'Private game %'`;
     }
     for (const user of Object.values(options.initialUsers)) {
+      await sql`INSERT INTO auth_identity (id, email) VALUES (${user.id}, ${user.email ?? null})
+                ON CONFLICT (id) DO NOTHING`;
       await sql`INSERT INTO app_user (id, auth_identity_id, email) VALUES (${user.id}, ${user.id}, ${user.email ?? null})
                 ON CONFLICT (id) DO NOTHING`;
     }

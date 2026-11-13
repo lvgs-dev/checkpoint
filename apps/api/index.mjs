@@ -7,7 +7,7 @@
 // vercel.json, e só este arquivo é construído como função (bloco `builds`),
 // evitando que api/src/** e api/test/** virem funções serverless.
 //
-// Persistência: com DATABASE_URL (produção) usa o Postgres do Supabase via pooler em
+// Persistência: com DATABASE_URL (produção) usa o Postgres via DATABASE_URL em
 // modo transação. Sem DATABASE_URL cai nos JSON locais em /tmp (efêmero, por instância:
 // edições se perdem) — só serve para previews sem banco. Ver docs/deploy.md.
 // Imports explícitos das dependências usadas só pelos .ts: garantem que o trace de

@@ -263,7 +263,7 @@ export function formatDatabaseLogRow(e: LogEvent): DatabaseLogRow {
 }
 
 /**
- * Persists error-level and unhandled error logs to the Supabase `public.logs` table.
+ * Persists error-level and unhandled error logs to the PostgreSQL `public.logs` table.
  * Operations are non-blocking and caught so DB failures never affect the request path.
  */
 export class DatabaseSink implements LogSink {

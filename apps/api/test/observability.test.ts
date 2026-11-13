@@ -89,7 +89,7 @@ it('DatabaseSink catches errors and does not throw if database fails', async () 
   await closeDb();
 });
 
-it.skipIf(!hasDb)('DatabaseSink persists error log into Supabase public.logs table', async () => {
+it.skipIf(!hasDb)('DatabaseSink persists error log into PostgreSQL public.logs table', async () => {
   const url = testDatabaseUrl();
 
   const testRequestId = `test-req-${Date.now()}`;

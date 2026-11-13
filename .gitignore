@@ -15,9 +15,6 @@ local-env.env
 # Configuração local do Claude Code (pode conter permissões/tokens locais)
 .claude/settings.local.json
 
-# Vercel
-.vercel/
-
 # Supabase CLI (estado local)
 apps/api/infra/supabase/.temp/
 apps/api/infra/supabase/.branches/
@@ -37,7 +34,6 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/settings.json
 
-.vercel
 .env*
 !.env.example
 

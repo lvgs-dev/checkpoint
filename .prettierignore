@@ -2,7 +2,6 @@ dist
 node_modules
 pnpm-lock.yaml
 apps/api/infra/data/
-.vercel
 # Generated output, not source
 .beads/backup
 apps/api/src/data/seed.ts

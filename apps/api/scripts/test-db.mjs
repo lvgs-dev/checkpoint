@@ -60,7 +60,7 @@ function up() {
   if (!exists) psql("CREATE DATABASE " + DB_NAME, "postgres");
   execFileSync(
     process.execPath,
-    [fileURLToPath(new URL("../src/data/migrate.ts", import.meta.url))],
+    [fileURLToPath(new URL("../src/data/migrate-cli.ts", import.meta.url))],
     { env: { ...process.env, DATABASE_URL: DB_URL }, stdio: "inherit" },
   );
   psql(readFileSync(new URL("../db/seed.sql", import.meta.url), "utf8"));

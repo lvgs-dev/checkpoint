@@ -4,7 +4,16 @@ import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
 import { ContentType, type RouteResult } from "./http.ts";
 
-const base = resolve(fileURLToPath(new URL("../../", import.meta.url)), "../web/dist");
+const devBase = resolve(fileURLToPath(new URL("../../", import.meta.url)), "../web/dist");
+
+/** Production serves ./public next to start.cjs (cwd /app). STATIC_DIR overrides it. */
+export function staticBase(
+  env: Record<string, string | undefined> = process.env,
+  cwd = process.cwd(),
+): string {
+  if (env.STATIC_DIR) return env.STATIC_DIR;
+  return env.NODE_ENV === "production" ? resolve(cwd, "public") : devBase;
+}
 const mime: Record<string, string> = {
   ".html": ContentType.HtmlUtf8,
   ".js": ContentType.JavaScript,
@@ -16,6 +25,7 @@ const mime: Record<string, string> = {
 };
 
 export async function staticRoute(path: string): Promise<RouteResult> {
+  const base = staticBase();
   let target = resolve(base, "." + decodeURIComponent(path));
   if (!target.startsWith(base + sep)) target = resolve(base, "index.html");
   let content;

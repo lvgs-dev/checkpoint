@@ -1,5 +1,5 @@
 services:
-  { { project } }:
+  game-list:
     networks:
       internal: {}
       edge:
@@ -12,3 +12,7 @@ networks:
 secrets:
   db_password:
     file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/db_password
+  smtp_password:
+    file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/smtp_password
+  github_client_secret:
+    file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/github_client_secret

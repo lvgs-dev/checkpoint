@@ -1,5 +1,6 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { AppError } from "../shared/errors.ts";
+import { readSecret } from "../shared/secret.ts";
 import { newToken, tokenHash, type AuthService } from "./service.ts";
 import type { Identity } from "./repository.ts";
 
@@ -16,11 +17,12 @@ export class GitHubOAuth {
   private config() {
     const env = this.env;
     if (env.AUTH_GITHUB_ENABLED !== "true") throw new AppError("GitHub login disabled", 404);
-    if (!env.AUTH_GITHUB_CLIENT_ID || !env.AUTH_GITHUB_CLIENT_SECRET || !env.AUTH_ORIGIN)
+    const secret = readSecret("AUTH_GITHUB_CLIENT_SECRET", env);
+    if (!env.AUTH_GITHUB_CLIENT_ID || !secret || !env.AUTH_ORIGIN)
       throw new AppError("GitHub login unavailable", 503);
     return {
       clientId: env.AUTH_GITHUB_CLIENT_ID,
-      secret: env.AUTH_GITHUB_CLIENT_SECRET,
+      secret,
       callback: new URL("/api/v1/auth/github/callback", env.AUTH_ORIGIN).href,
     };
   }

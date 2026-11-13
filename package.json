@@ -8,9 +8,9 @@
     "node": ">=24.15.0"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env apps/api/src/main/server.ts",
+    "start": "node --env-file-if-exists=.env apps/api/src/main/index.ts",
     "dev": "node scripts/dev.mjs",
-    "build": "pnpm --filter @checkpoint/web build",
+    "build": "pnpm --filter @checkpoint/web build && pnpm --filter @checkpoint/api build",
     "master:create": "node --env-file-if-exists=.env --env-file-if-exists=local-env.env apps/api/scripts/master-user.mjs",
     "release:list": "node --env-file-if-exists=.env apps/api/scripts/rollback.mjs list",
     "release:note": "node --env-file-if-exists=.env --env-file-if-exists=local-env.env apps/api/scripts/release-note.mjs",

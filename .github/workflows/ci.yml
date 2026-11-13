@@ -40,7 +40,7 @@ jobs:
       - name: Build and smoke-test image
         uses: lvgs-dev/ci-workflows/actions/image-check@4649bed6b5eea6264164f6ef9f6454c48247a52e
         with:
-          project: { { project } }
+          project: game-list
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
@@ -56,8 +56,8 @@ jobs:
     uses: lvgs-dev/ci-workflows/.github/workflows/publish.yml@4649bed6b5eea6264164f6ef9f6454c48247a52e
     secrets: inherit
     with:
-      project: { { project } }
-      owner: { { owner } }
+      project: game-list
+      owner: lvgs-dev
 
   deploy-production:
     name: Deploy production (Atlas)
@@ -73,7 +73,7 @@ jobs:
     secrets: inherit
     with:
       environment: production
-      project: { { project } }
-      owner: { { owner } }
+      project: game-list
+      owner: lvgs-dev
       digest: ${{ needs.publish.outputs.digest }}
       app-host-port: "8002"

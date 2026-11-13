@@ -1,5 +1,6 @@
 import { connect } from "node:tls";
 import { once } from "node:events";
+import { readSecret } from "../shared/secret.ts";
 import type { AuthMail, MailSender } from "./service.ts";
 
 type Env = Record<string, string | undefined>;
@@ -118,6 +119,6 @@ export function mailSenderFromEnv(env: Env): MailSender {
     from: env.SMTP_FROM,
     origin: env.AUTH_ORIGIN,
     user: env.SMTP_USER,
-    password: env.SMTP_PASSWORD,
+    password: readSecret("SMTP_PASSWORD", env),
   });
 }

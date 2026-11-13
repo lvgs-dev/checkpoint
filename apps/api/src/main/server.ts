@@ -1,23 +1,19 @@
-import { migrate } from "../data/migrate.ts";
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { assertOrigin, authRoute } from "../auth/http.ts";
 import { AppError } from "../shared/errors.ts";
 import { GameService } from "../services/games.ts";
-import { createService } from "./setup.ts";
-import { SEED_APP_USER_ID } from "../services/auth-user.ts";
-import { assertNoAuthAllowed, authenticatorFromEnv, type Authenticator } from "../auth/auth.ts";
+import { authenticatorFromEnv, type Authenticator } from "../auth/auth.ts";
 import { can, Permission, Role } from "../../../../packages/core/src/authorization.ts";
 import { toProblem } from "../routes/http-errors.ts";
-import { flushLogs, logger, metrics } from "../observability/logger.ts";
+import { logger, metrics } from "../observability/logger.ts";
 import { telemetryRoute } from "../routes/telemetry.ts";
 import { getContext, runWithContext, setContext } from "../shared/context.ts";
 import type { WishlistService } from "../services/wishlist.ts";
 import { wishlistRoute } from "../routes/wishlist.ts";
 import { gamesRoute } from "../routes/games.ts";
 import { listsRoute } from "../routes/lists.ts";
+import { healthRoute } from "../routes/health.ts";
 import { systemRoute } from "../routes/system.ts";
 import { staticRoute } from "../routes/static.ts";
 import { releaseRoute } from "../routes/releases.ts";
@@ -38,7 +34,6 @@ import {
   traceStore,
 } from "../observability/timing.ts";
 import { createRequestGuard, requestDeadlineMs, withDeadline } from "../shared/request-guard.ts";
-const root = fileURLToPath(new URL("../../", import.meta.url));
 const EXPENSIVE_DEADLINE_FACTOR = 4;
 const MAX_BODY_BYTES = 100_000;
 const REQUEST_ID = /^[\w.-]{8,64}$/;
@@ -63,6 +58,8 @@ export function makeServer(
 ) {
   const guardExpensive = createRequestGuard(60, 60_000, 10);
   return createServer((req, res) => {
+    // Health precedes headers, auth, rate limits and any database access.
+    if (healthRoute(req, res)) return;
     const incoming = req.headers["x-request-id"];
     const requestId =
       typeof incoming === "string" && REQUEST_ID.test(incoming) ? incoming : randomUUID();
@@ -255,25 +252,4 @@ export function makeServer(
       }),
     );
   });
-}
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (process.env.DATABASE_URL) await migrate();
-  const auth = authenticatorFromEnv();
-  const host = process.env.HOST ?? "127.0.0.1";
-  if (!auth) assertNoAuthAllowed(process.env, host);
-  const { service, storage, wishlist, config, track } = await createService({
-    dataDir: resolve(root, "data"),
-    // Sem auth (dev), os dados do Postgres são os do dono do seed.
-    devAppUserId: auth ? undefined : SEED_APP_USER_ID,
-  });
-  const server = makeServer(service, auth, wishlist, releaseStoreFromEnv(), config, track);
-  if (!auth)
-    logger.warn("server.no_auth", {
-      note: "DATABASE_URL is unset: running without authentication on loopback only",
-    });
-  for (const signal of ["SIGTERM", "SIGINT"] as const)
-    process.on(signal, () => void flushLogs().finally(() => process.exit(0)));
-  server.listen(Number(process.env.PORT) || 3000, host, () =>
-    logger.info("server.listening", { storage, host, port: Number(process.env.PORT) || 3000 }),
-  );
 }

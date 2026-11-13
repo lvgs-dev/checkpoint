@@ -100,7 +100,3 @@ export async function migrate(url = process.env.DATABASE_URL): Promise<void> {
     await pool.end({ timeout: 5 });
   }
 }
-
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  await migrate();
-}

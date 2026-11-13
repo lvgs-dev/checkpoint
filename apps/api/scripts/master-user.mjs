@@ -2,16 +2,19 @@
 import { randomUUID } from "node:crypto";
 import postgres from "postgres";
 import { hashPassword } from "../src/auth/password.ts";
+import { readSecret } from "../src/shared/secret.ts";
 
 const env = process.env;
-for (const key of ["DATABASE_URL", "MASTER_EMAIL", "MASTER_PASSWORD"]) {
+const masterPassword = readSecret("MASTER_PASSWORD", env);
+for (const key of ["DATABASE_URL", "MASTER_EMAIL"]) {
   if (!env[key]) throw new Error(`Set ${key}`);
 }
-if (env.MASTER_PASSWORD.length < 8 || Buffer.byteLength(env.MASTER_PASSWORD) > 1024)
+if (!masterPassword) throw new Error("Set MASTER_PASSWORD or MASTER_PASSWORD_FILE");
+if (masterPassword.length < 8 || Buffer.byteLength(masterPassword) > 1024)
   throw new Error("MASTER_PASSWORD must contain 8 to 1024 bytes");
 const email = env.MASTER_EMAIL.trim().toLowerCase();
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Invalid MASTER_EMAIL");
-const passwordHash = await hashPassword(env.MASTER_PASSWORD);
+const passwordHash = await hashPassword(masterPassword);
 const seedId = "00000000-0000-4000-8000-000000000001";
 const reset = process.argv.includes("--reset");
 const sql = postgres(env.DATABASE_URL, { prepare: false, max: 1 });

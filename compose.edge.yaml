@@ -1,0 +1,14 @@
+services:
+  { { project } }:
+    networks:
+      internal: {}
+      edge:
+        aliases:
+          - ${APP_ALIAS:?set APP_ALIAS to the DNS alias on the edge network}
+networks:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:-edge}
+secrets:
+  db_password:
+    file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/db_password

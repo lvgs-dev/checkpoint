@@ -1,0 +1,43 @@
+services:
+  { { project } }:
+    build: .
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8000"
+      PGHOST: db
+      PGUSER: app
+      PGDATABASE: app
+      APP_REVISION: ${EXPECTED_REVISION:-unknown}
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets: [db_password]
+    ports:
+      - "127.0.0.1:8002:8000"
+    networks: [internal]
+  db:
+    image: postgres:17-trixie
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets: [db_password]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    networks: [internal]
+networks:
+  internal:
+    internal: true
+volumes:
+  pgdata: {}
+secrets:
+  db_password:
+    file: ${SECRETS_DIR:-./secrets}/db_password

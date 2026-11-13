@@ -1,0 +1,12 @@
+{
+  "kind": "node-service",
+  "project": "game-list",
+  "owner": "lvgs-dev",
+  "prod_port": 8002,
+  "deploy_homolog": false,
+  "ci_workflows_ref": "4649bed6b5eea6264164f6ef9f6454c48247a52e",
+  "allow_ref_name": false,
+  "prod_hostname": "game-list.gps.dev.br",
+  "homolog_hostname": "homolog-game-list.gps.dev.br",
+  "port": 8000
+}

@@ -1,0 +1,17 @@
+{
+  "platform": [
+    "DEPLOY_HOMOLOG",
+    "PUBLIC_HOSTNAME",
+    "APP_HOST_PORT",
+    "COMPOSE_PROJECT_NAME",
+    "APP_ALIAS"
+  ],
+  "entries": [
+    {
+      "name": "DB_PASSWORD",
+      "kind": "secret",
+      "file": "db_password",
+      "required": true
+    }
+  ]
+}

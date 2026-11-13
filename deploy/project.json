@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "service": "game-list",
+  "port": 8000,
+  "health": {
+    "path": "/api/health",
+    "revision_field": "revision"
+  },
+  "database": {
+    "kind": "postgres",
+    "service": "db",
+    "user": "app",
+    "name": "app",
+    "password_secret": "db_password"
+  },
+  "migrate": {
+    "kind": "none"
+  },
+  "compose": {
+    "files": ["compose.yaml"],
+    "edge_overlay": "compose.edge.yaml"
+  },
+  "smoke": {
+    "command": ["node", "dist/index.js"],
+    "env": {
+      "APP_SMOKE_TEST": "true"
+    }
+  }
+}

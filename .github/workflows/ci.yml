@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, homolog]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Cancel superseded PR runs only. main and homolog push runs must finish, because publish waits for them.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Build and image check (Oreon)
+    runs-on: ${{ (github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.actor == 'dependabot[bot]')) && 'ubuntu-24.04' || fromJSON('["self-hosted","linux","x64","oreon"]') }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Reject untrusted PRs
+        if: github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository || github.actor == 'dependabot[bot]')
+        run: |
+          echo "::error::Replay this fork or Dependabot PR on an owner-reviewed same-repository branch."
+          exit 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm install --global pnpm@12.14.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter ./apps/web build && pnpm --filter ./apps/api build
+
+      - name: Build and smoke-test image
+        uses: lvgs-dev/ci-workflows/actions/image-check@4649bed6b5eea6264164f6ef9f6454c48247a52e
+        with:
+          project: { { project } }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    name: Publish image (Oreon)
+    needs: [check]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/homolog')
+    permissions:
+      contents: read
+      packages: write
+    concurrency:
+      group: publish-${{ github.ref_name }}
+      cancel-in-progress: false
+    uses: lvgs-dev/ci-workflows/.github/workflows/publish.yml@4649bed6b5eea6264164f6ef9f6454c48247a52e
+    secrets: inherit
+    with:
+      project: { { project } }
+      owner: { { owner } }
+
+  deploy-production:
+    name: Deploy production (Atlas)
+    needs: [publish]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: read
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    uses: lvgs-dev/ci-workflows/.github/workflows/deploy.yml@4649bed6b5eea6264164f6ef9f6454c48247a52e
+    secrets: inherit
+    with:
+      environment: production
+      project: { { project } }
+      owner: { { owner } }
+      digest: ${{ needs.publish.outputs.digest }}
+      app-host-port: "8002"

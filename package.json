@@ -11,7 +11,6 @@
     "start": "node --env-file-if-exists=.env apps/api/src/main/server.ts",
     "dev": "node scripts/dev.mjs",
     "build": "pnpm --filter @checkpoint/web build",
-    "vercel-build": "pnpm --filter @checkpoint/web build && node apps/api/scripts/record-release.mjs",
     "master:create": "node --env-file-if-exists=.env --env-file-if-exists=local-env.env apps/api/scripts/master-user.mjs",
     "release:list": "node --env-file-if-exists=.env apps/api/scripts/rollback.mjs list",
     "release:note": "node --env-file-if-exists=.env --env-file-if-exists=local-env.env apps/api/scripts/release-note.mjs",

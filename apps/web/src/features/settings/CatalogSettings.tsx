@@ -1,56 +1,51 @@
-import { testIdValue } from '@/components/ui/test-id';
-import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  can,
-  Permission,
-  Role,
-  roleFromAppMetadata,
-} from '../../../../../packages/core/src/authorization';
+import { testIdValue } from "@/components/ui/test-id";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { can, Permission, Role } from "../../../../../packages/core/src/authorization";
 import {
   metadataFields,
   type MetadataCategory,
   type MetadataCatalog,
-} from '../../../../../packages/core/src/metadata';
-import { useAuth } from '../../auth/AuthProvider';
-import { api } from '../../api/http';
-import { errorMessage } from '../../query/errors';
-import { AppLoader } from '../loader/AppLoader';
+} from "../../../../../packages/core/src/metadata";
+import { useAuth } from "../../auth/AuthProvider";
+import { api } from "../../api/http";
+import { errorMessage } from "../../query/errors";
+import { AppLoader } from "../loader/AppLoader";
 
 const labels: Record<MetadataCategory, string> = {
-  genres: 'Gêneros',
-  tags: 'Tags',
-  mechanics: 'Mecânicas',
-  stores: 'Lojas',
-  paces: 'Ritmos',
-  structures: 'Estruturas',
-  platforms: 'Plataformas',
+  genres: "Gêneros",
+  tags: "Tags",
+  mechanics: "Mecânicas",
+  stores: "Lojas",
+  paces: "Ritmos",
+  structures: "Estruturas",
+  platforms: "Plataformas",
 };
 export function CatalogSettings() {
   const auth = useAuth();
-  const role = auth.enabled ? roleFromAppMetadata(auth.user?.app_metadata) : Role.Admin;
+  const role = auth.enabled ? (auth.user?.role ?? Role.User) : Role.Admin;
   return can(role, Permission.CatalogUpdate) ? <CatalogEditor userId={auth.userId} /> : null;
 }
 function CatalogEditor({ userId }: { userId: string }) {
   const client = useQueryClient();
   const query = useQuery({
-    queryKey: [userId, 'config-options'],
-    queryFn: ({ signal }) => api.get<MetadataCatalog>('config/options', { signal }),
+    queryKey: [userId, "config-options"],
+    queryFn: ({ signal }) => api.get<MetadataCatalog>("config/options", { signal }),
   });
-  const [category, setCategory] = useState<MetadataCategory>('genres');
-  const [name, setName] = useState('');
+  const [category, setCategory] = useState<MetadataCategory>("genres");
+  const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  async function change(method: 'post' | 'delete', value: string) {
+  const [error, setError] = useState("");
+  async function change(method: "post" | "delete", value: string) {
     setBusy(true);
-    setError('');
+    setError("");
     try {
-      const catalog = await api[method]<MetadataCatalog>('config/options/' + category, {
+      const catalog = await api[method]<MetadataCatalog>("config/options/" + category, {
         json: { name: value },
       });
-      client.setQueryData([userId, 'config-options'], catalog);
-      await client.invalidateQueries({ queryKey: [userId, 'catalog'] });
-      if (method === 'post') setName('');
+      client.setQueryData([userId, "config-options"], catalog);
+      await client.invalidateQueries({ queryKey: [userId, "catalog"] });
+      if (method === "post") setName("");
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -62,7 +57,7 @@ function CatalogEditor({ userId }: { userId: string }) {
       <h2 id="catalog-heading">Opções do catálogo</h2>
       <p>As opções valem para todos os usuários. Só é possível excluir opções sem uso.</p>
       <label>
-        Categoria{' '}
+        Categoria{" "}
         <select
           data-testid="settings-catalog-category"
           value={category}
@@ -84,13 +79,13 @@ function CatalogEditor({ userId }: { userId: string }) {
         <ul>
           {query.data?.[category].map((value) => (
             <li key={value}>
-              {value}{' '}
+              {value}{" "}
               <button
                 data-testid={`settings-catalog-remove-${category}-${testIdValue(value)}`}
                 type="button"
                 disabled={busy}
-                aria-label={'Excluir ' + value}
-                onClick={() => void change('delete', value)}
+                aria-label={"Excluir " + value}
+                onClick={() => void change("delete", value)}
               >
                 Excluir
               </button>
@@ -101,15 +96,15 @@ function CatalogEditor({ userId }: { userId: string }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          void change('post', name);
+          void change("post", name);
         }}
       >
         <label>
-          Nova opção{' '}
+          Nova opção{" "}
           <input
             data-testid="settings-catalog-name"
             value={name}
-            maxLength={category === 'tags' || category === 'stores' ? 80 : 120}
+            maxLength={category === "tags" || category === "stores" ? 80 : 120}
             disabled={busy}
             onChange={(e) => setName(e.target.value)}
           />

@@ -1,13 +1,13 @@
-import { describe, expect, it, vi } from 'vitest';
-import { renderToString } from 'react-dom/server';
-import { MemoryRouter } from 'react-router';
-import { LoginPage } from './LoginPage';
+import { describe, expect, it, vi } from "vitest";
+import { renderToString } from "react-dom/server";
+import { MemoryRouter } from "react-router";
+import { LoginPage } from "./LoginPage";
 
-vi.mock('../auth/AuthProvider', () => ({
+vi.mock("../auth/AuthProvider", () => ({
   useAuth: () => ({
     session: null,
     user: null,
-    userId: 'local',
+    userId: "local",
     ready: true,
     githubEnabled: false,
     initError: null,
@@ -20,8 +20,8 @@ vi.mock('../auth/AuthProvider', () => ({
   }),
 }));
 
-describe('LoginPage', () => {
-  it('renders the bonfire sword brand mark instead of the old C letter', () => {
+describe("LoginPage", () => {
+  it("renders the bonfire sword brand mark instead of the old C letter", () => {
     const html = renderToString(
       <MemoryRouter>
         <LoginPage />
@@ -29,14 +29,14 @@ describe('LoginPage', () => {
     );
 
     // Old C mark should NOT be present
-    expect(html).not.toContain('C<span>•</span>');
+    expect(html).not.toContain("C<span>•</span>");
     // Bonfire mark should be rendered inside brand-mark
-    expect(html).toContain('brand-mark');
-    expect(html).toContain('bonfire');
+    expect(html).toContain("brand-mark");
+    expect(html).toContain("bonfire");
     expect(html).toContain('viewBox="0 0 64 64"');
   });
 
-  it('renders accessible password toggle button and initial password input', () => {
+  it("renders accessible password toggle button and initial password input", () => {
     const html = renderToString(
       <MemoryRouter>
         <LoginPage />

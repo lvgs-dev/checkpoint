@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "vitest run --root ../.. --project api",
-    "test:security": "vitest run --root ../.. --project api test/security/"
+    "test:security": "vitest run --root ../.. --project api test/security/",
+    "db:migrate": "node --env-file-if-exists=../../.env src/data/migrate-cli.ts",
+    "build": "tsc -p tsconfig.build.json && node scripts/build-dist.mjs"
   },
   "dependencies": {
-    "@vercel/functions": "^3.9.11",
-    "jose": "^6.2.12",
     "postgres": "3.4.9",
     "zod": "^4.6.7"
   }

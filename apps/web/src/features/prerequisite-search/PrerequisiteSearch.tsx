@@ -1,23 +1,23 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useId, useRef, useState } from 'react';
-import type { ScoredGame } from '../../../../../packages/core/src/models';
-import { api } from '../../api/http';
-import { useQueryKeys } from '../../query/keys';
-import { AppLoader } from '../loader/AppLoader';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useId, useRef, useState } from "react";
+import type { ScoredGame } from "../../../../../packages/core/src/models";
+import { api } from "../../api/http";
+import { useQueryKeys } from "../../query/keys";
+import { AppLoader } from "../loader/AppLoader";
 
-import { Cover } from '@/components/Cover';
+import { Cover } from "@/components/Cover";
 
 const MIN_CHARS = 3;
 const DEBOUNCE_MS = 300;
 
 const rowClass =
-  'flex min-h-[50px] w-full min-w-0 items-center gap-2.5 rounded-md border-0 bg-transparent p-1.5 text-left text-foreground';
-const nameClass = 'min-w-0 flex-1 truncate text-sm';
+  "flex min-h-[50px] w-full min-w-0 items-center gap-2.5 rounded-md border-0 bg-transparent p-1.5 text-left text-foreground";
+const nameClass = "min-w-0 flex-1 truncate text-sm";
 
 /** Search predecessor candidates by name (3+ characters, debounced); typed queries are never cached. */
 export function PrerequisiteSearch({
   value,
-  excludeId = '',
+  excludeId = "",
   onValueChange,
 }: {
   value: string | null;
@@ -27,20 +27,20 @@ export function PrerequisiteSearch({
   const k = useQueryKeys();
   const qc = useQueryClient();
   const inputId = useId();
-  const [text, setText] = useState('');
-  const [query, setQuery] = useState('');
+  const [text, setText] = useState("");
+  const [query, setQuery] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const selected = useQuery({
-    queryKey: k.game(value ?? ''),
-    queryFn: ({ signal }) => api.get<ScoredGame>('games/' + encodeURIComponent(value!), { signal }),
+    queryKey: k.game(value ?? ""),
+    queryFn: ({ signal }) => api.get<ScoredGame>("games/" + encodeURIComponent(value!), { signal }),
     enabled: !!value,
   });
   const search = useQuery({
-    queryKey: [...k.all, 'game-search', excludeId, query],
+    queryKey: [...k.all, "game-search", excludeId, query],
     queryFn: ({ signal }) =>
-      api.get<ScoredGame[]>('games/search', {
+      api.get<ScoredGame[]>("games/search", {
         searchParams: { q: query, ...(excludeId ? { excludeId } : {}) },
         signal,
       }),
@@ -56,17 +56,17 @@ export function PrerequisiteSearch({
     setText(next);
     clearTimeout(timer.current);
     const trimmed = next.trim();
-    if (trimmed.length < MIN_CHARS) return setQuery('');
+    if (trimmed.length < MIN_CHARS) return setQuery("");
     timer.current = setTimeout(() => setQuery(trimmed), DEBOUNCE_MS);
   }
   function choose(game: ScoredGame) {
     qc.setQueryData(k.game(game.id), game);
     onValueChange(game.id);
-    type('');
+    type("");
   }
   function clear() {
     onValueChange(null);
-    type('');
+    type("");
   }
 
   const clearButton = (
@@ -118,10 +118,10 @@ export function PrerequisiteSearch({
         onChange={(e) => type(e.target.value)}
         placeholder="Buscar jogo pelo nome"
         autoComplete="off"
-        aria-describedby={inputId + '-help'}
+        aria-describedby={inputId + "-help"}
         className="mt-2 min-h-[46px] w-full rounded-[7px] border border-border bg-card p-[11px] text-base text-foreground"
       />
-      <small id={inputId + '-help'} className="mt-1.5 block text-xs text-muted-foreground">
+      <small id={inputId + "-help"} className="mt-1.5 block text-xs text-muted-foreground">
         Opcional. Digite pelo menos 3 caracteres.
       </small>
       <div role="status" className="mt-1.5 block text-xs text-muted-foreground">
@@ -133,9 +133,9 @@ export function PrerequisiteSearch({
             data-testid="loader-prerequisite-search"
           />
         ) : search.isError ? (
-          'Não foi possível buscar. Tente novamente.'
+          "Não foi possível buscar. Tente novamente."
         ) : (
-          query && search.isSuccess && !results.length && 'Nenhum jogo encontrado.'
+          query && search.isSuccess && !results.length && "Nenhum jogo encontrado."
         )}
       </div>
       {results.length > 0 && (

@@ -1,11 +1,11 @@
 import type {
   MetadataCatalog,
   MetadataCategory,
-} from '../../../../../../packages/core/src/metadata.ts';
-import { metadataFields, normalizeMetadata } from '../../../../../../packages/core/src/metadata.ts';
-import type { ConfigDriver, GamesDriver } from '../types.ts';
-import { defaultMetadata } from '../../config-seed.ts';
-import { JsonFile } from './file.ts';
+} from "../../../../../../packages/core/src/metadata.ts";
+import { metadataFields, normalizeMetadata } from "../../../../../../packages/core/src/metadata.ts";
+import type { ConfigDriver, GamesDriver } from "../types.ts";
+import { defaultMetadata } from "../../config-seed.ts";
+import { JsonFile } from "./file.ts";
 
 export class JsonConfigDriver implements ConfigDriver {
   private catalog = structuredClone(defaultMetadata);
@@ -13,7 +13,7 @@ export class JsonConfigDriver implements ConfigDriver {
   private ready: Promise<void>;
   private games: GamesDriver;
   private owner: string;
-  constructor(path: string | null, games: GamesDriver, owner = 'local') {
+  constructor(path: string | null, games: GamesDriver, owner = "local") {
     this.games = games;
     this.owner = owner;
     this.file = new JsonFile(path);
@@ -25,7 +25,7 @@ export class JsonConfigDriver implements ConfigDriver {
     else {
       for (const game of await this.games.list(this.owner)) {
         for (const [category, field] of Object.entries(metadataFields)) {
-          const values = field === 'secondaryTags' ? game.secondaryTags : [game[field]];
+          const values = field === "secondaryTags" ? game.secondaryTags : [game[field]];
           const options = this.catalog[category as MetadataCategory];
           for (const value of values)
             if (
@@ -49,20 +49,20 @@ export class JsonConfigDriver implements ConfigDriver {
       this.catalog[category].push(name);
     await this.file.write(this.catalog);
   }
-  async remove(category: MetadataCategory, name: string): Promise<'removed' | 'missing' | 'used'> {
+  async remove(category: MetadataCategory, name: string): Promise<"removed" | "missing" | "used"> {
     await this.ready;
     const actual = this.catalog[category].find(
       (value) => normalizeMetadata(value) === normalizeMetadata(name),
     );
-    if (!actual) return 'missing';
+    if (!actual) return "missing";
     const field = metadataFields[category];
     for (const game of await this.games.list(this.owner)) {
-      const values = field === 'secondaryTags' ? game.secondaryTags : [game[field]];
+      const values = field === "secondaryTags" ? game.secondaryTags : [game[field]];
       if (values.some((value) => normalizeMetadata(value) === normalizeMetadata(actual)))
-        return 'used';
+        return "used";
     }
     this.catalog[category] = this.catalog[category].filter((value) => value !== actual);
     await this.file.write(this.catalog);
-    return 'removed';
+    return "removed";
   }
 }

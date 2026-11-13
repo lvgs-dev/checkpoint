@@ -4,9 +4,9 @@ import {
   type DeployInput,
   type Environment,
   type NewRelease,
-} from '../../domain/releases.ts';
-import { type ReleaseStore } from '../ports.ts';
-import { DataError, type ReleaseDriver } from '../drivers/types.ts';
+} from "../../domain/releases.ts";
+import { type ReleaseStore } from "../ports.ts";
+import { DataError, type ReleaseDriver } from "../drivers/types.ts";
 
 export class ReleaseRepository implements ReleaseStore {
   private driver: ReleaseDriver;
@@ -27,9 +27,9 @@ export class ReleaseRepository implements ReleaseStore {
     try {
       return await this.driver.insert(row);
     } catch (e) {
-      if (e instanceof DataError && e.code === 'conflict') {
-        if (e.constraint === 'app_release_env_version_uidx') throw new VersionTaken(row.version);
-        if (e.constraint === 'app_release_env_sha_uidx') {
+      if (e instanceof DataError && e.code === "conflict") {
+        if (e.constraint === "app_release_env_version_uidx") throw new VersionTaken(row.version);
+        if (e.constraint === "app_release_env_sha_uidx") {
           const existing = await this.bySha(row.environment, row.gitSha);
           if (existing) throw new ReleaseAlreadyExists(existing);
         }

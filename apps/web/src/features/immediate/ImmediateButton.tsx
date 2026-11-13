@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import type { Desire } from '../../../../../packages/core/src/models';
-import { cn } from '@/lib/utils';
-import { useGameWriter } from '../playing/gameWriter';
-import { Bonfire } from './Bonfire';
-import { previousDesire, rememberDesire } from './desireMemory';
+import { useState } from "react";
+import type { Desire } from "../../../../../packages/core/src/models";
+import { cn } from "@/lib/utils";
+import { useGameWriter } from "../playing/gameWriter";
+import { Bonfire } from "./Bonfire";
+import { previousDesire, rememberDesire } from "./desireMemory";
 
 /** Toggle immediate desire; emits the optimistic change and restores the original desire after failure. */
 export function ImmediateButton({
   game,
-  'data-testid': testId,
+  "data-testid": testId,
   onChanged,
   onFailed,
   onSaved,
 }: {
-  'data-testid': string;
+  "data-testid": string;
   game: { id: string; name: string; desire: Desire };
   onChanged?(desire: Desire): void;
   onFailed?(message: string): void;
@@ -22,14 +22,14 @@ export function ImmediateButton({
 }) {
   const writer = useGameWriter();
   const [busy, setBusy] = useState(false);
-  const on = game.desire === 'Imediata';
+  const on = game.desire === "Imediata";
 
   async function toggle(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
     if (busy) return;
-    const next: Desire = on ? previousDesire(game.id) : 'Imediata';
-    if (next === 'Imediata') rememberDesire(game.id, game.desire);
+    const next: Desire = on ? previousDesire(game.id) : "Imediata";
+    if (next === "Imediata") rememberDesire(game.id, game.desire);
     setBusy(true);
     onChanged?.(next);
     try {
@@ -47,14 +47,14 @@ export function ImmediateButton({
     <button
       data-testid={testId}
       type="button"
-      className={cn('immediate-btn', on && 'on')}
+      className={cn("immediate-btn", on && "on")}
       aria-pressed={on}
       aria-label={
         on
-          ? 'Tirar ' + game.name + ' da vontade imediata'
-          : 'Jogar ' + game.name + ' já: vontade imediata, vai para o topo da fila'
+          ? "Tirar " + game.name + " da vontade imediata"
+          : "Jogar " + game.name + " já: vontade imediata, vai para o topo da fila"
       }
-      title={on ? 'Voltar à vontade anterior' : 'Vontade imediata: vai para o topo da fila'}
+      title={on ? "Voltar à vontade anterior" : "Vontade imediata: vai para o topo da fila"}
       disabled={busy}
       onClick={toggle}
     >

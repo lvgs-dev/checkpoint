@@ -36,7 +36,7 @@ Use this template for writing the PR body:
 
 Skip all preambles and keep prose brief. Use the user's domain language from `GLOSSARY.md`.
 
-### Summary
+### Summary (section guide)
 
 Pick the smallest view that makes the key point clear.
 
@@ -155,7 +155,7 @@ Place each visual next to the short text it supports. Keep only the calls, files
 
 You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
 
-### Evidence
+### Evidence (section guide)
 
 Concrete evidence that the change works. Show a before and after.
 
@@ -163,7 +163,7 @@ Screenshots are S-tier - when the environment is set up for it and the change is
 
 Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.
 
-### Merge Danger
+### Merge Danger (section guide)
 
 Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.
 

@@ -1,0 +1,19 @@
+name: ${COMPOSE_PROJECT_NAME:-game-list}
+services:
+  game-list:
+    image: ${IMAGE_REF:?set IMAGE_REF to ghcr.io/lvgs-dev/game-list@sha256:<digest>}
+    build: !reset null
+    environment:
+      AUTH_ORIGIN: https://${PUBLIC_HOSTNAME:?set PUBLIC_HOSTNAME to game-list.gps.dev.br}
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST}
+      SMTP_FROM: ${SMTP_FROM:?set SMTP_FROM}
+    pull_policy: never
+    ports: !override
+      - "127.0.0.1:${APP_HOST_PORT:-8002}:8000"
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+  db:
+    logging: *logging

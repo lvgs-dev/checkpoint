@@ -1,9 +1,9 @@
 // Pieces shared by the Postgres drivers: vocabulary maps, row shapes and SQL fragments.
 // Fragments are built from tagged templates only; nothing here concatenates SQL text.
-import postgres from 'postgres';
-import { Desire, type Game, GameStatus } from '../../../../../../packages/core/src/models.ts';
-import type { Sql } from '../../db.ts';
-import { DataError } from '../types.ts';
+import postgres from "postgres";
+import { Desire, type Game, GameStatus } from "../../../../../../packages/core/src/models.ts";
+import type { Sql } from "../../db.ts";
+import { DataError } from "../types.ts";
 
 type Fragment = postgres.PendingQuery<postgres.Row[]>;
 
@@ -11,19 +11,19 @@ type Fragment = postgres.PendingQuery<postgres.Row[]>;
 export const json = (v: unknown) => v as postgres.JSONValue;
 
 export const statusCode: Record<GameStatus, string> = {
-  [GameStatus.NotStarted]: 'not_started',
-  [GameStatus.Playing]: 'playing',
-  [GameStatus.Abandoned]: 'abandoned',
-  [GameStatus.Finished]: 'finished',
-  [GameStatus.Wishlist]: 'wishlist',
+  [GameStatus.NotStarted]: "not_started",
+  [GameStatus.Playing]: "playing",
+  [GameStatus.Abandoned]: "abandoned",
+  [GameStatus.Finished]: "finished",
+  [GameStatus.Wishlist]: "wishlist",
 };
 export const desireCode: Record<Desire, string> = {
-  [Desire.Immediate]: 'immediate',
-  [Desire.VeryHigh]: 'very_high',
-  [Desire.High]: 'high',
-  [Desire.Medium]: 'medium',
-  [Desire.Low]: 'low',
-  [Desire.VeryLow]: 'very_low',
+  [Desire.Immediate]: "immediate",
+  [Desire.VeryHigh]: "very_high",
+  [Desire.High]: "high",
+  [Desire.Medium]: "medium",
+  [Desire.Low]: "low",
+  [Desire.VeryLow]: "very_low",
 };
 const invert = <K extends string>(m: Record<K, string>) =>
   Object.fromEntries(Object.entries(m).map(([k, v]) => [v, k])) as Record<string, K>;
@@ -57,7 +57,7 @@ export const gameFrom = (sql: Sql): Fragment => sql`library_entry e
   LEFT JOIN store st ON st.id = e.store_id
   LEFT JOIN game pre ON pre.id = g.prerequisite_game_id`;
 
-export type RawGame = Omit<Game, 'status' | 'desire'> & { status: string; desire: string };
+export type RawGame = Omit<Game, "status" | "desire"> & { status: string; desire: string };
 export const toGame = (raw: RawGame): Game => ({
   ...raw,
   status: statusLabel[raw.status],
@@ -76,11 +76,11 @@ export const settingsJson = (sql: Sql): Fragment =>
 /** Violações de CHECK/tamanho/faixa/FK/unicidade viram DataError neutro; o resto passa. */
 export function pgError(e: unknown): never {
   if (e instanceof postgres.PostgresError) {
-    if (['23514', '22001', '22003', '22007', '22008', '22021'].includes(e.code))
-      throw new DataError('invalid');
+    if (["23514", "22001", "22003", "22007", "22008", "22021"].includes(e.code))
+      throw new DataError("invalid");
     // FK: lista/jogo inexistente ou de outro usuário (ex.: (user_id, list_id) → game_list).
-    if (e.code === '23503') throw new DataError('not_found');
-    if (e.code === '23505') throw new DataError('conflict', 'conflict', e.constraint_name);
+    if (e.code === "23503") throw new DataError("not_found");
+    if (e.code === "23505") throw new DataError("conflict", "conflict", e.constraint_name);
   }
   throw e;
 }

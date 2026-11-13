@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router';
-import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../auth/AuthProvider';
-import { safeRedirect } from '../auth/safeRedirect';
-import type { AuthResult } from '../auth/session';
-import { Bonfire } from '../features/immediate/Bonfire';
-import { AppLoader } from '../features/loader/AppLoader';
-import './login.css';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useSearchParams } from "react-router";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../auth/AuthProvider";
+import { safeRedirect } from "../auth/safeRedirect";
+import type { AuthResult } from "../auth/session";
+import { Bonfire } from "../features/immediate/Bonfire";
+import { AppLoader } from "../features/loader/AppLoader";
+import "./login.css";
 
-type Mode = 'login' | 'signup' | 'forgot' | 'reset';
+type Mode = "login" | "signup" | "forgot" | "reset";
 interface Fields {
   email: string;
   password: string;
@@ -17,36 +17,36 @@ interface Fields {
 }
 
 const TITLES: Record<Mode, [string, string, string]> = {
-  login: ['BEM-VINDO DE VOLTA', 'Entrar', 'Sua biblioteca está esperando a próxima partida.'],
-  signup: ['COMECE SUA BIBLIOTECA', 'Criar conta', 'Organize o que jogar, no seu ritmo.'],
+  login: ["BEM-VINDO DE VOLTA", "Entrar", "Sua biblioteca está esperando a próxima partida."],
+  signup: ["COMECE SUA BIBLIOTECA", "Criar conta", "Organize o que jogar, no seu ritmo."],
   forgot: [
-    'ACONTECE COM TODO MUNDO',
-    'Esqueci a senha',
-    'Enviaremos um link para você criar uma nova senha.',
+    "ACONTECE COM TODO MUNDO",
+    "Esqueci a senha",
+    "Enviaremos um link para você criar uma nova senha.",
   ],
-  reset: ['QUASE LÁ', 'Nova senha', 'Escolha uma senha nova para sua conta.'],
+  reset: ["QUASE LÁ", "Nova senha", "Escolha uma senha nova para sua conta."],
 };
 const SUBMIT: Record<Mode, string> = {
-  login: 'Entrar',
-  signup: 'Criar conta',
-  forgot: 'Enviar link',
-  reset: 'Salvar nova senha',
+  login: "Entrar",
+  signup: "Criar conta",
+  forgot: "Enviar link",
+  reset: "Salvar nova senha",
 };
 
 const USERNAME = /^[a-z0-9._-]{3,32}$/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Serves /login (mode "login", switchable) and /redefinir-senha (mode "reset"). */
-export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
+export function LoginPage({ initialMode = "login" }: { initialMode?: Mode }) {
   const auth = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-  const form = useForm<Fields>({ defaultValues: { email: '', password: '', confirm: '' } });
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const form = useForm<Fields>({ defaultValues: { email: "", password: "", confirm: "" } });
   const {
     register,
     handleSubmit,
@@ -54,29 +54,29 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
     reset,
     formState: { errors },
   } = form;
-  const redirect = safeRedirect(params.get('redirect'));
+  const redirect = safeRedirect(params.get("redirect"));
   const title = TITLES[mode];
 
   const switchMode = (next: Mode) => {
     setMode(next);
     setShowPassword(false);
-    setError('');
-    setNotice('');
+    setError("");
+    setNotice("");
     reset(undefined, { keepValues: true });
   };
 
   async function submit({ email, password }: Fields) {
-    setError('');
-    setNotice('');
+    setError("");
+    setNotice("");
     setLoading(true);
     let result: AuthResult;
     try {
       result =
-        mode === 'login'
+        mode === "login"
           ? await auth.signIn(email, password)
-          : mode === 'signup'
+          : mode === "signup"
             ? await auth.signUp(email, password)
-            : mode === 'forgot'
+            : mode === "forgot"
               ? await auth.resetPassword(email)
               : await auth.updatePassword(password);
     } finally {
@@ -85,7 +85,7 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
     if (!result.ok) return setError(result.message);
     if (result.message) setNotice(result.message);
     // A sign-in resolves its session through onAuthStateChange; the guest route redirects on its own.
-    if (mode !== 'forgot' && (mode === 'reset' || mode === 'signup'))
+    if (mode !== "forgot" && (mode === "reset" || mode === "signup"))
       void navigate(redirect, { replace: true });
   }
 
@@ -101,15 +101,15 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
     validate: (v: string) => {
       const value = v.trim();
       // Usernames are accepted only for sign-in; registration and recovery require an email.
-      return mode === 'login' && USERNAME.test(value) ? true : EMAIL.test(value);
+      return mode === "login" && USERNAME.test(value) ? true : EMAIL.test(value);
     },
   };
-  const tab = (id: 'login' | 'signup', label: string) => (
+  const tab = (id: "login" | "signup", label: string) => (
     <button
       data-testid={`login-tab-${id}`}
       type="button"
       role="tab"
-      className={mode === id ? 'active' : undefined}
+      className={mode === id ? "active" : undefined}
       aria-selected={mode === id}
       onClick={() => switchMode(id)}
     >
@@ -135,14 +135,14 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
         </h1>
         <p className="muted">{title[2]}</p>
 
-        {(mode === 'login' || mode === 'signup') && (
+        {(mode === "login" || mode === "signup") && (
           <div className="auth-tabs" role="tablist">
-            {tab('login', 'Entrar')}
-            {tab('signup', 'Criar conta')}
+            {tab("login", "Entrar")}
+            {tab("signup", "Criar conta")}
           </div>
         )}
 
-        {mode === 'reset' && !auth.session ? (
+        {mode === "reset" && !auth.recoveryAvailable && !auth.session ? (
           <>
             <p className="error" role="alert">
               Link inválido ou expirado. Peça um novo link de redefinição.
@@ -151,60 +151,60 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
               data-testid="login-recovery-request"
               type="button"
               className="button primary wide"
-              onClick={() => switchMode('forgot')}
+              onClick={() => switchMode("forgot")}
             >
               Pedir novo link
             </button>
           </>
         ) : (
           <form onSubmit={handleSubmit(submit)} noValidate>
-            {mode !== 'reset' && (
+            {mode !== "reset" && (
               <>
                 <label className="field" htmlFor="auth-email">
-                  <span>{mode === 'login' ? 'E-mail ou usuário' : 'E-mail'}</span>
+                  <span>{mode === "login" ? "E-mail ou usuário" : "E-mail"}</span>
                   <input
                     data-testid="login-email"
                     id="auth-email"
-                    type={mode === 'login' ? 'text' : 'email'}
+                    type={mode === "login" ? "text" : "email"}
                     inputMode="email"
                     autoCapitalize="none"
                     spellCheck={false}
-                    autoComplete={mode === 'login' ? 'username' : 'email'}
+                    autoComplete={mode === "login" ? "username" : "email"}
                     placeholder="voce@exemplo.com"
                     aria-invalid={!!errors.email}
-                    {...register('email', emailRules)}
+                    {...register("email", emailRules)}
                   />
                 </label>
                 {errors.email && (
                   <small className="field-error">
-                    {mode === 'login'
-                      ? 'Informe um e-mail ou usuário válido.'
-                      : 'Informe um e-mail válido.'}
+                    {mode === "login"
+                      ? "Informe um e-mail ou usuário válido."
+                      : "Informe um e-mail válido."}
                   </small>
                 )}
               </>
             )}
-            {mode !== 'forgot' && (
+            {mode !== "forgot" && (
               <>
                 <div className="field">
                   <label htmlFor="auth-password">
-                    <span>{mode === 'reset' ? 'Nova senha' : 'Senha'}</span>
+                    <span>{mode === "reset" ? "Nova senha" : "Senha"}</span>
                   </label>
                   <div className="password-input-wrap">
                     <input
                       data-testid="login-password"
                       id="auth-password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={mode === "login" ? "current-password" : "new-password"}
                       placeholder="Mínimo de 8 caracteres"
                       aria-invalid={!!errors.password}
-                      {...register('password', { required: true, minLength: 8 })}
+                      {...register("password", { required: true, minLength: 8 })}
                     />
                     <button
                       data-testid="login-password-toggle"
                       type="button"
                       className="password-toggle"
-                      aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
+                      aria-label={showPassword ? "Ocultar" : "Mostrar"}
                       onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? (
@@ -222,7 +222,7 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
                 )}
               </>
             )}
-            {(mode === 'signup' || mode === 'reset') && (
+            {(mode === "signup" || mode === "reset") && (
               <>
                 <label className="field" htmlFor="auth-confirm">
                   <span>Confirmar senha</span>
@@ -232,18 +232,18 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
                     type="password"
                     autoComplete="new-password"
                     aria-invalid={!!errors.confirm}
-                    {...register('confirm', { validate: (v) => v === getValues('password') })}
+                    {...register("confirm", { validate: (v) => v === getValues("password") })}
                   />
                 </label>
                 {errors.confirm && <small className="field-error">As senhas não conferem.</small>}
               </>
             )}
-            {mode === 'login' && (
+            {mode === "login" && (
               <button
                 data-testid="login-forgot"
                 type="button"
                 className="link"
-                onClick={() => switchMode('forgot')}
+                onClick={() => switchMode("forgot")}
               >
                 Esqueci a senha
               </button>
@@ -269,17 +269,17 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
           </form>
         )}
 
-        {mode === 'forgot' && (
+        {mode === "forgot" && (
           <button
             data-testid="login-back"
             type="button"
             className="link center"
-            onClick={() => switchMode('login')}
+            onClick={() => switchMode("login")}
           >
             ← Voltar para o login
           </button>
         )}
-        {auth.githubEnabled && (mode === 'login' || mode === 'signup') && (
+        {auth.githubEnabled && (mode === "login" || mode === "signup") && (
           <>
             <div className="divider">
               <span>ou</span>
@@ -294,7 +294,7 @@ export function LoginPage({ initialMode = 'login' }: { initialMode?: Mode }) {
               {loading ? (
                 <AppLoader layout="inline" size="sm" label="Aguarde…" />
               ) : (
-                'Continuar com GitHub'
+                "Continuar com GitHub"
               )}
             </button>
           </>

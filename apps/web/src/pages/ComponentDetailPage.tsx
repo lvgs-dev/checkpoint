@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router';
-import { ErrorState } from '@checkpoint/ui-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { getComponent, type ComponentEntry } from '@/components/registry';
+import { useMemo, useState } from "react";
+import { Link, useParams } from "react-router";
+import { ErrorState } from "@checkpoint/ui-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { getComponent, type ComponentEntry } from "@/components/registry";
 
-type SurfaceType = 'default' | 'dark' | 'light' | 'grid';
+type SurfaceType = "default" | "dark" | "light" | "grid";
 
 function generateJsxSnippet(entry: ComponentEntry, props: Record<string, unknown>): string {
   const propStrings: string[] = [];
@@ -13,24 +13,24 @@ function generateJsxSnippet(entry: ComponentEntry, props: Record<string, unknown
 
   for (const def of entry.propDefinitions) {
     const val = props[def.name];
-    if (def.name === 'children' && typeof val === 'string') {
+    if (def.name === "children" && typeof val === "string") {
       childrenContent = val;
       continue;
     }
-    if (def.type === 'boolean') {
+    if (def.type === "boolean") {
       if (val === true) {
         propStrings.push(def.name);
       } else if (val === false) {
         propStrings.push(`${def.name}={false}`);
       }
-    } else if (def.type === 'number') {
+    } else if (def.type === "number") {
       propStrings.push(`${def.name}={${val}}`);
-    } else if (typeof val === 'string') {
+    } else if (typeof val === "string") {
       propStrings.push(`${def.name}="${val}"`);
     }
   }
 
-  const propsJoined = propStrings.length > 0 ? ' ' + propStrings.join(' ') : '';
+  const propsJoined = propStrings.length > 0 ? " " + propStrings.join(" ") : "";
   if (childrenContent) {
     return `<${entry.name}${propsJoined}>\n  ${childrenContent}\n</${entry.name}>`;
   }
@@ -41,7 +41,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
   const [activeProps, setActiveProps] = useState<Record<string, unknown>>(() => ({
     ...component.defaultProps,
   }));
-  const [surface, setSurface] = useState<SurfaceType>('default');
+  const [surface, setSurface] = useState<SurfaceType>("default");
 
   const updateProp = (name: string, value: unknown) => {
     setActiveProps((prev) => ({ ...prev, [name]: value }));
@@ -52,10 +52,10 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
   };
 
   const surfaceClasses: Record<SurfaceType, string> = {
-    default: 'bg-card text-card-foreground border-border',
-    dark: 'bg-zinc-950 text-zinc-100 border-zinc-800',
-    light: 'bg-white text-zinc-900 border-zinc-200',
-    grid: 'bg-background text-foreground border-border bg-[radial-gradient(#8884_1px,transparent_1px)] [background-size:16px_16px]',
+    default: "bg-card text-card-foreground border-border",
+    dark: "bg-zinc-950 text-zinc-100 border-zinc-800",
+    light: "bg-white text-zinc-900 border-zinc-200",
+    grid: "bg-background text-foreground border-border bg-[radial-gradient(#8884_1px,transparent_1px)] [background-size:16px_16px]",
   };
 
   const jsxSnippet = generateJsxSnippet(component, activeProps);
@@ -103,44 +103,44 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
             <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-0.5 text-xs">
               <button
                 type="button"
-                onClick={() => setSurface('default')}
+                onClick={() => setSurface("default")}
                 className={`rounded px-2 py-1 font-medium transition-colors ${
-                  surface === 'default'
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  surface === "default"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Padrão
               </button>
               <button
                 type="button"
-                onClick={() => setSurface('dark')}
+                onClick={() => setSurface("dark")}
                 className={`rounded px-2 py-1 font-medium transition-colors ${
-                  surface === 'dark'
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  surface === "dark"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Escuro
               </button>
               <button
                 type="button"
-                onClick={() => setSurface('light')}
+                onClick={() => setSurface("light")}
                 className={`rounded px-2 py-1 font-medium transition-colors ${
-                  surface === 'light'
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  surface === "light"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Claro
               </button>
               <button
                 type="button"
-                onClick={() => setSurface('grid')}
+                onClick={() => setSurface("grid")}
                 className={`rounded px-2 py-1 font-medium transition-colors ${
-                  surface === 'grid'
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  surface === "grid"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Grade
@@ -188,7 +188,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
             {component.propDefinitions.map((propDef) => {
               const currentVal = activeProps[propDef.name];
 
-              if (propDef.type === 'boolean') {
+              if (propDef.type === "boolean") {
                 return (
                   <div key={propDef.name} className="flex items-center justify-between gap-2">
                     <label
@@ -209,7 +209,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
                 );
               }
 
-              if (propDef.type === 'select') {
+              if (propDef.type === "select") {
                 return (
                   <div key={propDef.name} className="flex flex-col gap-1.5">
                     <label
@@ -221,7 +221,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
                     <select
                       id={`prop-${propDef.name}`}
                       data-testid={`prop-control-${propDef.name}`}
-                      value={String(currentVal ?? propDef.default ?? '')}
+                      value={String(currentVal ?? propDef.default ?? "")}
                       onChange={(e) => updateProp(propDef.name, e.target.value)}
                       className="h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
                     >
@@ -235,7 +235,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
                 );
               }
 
-              if (propDef.type === 'number') {
+              if (propDef.type === "number") {
                 return (
                   <div key={propDef.name} className="flex flex-col gap-1.5">
                     <label
@@ -251,7 +251,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
                       min={propDef.min}
                       max={propDef.max}
                       value={
-                        typeof currentVal === 'number' ? currentVal : (propDef.default as number)
+                        typeof currentVal === "number" ? currentVal : (propDef.default as number)
                       }
                       onChange={(e) => updateProp(propDef.name, Number(e.target.value))}
                     />
@@ -271,7 +271,7 @@ function ComponentPlaygroundContent({ component }: { component: ComponentEntry }
                     id={`prop-${propDef.name}`}
                     data-testid={`prop-control-${propDef.name}`}
                     type="text"
-                    value={String(currentVal ?? '')}
+                    value={String(currentVal ?? "")}
                     onChange={(e) => updateProp(propDef.name, e.target.value)}
                   />
                 </div>

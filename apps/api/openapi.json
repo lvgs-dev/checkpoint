@@ -12,7 +12,7 @@
   ],
   "security": [
     {
-      "bearerAuth": []
+      "sessionCookie": []
     }
   ],
   "paths": {
@@ -40,7 +40,7 @@
     },
     "/config": {
       "get": {
-        "summary": "Configuração pública do front (Supabase Auth)",
+        "summary": "Configuração pública do front (autenticação)",
         "description": "Pública (sem token). URL do projeto e publishable key são públicas por design; auth é null quando a autenticação não está configurada.",
         "security": [],
         "responses": {
@@ -1380,15 +1380,358 @@
           }
         }
       }
+    },
+    "/auth/session": {
+      "get": {
+        "summary": "Consultar a sessão autenticada atual.",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "401": {
+            "description": "Sessão inválida ou expirada"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Cadastrar uma nova conta com e-mail e senha.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 1024
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "202": {
+            "description": "Cadastro aceito para verificação por e-mail"
+          },
+          "400": {
+            "description": "E-mail ou senha inválidos"
+          },
+          "429": {
+            "description": "Muitas tentativas de cadastro"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Autenticar usuário com e-mail e senha.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254
+                  },
+                  "password": {
+                    "type": "string",
+                    "maxLength": 1024
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão iniciada"
+          },
+          "400": {
+            "description": "Entrada inválida"
+          },
+          "401": {
+            "description": "Credenciais inválidas"
+          },
+          "429": {
+            "description": "Muitas tentativas de login"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Encerrar a sessão atual ou todas as sessões.",
+        "security": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                  "all": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão encerrada"
+          },
+          "401": {
+            "description": "Sessão inválida ou expirada"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/request-reset": {
+      "post": {
+        "summary": "Solicitar link de recuperação de senha por e-mail.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "202": {
+            "description": "Solicitação aceita"
+          },
+          "400": {
+            "description": "E-mail inválido"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Redefinir a senha usando um token de recuperação.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["token", "password"],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 1024
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha redefinida"
+          },
+          "400": {
+            "description": "Token ou senha inválidos"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/verify-email": {
+      "get": {
+        "summary": "Verificar o e-mail por link e redirecionar para o login.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "E-mail verificado"
+          },
+          "302": {
+            "description": "Redirecionamento para o login"
+          },
+          "400": {
+            "description": "Link inválido ou expirado"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      },
+      "post": {
+        "summary": "Verificar o endereço de e-mail com o token enviado.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["token"],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "maxLength": 2048
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "E-mail verificado"
+          },
+          "400": {
+            "description": "Token inválido ou expirado"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/github": {
+      "get": {
+        "summary": "Iniciar autenticação OAuth com o GitHub.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirecionamento para o GitHub"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/auth/github/callback": {
+      "get": {
+        "summary": "Concluir autenticação OAuth do GitHub e criar sessão.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirecionamento após autenticação"
+          },
+          "400": {
+            "description": "Estado OAuth inválido ou expirado"
+          },
+          "401": {
+            "description": "Falha na autenticação com o GitHub"
+          },
+          "default": {
+            "": "#/components/responses/Problem"
+          }
+        }
+      }
     }
   },
   "components": {
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "description": "access_token da sessão do Supabase Auth. Sem token válido as rotas protegidas respondem 401 (503 se a verificação de chaves estiver indisponível)."
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "checkpoint_session",
+        "description": "Session cookie set by the login endpoint. HttpOnly, Secure, SameSite=Lax. Without a valid session the protected routes answer 401."
       }
     },
     "schemas": {
@@ -1425,17 +1768,11 @@
         "properties": {
           "auth": {
             "type": ["object", "null"],
-            "required": ["supabaseUrl", "supabasePublishableKey", "providers"],
+            "required": ["providers"],
             "properties": {
-              "supabaseUrl": {
-                "type": "string",
-                "format": "uri"
-              },
-              "supabasePublishableKey": {
-                "type": "string"
-              },
               "providers": {
                 "type": "object",
+                "required": ["github"],
                 "properties": {
                   "github": {
                     "type": "boolean"

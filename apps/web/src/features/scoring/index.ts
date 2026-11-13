@@ -3,4 +3,4 @@ export {
   useSaveScoringSettings,
   useResetScoringSettings,
   useSyncScoringVersion,
-} from './scoring-settings';
+} from "./scoring-settings";

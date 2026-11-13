@@ -1,37 +1,37 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { emptyGame } from '../../src/integrations/steam/mapping.ts';
-import { GameService } from '../../src/services/games.ts';
-import { createData } from '../../src/main/data.ts';
-import { GameStatus } from '../../../../packages/core/src/models.ts';
-import { runWithContext } from '../../src/shared/context.ts';
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { emptyGame } from "../../src/integrations/steam/mapping.ts";
+import { GameService } from "../../src/services/games.ts";
+import { createData } from "../../src/main/data.ts";
+import { GameStatus } from "../../../../packages/core/src/models.ts";
+import { runWithContext } from "../../src/shared/context.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('Scoring Cache (checkpoint-0j1)', () => {
+describe("Scoring Cache (checkpoint-0j1)", () => {
   async function setupService() {
     const data = await createData({
-      dataDir: '/tmp',
+      dataDir: "/tmp",
       env: {
-        DATA_FILE: '',
-        LISTS_FILE: '',
-        MANUAL_FILE: '',
-        SETTINGS_FILE: '',
-        WISHLIST_FILE: '',
+        DATA_FILE: "",
+        LISTS_FILE: "",
+        MANUAL_FILE: "",
+        SETTINGS_FILE: "",
+        WISHLIST_FILE: "",
       },
     });
-    const game = { ...emptyGame('Cache Game 1'), id: 'cache-game-1', rating: 3 };
+    const game = { ...emptyGame("Cache Game 1"), id: "cache-game-1", rating: 3 };
     await data.games.save(game);
     const service = new GameService(data.games, data.manual, data.queue, data.scoring, data.lists);
     return { data, service, game };
   }
 
-  it('returns cached scored games on repeated all() calls without reading repository again', async () => {
+  it("returns cached scored games on repeated all() calls without reading repository again", async () => {
     const { service } = await setupService();
 
-    await runWithContext({ userId: 'user-cache-1' }, async () => {
-      const listSpy = vi.spyOn(service.repository, 'list');
+    await runWithContext({ userId: "user-cache-1" }, async () => {
+      const listSpy = vi.spyOn(service.repository, "list");
 
       const first = await service.all();
       expect(first).toBeDefined();
@@ -44,11 +44,11 @@ describe('Scoring Cache (checkpoint-0j1)', () => {
     });
   });
 
-  it('recalculates when scoring settings version bumps', async () => {
+  it("recalculates when scoring settings version bumps", async () => {
     const { service } = await setupService();
 
-    await runWithContext({ userId: 'user-cache-2' }, async () => {
-      const listSpy = vi.spyOn(service.repository, 'list');
+    await runWithContext({ userId: "user-cache-2" }, async () => {
+      const listSpy = vi.spyOn(service.repository, "list");
 
       const first = await service.all();
       expect(listSpy).toHaveBeenCalledTimes(1);
@@ -71,11 +71,11 @@ describe('Scoring Cache (checkpoint-0j1)', () => {
     });
   });
 
-  it('evicts cache and recalculates when a game is updated via patch()', async () => {
+  it("evicts cache and recalculates when a game is updated via patch()", async () => {
     const { service, game } = await setupService();
 
-    await runWithContext({ userId: 'user-cache-3' }, async () => {
-      const listSpy = vi.spyOn(service.repository, 'list');
+    await runWithContext({ userId: "user-cache-3" }, async () => {
+      const listSpy = vi.spyOn(service.repository, "list");
 
       const first = await service.all();
       expect(listSpy).toHaveBeenCalledTimes(1);
@@ -97,13 +97,13 @@ describe('Scoring Cache (checkpoint-0j1)', () => {
     });
   });
 
-  it('evicts cache when a game is purchased', async () => {
+  it("evicts cache when a game is purchased", async () => {
     const { service, data } = await setupService();
-    const wish = { ...emptyGame('Wish to Buy'), id: 'wish-to-buy', status: GameStatus.Wishlist };
+    const wish = { ...emptyGame("Wish to Buy"), id: "wish-to-buy", status: GameStatus.Wishlist };
     await data.games.save(wish);
 
-    await runWithContext({ userId: 'user-cache-4' }, async () => {
-      const listSpy = vi.spyOn(service.repository, 'list');
+    await runWithContext({ userId: "user-cache-4" }, async () => {
+      const listSpy = vi.spyOn(service.repository, "list");
 
       const first = await service.all();
       expect(first.find((g) => g.id === wish.id)?.status).toBe(GameStatus.Wishlist);
@@ -117,7 +117,7 @@ describe('Scoring Cache (checkpoint-0j1)', () => {
     });
   });
 
-  it('caps cache size at MAX_CACHE_ENTRIES', async () => {
+  it("caps cache size at MAX_CACHE_ENTRIES", async () => {
     const { service } = await setupService();
 
     // Populate 55 different user keys

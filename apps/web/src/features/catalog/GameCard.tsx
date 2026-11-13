@@ -1,12 +1,12 @@
-import { CircleDollarSign } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
-import { Link } from 'react-router';
-import type { Desire, ScoredGame } from '../../../../../packages/core/src/models';
-import { cn } from '@/lib/utils';
-import { FinishIcon } from '../finish-dialog';
-import { ImmediateButton } from '../immediate';
-import { badgeColor } from '../metadata';
-import { PlayingButton } from '../playing';
+import { CircleDollarSign } from "lucide-react";
+import { memo, useCallback, useState } from "react";
+import { Link } from "react-router";
+import type { Desire, ScoredGame } from "../../../../../packages/core/src/models";
+import { cn } from "@/lib/utils";
+import { FinishIcon } from "../finish-dialog";
+import { ImmediateButton } from "../immediate";
+import { badgeColor } from "../metadata";
+import { PlayingButton } from "../playing";
 
 export interface GameCardProps {
   game: ScoredGame;
@@ -27,7 +27,7 @@ export const GameCard = memo(function GameCard({
 }: GameCardProps) {
   const [coverBroken, setCoverBroken] = useState(false);
   const g = game;
-  const isPurchased = g.status !== 'Desejado';
+  const isPurchased = g.status !== "Desejado";
 
   const handleDesireChanged = useCallback(
     (d: Desire) => {
@@ -49,22 +49,22 @@ export const GameCard = memo(function GameCard({
           ) : (
             <span className="cover-fallback">{g.name.slice(0, 1)}</span>
           )}
-          <span className={'badge cover-status ' + badgeColor(g.status)}>{g.status}</span>
+          <span className={"badge cover-status " + badgeColor(g.status)}>{g.status}</span>
         </div>
         <div className="card-body">
-          <div className="card-store">{g.store || g.platform || 'Minha biblioteca'}</div>
+          <div className="card-store">{g.store || g.platform || "Minha biblioteca"}</div>
           <h2>{g.name}</h2>
           <div className="tags">
-            <span className={'badge ' + badgeColor(g.primaryGenre)}>{g.primaryGenre}</span>
+            <span className={"badge " + badgeColor(g.primaryGenre)}>{g.primaryGenre}</span>
             {g.secondaryTags.slice(0, 2).map((t) => (
-              <span key={t} className={'badge ' + badgeColor(t)}>
+              <span key={t} className={"badge " + badgeColor(t)}>
                 {t}
               </span>
             ))}
           </div>
           <div className="card-bottom">
             {g.plannedHours ? <span>{g.plannedHours} h estimadas</span> : null}
-            <span className={'badge ' + badgeColor(g.desire)}>{g.desire}</span>
+            <span className={"badge " + badgeColor(g.desire)}>{g.desire}</span>
           </div>
         </div>
       </Link>
@@ -98,18 +98,18 @@ export const GameCard = memo(function GameCard({
           }
           type="button"
           className={cn(
-            'icon-button',
+            "icon-button",
             isPurchased
-              ? 'text-emerald-400 hover:text-emerald-300'
-              : 'text-muted-foreground hover:text-foreground',
+              ? "text-emerald-400 hover:text-emerald-300"
+              : "text-muted-foreground hover:text-foreground",
           )}
           aria-label={
             isPurchased ? `Marcar ${g.name} como não comprado` : `Marcar ${g.name} como comprado`
           }
           title={
             isPurchased
-              ? 'Marcar como não comprado (devolver à lista de desejos)'
-              : 'Marcar como comprado'
+              ? "Marcar como não comprado (devolver à lista de desejos)"
+              : "Marcar como comprado"
           }
           onClick={(e) => {
             e.preventDefault();

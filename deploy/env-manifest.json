@@ -1,0 +1,64 @@
+{
+  "platform": [
+    "DEPLOY_HOMOLOG",
+    "PUBLIC_HOSTNAME",
+    "APP_HOST_PORT",
+    "COMPOSE_PROJECT_NAME",
+    "APP_ALIAS"
+  ],
+  "entries": [
+    {
+      "name": "DB_PASSWORD",
+      "kind": "secret",
+      "file": "db_password",
+      "required": true
+    },
+    {
+      "name": "SMTP_PASSWORD",
+      "kind": "secret",
+      "file": "smtp_password",
+      "required": true
+    },
+    {
+      "name": "AUTH_GITHUB_CLIENT_SECRET",
+      "kind": "secret",
+      "file": "github_client_secret",
+      "required": false
+    },
+    {
+      "name": "SMTP_HOST",
+      "kind": "variable",
+      "required": true
+    },
+    {
+      "name": "SMTP_PORT",
+      "kind": "variable",
+      "default": "465"
+    },
+    {
+      "name": "SMTP_USER",
+      "kind": "variable",
+      "allow_empty": true
+    },
+    {
+      "name": "SMTP_FROM",
+      "kind": "variable",
+      "required": true
+    },
+    {
+      "name": "AUTH_GITHUB_ENABLED",
+      "kind": "variable",
+      "default": "false"
+    },
+    {
+      "name": "AUTH_GITHUB_CLIENT_ID",
+      "kind": "variable",
+      "allow_empty": true
+    },
+    {
+      "name": "PG_POOL_MAX",
+      "kind": "variable",
+      "default": "5"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
+import { AsyncLocalStorage } from "node:async_hooks";
 
 /** Client stamp (epoch ms, header X-Client-Sent-At) to server arrival. Includes clock skew. */
 export function clientLatencyMs(arrivalEpochMs: number, header: string | undefined): number | null {
@@ -85,10 +85,10 @@ export function timed<T extends object>(sql: T): T {
       return query;
     },
     get(target, prop) {
-      if (prop === 'begin')
+      if (prop === "begin")
         return (...args: unknown[]) => {
           const cb = args.at(-1);
-          if (typeof cb === 'function') args[args.length - 1] = (tx: object) => cb(timed(tx));
+          if (typeof cb === "function") args[args.length - 1] = (tx: object) => cb(timed(tx));
           return (target as never as Record<string, (...a: unknown[]) => unknown>).begin(...args);
         };
       return Reflect.get(target, prop, target);
@@ -103,7 +103,7 @@ export const detailEnabled = (
   env: string | undefined,
   header: string | undefined,
   authed: boolean,
-) => authed && (env === '1' || header === '1');
+) => authed && (env === "1" || header === "1");
 
 /** Server-Timing value. Always `total` and `db` (`desc` is the query count); stages only with detail. */
 export function serverTimingHeader(trace: Trace, nowNs: bigint, detail: boolean): string {
@@ -115,7 +115,7 @@ export function serverTimingHeader(trace: Trace, nowNs: bigint, detail: boolean)
     if (trace.recvMs !== null) parts.push(`recv;dur=${trace.recvMs.toFixed(3)}`);
     for (const [name, ns] of Object.entries(trace.stages)) parts.push(`${name};dur=${ms(ns)}`);
   }
-  return parts.join(', ');
+  return parts.join(", ");
 }
 
 /** Whole stage table in ms for the request log line. */

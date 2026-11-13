@@ -1,25 +1,25 @@
-import type { ScoredGame } from '../../../../../packages/core/src/models';
-import { cn } from '@/lib/utils';
-import { useGameWriter } from './gameWriter';
+import type { ScoredGame } from "../../../../../packages/core/src/models";
+import { cn } from "@/lib/utils";
+import { useGameWriter } from "./gameWriter";
 
 /** Toggle the persisted playing status without changing the game's priority. */
 export function PlayingButton({
   game,
-  'data-testid': testId,
+  "data-testid": testId,
 }: {
   game: ScoredGame;
-  'data-testid': string;
+  "data-testid": string;
 }) {
   const writer = useGameWriter();
-  const on = game.status === 'Jogando';
+  const on = game.status === "Jogando";
   return (
     <button
       data-testid={testId}
       type="button"
-      className={cn('icon-button min-h-11 min-w-11', on && 'bg-accent text-accent-foreground')}
+      className={cn("icon-button min-h-11 min-w-11", on && "bg-accent text-accent-foreground")}
       aria-pressed={on}
-      aria-label={on ? 'Pausar ' + game.name : 'Começar a jogar ' + game.name}
-      title={on ? 'Pausar e devolver à fila' : 'Começar a jogar: registrar início hoje'}
+      aria-label={on ? "Pausar " + game.name : "Começar a jogar " + game.name}
+      title={on ? "Pausar e devolver à fila" : "Começar a jogar: registrar início hoje"}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();

@@ -3,12 +3,14 @@ name: code-review
 description: Self-review checklist for the code review role. Use it before you report a task done.
 type: reference
 area: jobs
+role: review
 ---
 
 # Code review checklist
 
-Apply this checklist to the changed scope. Mark unrelated items as not applicable.
-Fix issues in scope. Record other gaps in `bd`.
+Start with [AGENTS.md](../../AGENTS.md). Read this checklist only when its role applies to the task.
+
+Answer every item with yes, no or not applicable. Fix each no before you report done.
 
 ## Before
 
@@ -30,12 +32,11 @@ Fix issues in scope. Record other gaps in `bd`.
 - [ ] Does the change reuse existing code and not copy it?
 - [ ] Does each name say what the thing is or does?
 - [ ] Does each module keep a small interface and hide its details?
-- [ ] Does `packages/ui-react` stay free of imports from `apps/*`?
-- [ ] Does a change in `packages/core` keep both apps green?
+- [ ] Does the change respect each rule in the `Map` table of `AGENTS.md`?
 
 ## Risk
 
-- [ ] Does the change keep authorization checks and RLS intact?
+- [ ] Does the change keep the authorization checks intact?
 - [ ] Does the code hold no secret, no debug code and no commented-out code?
 - [ ] Can the change cause a slow query or a large bundle?
 - [ ] Does each new dependency have a reason?
@@ -45,10 +46,5 @@ Fix issues in scope. Record other gaps in `bd`.
 
 - [ ] Did you write each finding with the file, the line, the problem and a fix?
 - [ ] Did you rank the findings: must fix, should fix, optional?
-- [ ] Did `pnpm check` pass, and do you report the command and the result?
-- [ ] Did you run `ponytail-review` and `code-review` for code changes?
-
-## Related
-
-- [[AI/jobs/index]]: Role checklists for task review.
-- [[AI/index]]: Entry point: pick the area you change and follow one link.
+- [ ] Did the review use a fresh context, without the author's reasoning?
+- [ ] Did you base each finding on a test result, a tool output or a quoted line?

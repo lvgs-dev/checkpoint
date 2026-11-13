@@ -1,21 +1,21 @@
-import { useState, type ChangeEvent } from 'react';
-import { Link } from 'react-router';
-import { useAuth } from '../../auth/AuthProvider';
-import { useAppearance } from '../../appearance/AppearanceProvider';
+import { useState, type ChangeEvent } from "react";
+import { Link } from "react-router";
+import { useAuth } from "../../auth/AuthProvider";
+import { useAppearance } from "../../appearance/AppearanceProvider";
 import {
   ACCENTS,
   LOGOS,
   readLogoFile,
   type LogoChoice,
   type ThemeChoice,
-} from '../../appearance/appearance';
-import { Logo } from '../../app/Logo';
-import './appearance.css';
+} from "../../appearance/appearance";
+import { Logo } from "../../app/Logo";
+import "./appearance.css";
 
 const THEMES: { id: ThemeChoice; label: string; hint: string }[] = [
-  { id: 'system', label: 'Sistema', hint: 'Segue o celular' },
-  { id: 'light', label: 'Claro', hint: 'Sempre claro' },
-  { id: 'dark', label: 'Escuro', hint: 'Sempre escuro' },
+  { id: "system", label: "Sistema", hint: "Segue o celular" },
+  { id: "light", label: "Claro", hint: "Sempre claro" },
+  { id: "dark", label: "Escuro", hint: "Sempre escuro" },
 ];
 
 /** One radio card; the native radio stays in the DOM (visually hidden) for keyboard and screen readers. */
@@ -24,7 +24,7 @@ function Choice({
   value,
   selected,
   onSelect,
-  className = '',
+  className = "",
   children,
 }: {
   name: string;
@@ -35,7 +35,7 @@ function Choice({
   children: React.ReactNode;
 }) {
   return (
-    <label className={`choice ${className} ${selected ? 'selected' : ''}`}>
+    <label className={`choice ${className} ${selected ? "selected" : ""}`}>
       <input
         data-testid={`settings-${name}-${value}`}
         type="radio"
@@ -53,20 +53,20 @@ function Choice({
 export function AppearanceScreen() {
   const { value, resolved, update, reset } = useAppearance();
   const { user, signOut } = useAuth();
-  const [logoError, setLogoError] = useState('');
+  const [logoError, setLogoError] = useState("");
 
   const setLogo = (logo: LogoChoice) => {
-    setLogoError('');
+    setLogoError("");
     update({ logo });
   };
   const upload = async (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
     const file = input.files?.[0];
-    input.value = '';
+    input.value = "";
     if (!file) return;
-    setLogoError('');
+    setLogoError("");
     try {
-      update({ customLogo: await readLogoFile(file), logo: 'custom' });
+      update({ customLogo: await readLogoFile(file), logo: "custom" });
     } catch (err) {
       setLogoError((err as Error).message);
     }
@@ -127,7 +127,7 @@ export function AppearanceScreen() {
                 <span
                   className="dot"
                   aria-hidden="true"
-                  style={{ background: resolved === 'dark' ? a.dark : a.light }}
+                  style={{ background: resolved === "dark" ? a.dark : a.light }}
                 />
                 <span className="choice-label">{a.label}</span>
               </Choice>
@@ -169,8 +169,8 @@ export function AppearanceScreen() {
                 name="logo"
                 value="custom"
                 className="logo-choice"
-                selected={value.logo === 'custom'}
-                onSelect={() => setLogo('custom')}
+                selected={value.logo === "custom"}
+                onSelect={() => setLogo("custom")}
               >
                 <span className="logo-slot">
                   <Logo variant="custom" />
@@ -195,7 +195,7 @@ export function AppearanceScreen() {
                 data-testid="settings-logo-remove"
                 type="button"
                 className="button"
-                onClick={() => update({ customLogo: null, logo: 'bonfire' })}
+                onClick={() => update({ customLogo: null, logo: "bonfire" })}
               >
                 Remover imagem
               </button>
@@ -212,7 +212,7 @@ export function AppearanceScreen() {
 
       <section className="panel account">
         <h2>Conta</h2>
-        <p className="muted">{user ? user.email : 'Modo local, sem login.'}</p>
+        <p className="muted">{user ? user.email : "Modo local, sem login."}</p>
         <div className="row">
           {user && (
             <button

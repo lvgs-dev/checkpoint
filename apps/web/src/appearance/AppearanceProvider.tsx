@@ -6,8 +6,8 @@ import {
   useMemo,
   useState,
   type ReactNode,
-} from 'react';
-import { useAuth } from '../auth/AuthProvider';
+} from "react";
+import { useAuth } from "../auth/AuthProvider";
 import {
   BAR,
   DEFAULTS,
@@ -17,19 +17,19 @@ import {
   sanitize,
   write,
   type Appearance,
-} from './appearance';
+} from "./appearance";
 
 interface AppearanceValue {
   value: Appearance;
   /** Effective theme ("system" resolved). */
-  resolved: 'light' | 'dark';
+  resolved: "light" | "dark";
   update(patch: Partial<Appearance>): void;
   reset(): void;
 }
 
 const AppearanceContext = createContext<AppearanceValue | null>(null);
 const darkQuery = () =>
-  typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
+  typeof matchMedia === "function" ? matchMedia("(prefers-color-scheme: dark)") : null;
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
   const { userId } = useAuth();
@@ -41,8 +41,8 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const query = darkQuery();
     const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
-    query?.addEventListener('change', onChange);
-    return () => query?.removeEventListener('change', onChange);
+    query?.addEventListener("change", onChange);
+    return () => query?.removeEventListener("change", onChange);
   }, []);
 
   // User switch: load that user's appearance (or keep the current one as the starting point).
@@ -55,12 +55,12 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     setCarried(!mine);
   }
 
-  const resolved = value.theme === 'system' ? (systemDark ? 'dark' : 'light') : value.theme;
+  const resolved = value.theme === "system" ? (systemDark ? "dark" : "light") : value.theme;
   useEffect(() => {
     const html = document.documentElement;
-    html.dataset['theme'] = resolved;
-    html.dataset['accent'] = value.accent;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', BAR[resolved]);
+    html.dataset["theme"] = resolved;
+    html.dataset["accent"] = value.accent;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", BAR[resolved]);
     write(LAST_KEY, value);
     if (owner && !carried) write(PREFIX + owner, value);
   }, [value, resolved, owner, carried]);
@@ -79,6 +79,6 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 
 export function useAppearance(): AppearanceValue {
   const ctx = useContext(AppearanceContext);
-  if (!ctx) throw new Error('useAppearance must be used inside AppearanceProvider');
+  if (!ctx) throw new Error("useAppearance must be used inside AppearanceProvider");
   return ctx;
 }

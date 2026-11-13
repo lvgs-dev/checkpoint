@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
-import { Check, ChevronDown, RotateCw } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { AppLoader } from '@/features/loader/AppLoader';
+import * as React from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronDown, RotateCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { AppLoader } from "@/features/loader/AppLoader";
 
 export interface ComboboxOption {
   value: string;
@@ -29,7 +29,7 @@ export interface ComboboxProps {
   isError?: boolean;
   onRetry?: () => void;
   className?: string;
-  'data-testid'?: string;
+  "data-testid"?: string;
   renderOption?: (option: ComboboxOption, selected: boolean) => React.ReactNode;
   renderValue?: (selectedOptions: ComboboxOption[]) => React.ReactNode;
 }
@@ -44,16 +44,16 @@ export function Combobox({
   values,
   max = 0,
   onValuesChange,
-  placeholder = 'Selecionar…',
+  placeholder = "Selecionar…",
   searchable = false,
   searchPlaceholder,
-  emptyText = 'Nenhuma opção encontrada',
+  emptyText = "Nenhuma opção encontrada",
   disabled = false,
   isLoading = false,
   isError = false,
   onRetry,
   className,
-  'data-testid': testId,
+  "data-testid": testId,
   renderOption,
   renderValue,
 }: ComboboxProps) {
@@ -63,10 +63,10 @@ export function Combobox({
   const optionsListRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const normalizedOptions: ComboboxOption[] = React.useMemo(
-    () => options.map((opt) => (typeof opt === 'string' ? { value: opt, label: opt } : opt)),
+    () => options.map((opt) => (typeof opt === "string" ? { value: opt, label: opt } : opt)),
     [options],
   );
 
@@ -97,9 +97,9 @@ export function Combobox({
 
   const close = (restoreFocus = true) => {
     setOpen(false);
-    setSearchQuery('');
+    setSearchQuery("");
     if (restoreFocus) {
-      rootRef.current?.querySelector<HTMLButtonElement>('.combobox-trigger')?.focus();
+      rootRef.current?.querySelector<HTMLButtonElement>(".combobox-trigger")?.focus();
     }
   };
 
@@ -130,8 +130,8 @@ export function Combobox({
         close(false);
       }
     };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
   }, [open]);
 
   useEffect(() => {
@@ -139,8 +139,8 @@ export function Combobox({
     const list = optionsListRef.current;
     if (!list) return;
     const item = list.children[highlightedIndex] as HTMLElement | undefined;
-    if (item && typeof item.scrollIntoView === 'function') {
-      item.scrollIntoView({ block: 'nearest' });
+    if (item && typeof item.scrollIntoView === "function") {
+      item.scrollIntoView({ block: "nearest" });
     }
   }, [highlightedIndex, open]);
 
@@ -148,10 +148,10 @@ export function Combobox({
     if (disabled) return;
     if (!open) {
       if (
-        event.key === 'ArrowDown' ||
-        event.key === 'ArrowUp' ||
-        event.key === 'Enter' ||
-        event.key === ' '
+        event.key === "ArrowDown" ||
+        event.key === "ArrowUp" ||
+        event.key === "Enter" ||
+        event.key === " "
       ) {
         event.preventDefault();
         openList();
@@ -159,29 +159,29 @@ export function Combobox({
       return;
     }
 
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       event.preventDefault();
       close(true);
       return;
     }
-    if (event.key === 'Tab') {
+    if (event.key === "Tab") {
       close(false);
       return;
     }
     if (filteredOptions.length === 0) return;
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       event.preventDefault();
       setHighlightedIndex((prev) => (prev + 1) % filteredOptions.length);
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setHighlightedIndex((prev) => (prev - 1 + filteredOptions.length) % filteredOptions.length);
-    } else if (event.key === 'Home') {
+    } else if (event.key === "Home") {
       event.preventDefault();
       setHighlightedIndex(0);
-    } else if (event.key === 'End') {
+    } else if (event.key === "End") {
       event.preventDefault();
       setHighlightedIndex(filteredOptions.length - 1);
-    } else if (event.key === 'Enter' || event.key === ' ') {
+    } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       const option = filteredOptions[highlightedIndex];
       if (option) choose(option);
@@ -193,7 +193,7 @@ export function Combobox({
     open && highlightedOption ? `${id}-opt-${highlightedIndex}` : undefined;
 
   return (
-    <div ref={rootRef} className={cn('relative block min-w-0', open && 'z-30', className)}>
+    <div ref={rootRef} className={cn("relative block min-w-0", open && "z-30", className)}>
       {label && (
         <span
           className="mb-1 block text-[11px] font-semibold text-foreground max-sm:text-[13px]"
@@ -216,7 +216,7 @@ export function Combobox({
         onClick={() => !disabled && (open ? close() : openList())}
         onKeyDown={handleKeyDown}
         className={cn(
-          'combobox-trigger flex min-h-[46px] w-full items-center justify-between gap-2 rounded-[7px] border border-border bg-card px-3 pr-3.5 py-2 text-left text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50',
+          "combobox-trigger flex min-h-[46px] w-full items-center justify-between gap-2 rounded-[7px] border border-border bg-card px-3 pr-3.5 py-2 text-left text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
         )}
       >
         <span id={`${id}-value`} className="truncate">
@@ -226,7 +226,7 @@ export function Combobox({
             renderValue(selectedOptions)
           ) : multiple ? (
             selectedOptions.length ? (
-              selectedOptions.map((o) => o.label).join(', ')
+              selectedOptions.map((o) => o.label).join(", ")
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )
@@ -238,8 +238,8 @@ export function Combobox({
         </span>
         <ChevronDown
           className={cn(
-            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
-            open && 'rotate-180',
+            "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180",
           )}
           aria-hidden="true"
         />
@@ -261,7 +261,7 @@ export function Combobox({
                 role="searchbox"
                 data-testid={testId ? `${testId}-search` : undefined}
                 className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring"
-                placeholder={searchPlaceholder ?? 'Buscar…'}
+                placeholder={searchPlaceholder ?? "Buscar…"}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
@@ -325,10 +325,10 @@ export function Combobox({
                     onMouseEnter={() => setHighlightedIndex(index)}
                     onClick={() => choose(opt)}
                     className={cn(
-                      'flex min-h-10 w-full items-center justify-between gap-2 rounded-md bg-transparent p-2 text-left text-xs text-foreground transition-colors',
-                      isHighlighted && 'bg-secondary',
-                      optSelected && 'font-medium',
-                      optDisabled && 'cursor-not-allowed opacity-45',
+                      "flex min-h-10 w-full items-center justify-between gap-2 rounded-md bg-transparent p-2 text-left text-xs text-foreground transition-colors",
+                      isHighlighted && "bg-secondary",
+                      optSelected && "font-medium",
+                      optDisabled && "cursor-not-allowed opacity-45",
                     )}
                   >
                     {renderOption ? renderOption(opt, optSelected) : <span>{opt.label}</span>}

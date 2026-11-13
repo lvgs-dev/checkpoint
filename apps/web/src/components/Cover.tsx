@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export interface CoverProps {
   name?: string;
@@ -21,23 +21,23 @@ export function Cover({
   genre: propGenre,
   className,
   lazy = true,
-  alt = '',
+  alt = "",
   fallbackText,
   badge,
 }: CoverProps) {
-  const name = propName ?? game?.name ?? '';
+  const name = propName ?? game?.name ?? "";
   const coverUrl = propCoverUrl !== undefined ? propCoverUrl : game?.coverUrl;
   const genre = propGenre ?? game?.primaryGenre;
   const [broken, setBroken] = useState(false);
-  const initial = fallbackText ?? (name ? name.trim().slice(0, 1).toUpperCase() : '?');
+  const initial = fallbackText ?? (name ? name.trim().slice(0, 1).toUpperCase() : "?");
 
   return (
-    <div className={cn('cover', className)} data-genre={genre} data-testid="game-cover">
+    <div className={cn("cover", className)} data-genre={genre} data-testid="game-cover">
       {coverUrl && !broken ? (
         <img
           src={coverUrl}
           alt={alt}
-          loading={lazy ? 'lazy' : undefined}
+          loading={lazy ? "lazy" : undefined}
           draggable={false}
           onError={() => setBroken(true)}
         />

@@ -1,6 +1,6 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from "react";
 
-export type LoaderSize = number | 'sm' | 'md' | 'lg';
+export type LoaderSize = number | "sm" | "md" | "lg";
 export type LoaderArtComponent = ComponentType<{ size: number }>;
 
 export interface LoaderProps {
@@ -14,10 +14,10 @@ export interface LoaderProps {
   variant?: string;
   size?: LoaderSize;
   /** `stacked` puts the art above the label (default); `inline` puts them side by side. */
-  layout?: 'stacked' | 'inline';
+  layout?: "stacked" | "inline";
   /** `inline` hugs the content, `block` fills the width, `screen` centers in the viewport. */
-  fill?: 'inline' | 'block' | 'screen';
-  'data-testid'?: string;
+  fill?: "inline" | "block" | "screen";
+  "data-testid"?: string;
 }
 
 const SIZES = { sm: 20, md: 40, lg: 64 } as const;
@@ -47,7 +47,7 @@ function pickArt(props: LoaderProps, px: number): ReactNode {
   if (props.art) return props.art;
   if (props.src) return <img src={props.src} alt="" />;
   const named = props.variant ? registry.get(props.variant) : undefined;
-  if (typeof named === 'function') {
+  if (typeof named === "function") {
     const Art = named as LoaderArtComponent;
     return <Art size={px} />;
   }
@@ -56,8 +56,8 @@ function pickArt(props: LoaderProps, px: number): ReactNode {
 
 /** Product-agnostic loading indicator: art plus an optional phrase, announced as a status. */
 export function Loader(props: LoaderProps) {
-  const { label, size = 'md', layout = 'stacked', fill = 'inline' } = props;
-  const px = typeof size === 'number' ? size : SIZES[size];
+  const { label, size = "md", layout = "stacked", fill = "inline" } = props;
+  const px = typeof size === "number" ? size : SIZES[size];
   return (
     <div
       className={`ckl ckl--${layout} ckl--${fill}`}
@@ -65,7 +65,7 @@ export function Loader(props: LoaderProps) {
       aria-live="polite"
       aria-busy="true"
       aria-label={label || undefined}
-      data-testid={props['data-testid']}
+      data-testid={props["data-testid"]}
     >
       <style href="ckl-loader" precedence="default">
         {CSS}

@@ -8,9 +8,9 @@ import type {
   LogSink,
   MetricsRecorder,
   Tracer,
-} from '../../../../packages/core/src/observability.ts';
-import { getContext } from '../shared/context.ts';
-import { createSinkFromEnv } from './sinks.ts';
+} from "../../../../packages/core/src/observability.ts";
+import { getContext } from "../shared/context.ts";
+import { createSinkFromEnv } from "./sinks.ts";
 
 const SENSITIVE_KEY =
   /token|authorization|password|passwd|secret|api[-_]?key|cookie|credential|jwt|session|bearer|refresh/i;
@@ -19,21 +19,21 @@ const SENSITIVE_VALUE =
 const LEVELS: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 };
 
 const scrub = (text: string) => {
-  const clean = text.replace(SENSITIVE_VALUE, '$1[redacted]');
-  return clean.length > 2000 ? clean.slice(0, 2000) + '…' : clean;
+  const clean = text.replace(SENSITIVE_VALUE, "$1[redacted]");
+  return clean.length > 2000 ? clean.slice(0, 2000) + "…" : clean;
 };
 
 /** Copies a value for logging: sensitive keys and token-like strings are masked, depth is bounded. */
 export function redact(value: unknown, depth = 0): unknown {
-  if (typeof value === 'string') return scrub(value);
-  if (value === null || typeof value !== 'object') return value;
+  if (typeof value === "string") return scrub(value);
+  if (value === null || typeof value !== "object") return value;
   if (value instanceof Date) return value.toISOString();
-  if (depth >= 5) return '[truncated]';
+  if (depth >= 5) return "[truncated]";
   if (value instanceof Error) {
     const extra: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value)) {
-      if (k !== 'name' && k !== 'message' && k !== 'stack' && k !== 'cause') {
-        extra[k] = SENSITIVE_KEY.test(k) ? '[redacted]' : redact(v, depth + 1);
+      if (k !== "name" && k !== "message" && k !== "stack" && k !== "cause") {
+        extra[k] = SENSITIVE_KEY.test(k) ? "[redacted]" : redact(v, depth + 1);
       }
     }
     return {
@@ -50,7 +50,7 @@ export function redact(value: unknown, depth = 0): unknown {
   return Object.fromEntries(
     Object.entries(value).map(([k, v]) => [
       k,
-      SENSITIVE_KEY.test(k) ? '[redacted]' : redact(v, depth + 1),
+      SENSITIVE_KEY.test(k) ? "[redacted]" : redact(v, depth + 1),
     ]),
   );
 }
@@ -64,7 +64,7 @@ export const setSink = (newSink: LogSink): void => {
 export const getSink = (): LogSink => activeSink;
 
 const configured = process.env.LOG_LEVEL as LogLevel | undefined;
-const threshold = LEVELS[configured && configured in LEVELS ? configured : 'info'];
+const threshold = LEVELS[configured && configured in LEVELS ? configured : "info"];
 
 export const flushLogs = async () => {
   try {
@@ -83,8 +83,8 @@ function emit(level: LogLevel, event: string, fields: Attributes = {}): void {
       time: new Date().toISOString(),
       level,
       event,
-      requestId: ctx?.requestId ?? (typeof requestId === 'string' ? requestId : undefined),
-      userId: ctx?.userId ?? (typeof userId === 'string' ? userId : undefined),
+      requestId: ctx?.requestId ?? (typeof requestId === "string" ? requestId : undefined),
+      userId: ctx?.userId ?? (typeof userId === "string" ? userId : undefined),
       fields: redact(rest) as Attributes,
     });
   } catch {
@@ -107,10 +107,10 @@ function makeLog(bound: Attributes): Log {
     emit(level, event, { ...bound, ...fields });
   return {
     log: (level, event, fields) => emit(level, event, { ...bound, ...fields }),
-    debug: at('debug'),
-    info: at('info'),
-    warn: at('warn'),
-    error: at('error'),
+    debug: at("debug"),
+    info: at("info"),
+    warn: at("warn"),
+    error: at("error"),
     child: (more) => makeLog({ ...bound, ...more }),
   };
 }
@@ -122,13 +122,13 @@ export const logger = log;
 // Error reporting, metrics and tracing default to the same sink; a vendor adapter can replace them.
 const errorReporter: ErrorReporter = {
   report: (error, { event, ...attributes } = {}) =>
-    log.error(typeof event === 'string' ? event : 'error.reported', { ...attributes, error }),
+    log.error(typeof event === "string" ? event : "error.reported", { ...attributes, error }),
 };
 const metricsRecorder: MetricsRecorder = {
   count: (name, value = 1, attributes) =>
-    log.debug('metric', { ...attributes, kind: 'count', name, value }),
+    log.debug("metric", { ...attributes, kind: "count", name, value }),
   timing: (name, ms, attributes) =>
-    log.debug('metric', { ...attributes, kind: 'timing', name, ms }),
+    log.debug("metric", { ...attributes, kind: "timing", name, ms }),
 };
 const spanTracer: Tracer = {
   startSpan(name, attributes) {
@@ -137,7 +137,7 @@ const spanTracer: Tracer = {
     return {
       setAttributes: (a) => Object.assign(spanFields, a),
       end: (error) =>
-        log.debug('span', {
+        log.debug("span", {
           ...spanFields,
           name,
           ms: Math.round(performance.now() - started),

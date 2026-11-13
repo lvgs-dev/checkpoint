@@ -1,11 +1,11 @@
-import type { CSSProperties } from 'react';
-import { metadataPresentation, type MetadataKind } from './presentation';
+import type { CSSProperties } from "react";
+import { metadataPresentation, type MetadataKind } from "./presentation";
 
 /** Colored badge with the icon for a metadata value. */
 export function MetadataBadge({
   kind,
   value,
-  className = '',
+  className = "",
 }: {
   kind: MetadataKind;
   value: string;
@@ -15,7 +15,7 @@ export function MetadataBadge({
   return (
     <span
       className={`badge metadata-badge inline-flex max-w-full items-center gap-[5px] ${className}`}
-      style={{ '--metadata-color': color } as CSSProperties}
+      style={{ "--metadata-color": color } as CSSProperties}
     >
       <svg
         aria-hidden="true"
@@ -24,7 +24,7 @@ export function MetadataBadge({
       >
         <path d={icon} />
       </svg>
-      <span className={`min-w-0 ${className.includes('truncate') ? 'truncate' : 'break-words'}`}>
+      <span className={`min-w-0 ${className.includes("truncate") ? "truncate" : "break-words"}`}>
         {value}
       </span>
     </span>

@@ -1,8 +1,8 @@
 // Postgres: pins da fila (queue_manual_adjustment) e histórico de movimentos (queue_move_event).
-import type { ManualAdjustment, ManualMove } from '../../../../../../packages/core/src/models.ts';
-import type { Sql } from '../../db.ts';
-import type { PinsDriver } from '../types.ts';
-import { pgError, pinOrder } from './shared.ts';
+import type { ManualAdjustment, ManualMove } from "../../../../../../packages/core/src/models.ts";
+import type { Sql } from "../../db.ts";
+import type { PinsDriver } from "../types.ts";
+import { pgError, pinOrder } from "./shared.ts";
 
 export class PgPinsDriver implements PinsDriver {
   private sql: Sql;
@@ -12,7 +12,7 @@ export class PgPinsDriver implements PinsDriver {
   /** Pins da lista (manual_position preenchida), do movido há mais tempo ao mais recente. */
   async list(owner: string, listId: string): Promise<ManualAdjustment[]> {
     const sql = this.sql;
-    const rows = await sql<(Omit<ManualAdjustment, 'updatedAt'> & { updatedAt: Date })[]>`
+    const rows = await sql<(Omit<ManualAdjustment, "updatedAt"> & { updatedAt: Date })[]>`
       SELECT g.code AS "gameId", a.manual_position AS "manualPosition",
              coalesce(a.last_moved_at, a.updated_at) AS "updatedAt"
         FROM queue_manual_adjustment a JOIN game g ON g.id = a.game_id
@@ -82,7 +82,7 @@ export class PgPinsDriver implements PinsDriver {
   /** Últimos 500 movimentos da lista, em ordem cronológica. */
   async moves(owner: string, listId: string, gameId?: string): Promise<ManualMove[]> {
     const sql = this.sql;
-    const rows = await sql<(Omit<ManualMove, 'createdAt'> & { createdAt: Date })[]>`
+    const rows = await sql<(Omit<ManualMove, "createdAt"> & { createdAt: Date })[]>`
       SELECT id, "gameId", kind, "fromPosition", "toPosition", "createdAt"
         FROM (SELECT coalesce(m.client_request_id::text, m.id::text) AS id, g.code AS "gameId",
                      CASE m.kind WHEN 'reset' THEN 'reset' ELSE 'reorder' END AS kind,

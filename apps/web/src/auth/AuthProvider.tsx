@@ -1,5 +1,4 @@
-import type { User } from '@supabase/auth-js';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useContext,
@@ -7,11 +6,11 @@ import {
   useRef,
   useSyncExternalStore,
   type ReactNode,
-} from 'react';
-import { authSession, type AuthState } from './session';
+} from "react";
+import { authSession, type AuthState, type AuthUser } from "./session";
 
 export interface AuthValue extends AuthState {
-  user: User | null;
+  user: AuthUser | null;
   /** Stable identity used to scope query keys; 'local' when auth is disabled. */
   userId: string;
 }
@@ -31,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const queryClient = useQueryClient();
   const user = state.session?.user ?? null;
-  const userId = user?.id ?? 'local';
+  const userId = user?.id ?? "local";
   const previous = useRef(userId);
 
   useEffect(() => void authSession.init(), []);
@@ -52,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthValue & typeof actions {
   const value = useContext(AuthContext);
-  if (!value) throw new Error('useAuth must be used inside AuthProvider');
+  if (!value) throw new Error("useAuth must be used inside AuthProvider");
   return { ...value, ...actions };
 }
 

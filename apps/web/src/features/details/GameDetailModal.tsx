@@ -1,15 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router';
-import type { Catalog, ScoredGame } from '../../../../../packages/core/src/models';
-import { api } from '../../api/http';
-import { useQueryKeys } from '../../query/keys';
-import { FinishDialog } from '../finish-dialog';
-import { AppLoader } from '../loader/AppLoader';
-import { MetadataSelect } from '../metadata';
-import { useGameWriter } from '../playing/gameWriter';
-import { GameActionIcons } from './GameActionIcons';
-import { GameDetailTags } from './GameDetailTags';
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
+import type { Catalog, ScoredGame } from "../../../../../packages/core/src/models";
+import { api } from "../../api/http";
+import { useQueryKeys } from "../../query/keys";
+import { FinishDialog } from "../finish-dialog";
+import { AppLoader } from "../loader/AppLoader";
+import { MetadataSelect } from "../metadata";
+import { useGameWriter } from "../playing/gameWriter";
+import { GameActionIcons } from "./GameActionIcons";
+import { GameDetailTags } from "./GameDetailTags";
 
 export interface GameDetailModalProps {
   gameId: string | null;
@@ -29,10 +29,10 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
   const writer = useGameWriter();
 
   const gameQuery = useQuery({
-    queryKey: k.game(gameId ?? ''),
+    queryKey: k.game(gameId ?? ""),
     queryFn: ({ signal }) => {
       const combinedSignal = AbortSignal.any([signal, AbortSignal.timeout(MODAL_QUERY_TIMEOUT_MS)]);
-      return api.get<ScoredGame>('games/' + encodeURIComponent(gameId!), {
+      return api.get<ScoredGame>("games/" + encodeURIComponent(gameId!), {
         signal: combinedSignal,
         timeout: MODAL_QUERY_TIMEOUT_MS,
       });
@@ -45,7 +45,7 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
     queryKey: k.catalog(),
     queryFn: ({ signal }) => {
       const combinedSignal = AbortSignal.any([signal, AbortSignal.timeout(MODAL_QUERY_TIMEOUT_MS)]);
-      return api.get<Catalog>('catalog', {
+      return api.get<Catalog>("catalog", {
         signal: combinedSignal,
         timeout: MODAL_QUERY_TIMEOUT_MS,
       });
@@ -61,17 +61,17 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
   const [notesInput, setNotesInput] = useState<string | null>(null);
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
-  const [notesError, setNotesError] = useState('');
+  const [notesError, setNotesError] = useState("");
   const [finishing, setFinishing] = useState(false);
 
-  const notes = notesInput ?? game?.notes ?? '';
+  const notes = notesInput ?? game?.notes ?? "";
 
   useEffect(() => {
     const el = dialogRef.current;
     if (!el) return;
     if (open) {
       const prevOverflow = document.documentElement.style.overflow;
-      document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.overflow = "hidden";
       if (!el.open) {
         el.showModal();
         el.focus({ preventScroll: true });
@@ -87,9 +87,9 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
 
   async function handleStatusChange(status: string) {
     if (!game || isCatalogDisabled) return;
-    if (catalog?.statuses && !catalog.statuses.includes(status as ScoredGame['status'])) return;
+    if (catalog?.statuses && !catalog.statuses.includes(status as ScoredGame["status"])) return;
     try {
-      await writer.save(game.id, { status: status as ScoredGame['status'] });
+      await writer.save(game.id, { status: status as ScoredGame["status"] });
     } catch {
       // GameWriter handles error reporting
     }
@@ -97,9 +97,9 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
 
   async function handleDesireChange(desire: string) {
     if (!game || isCatalogDisabled) return;
-    if (catalog?.desires && !catalog.desires.includes(desire as ScoredGame['desire'])) return;
+    if (catalog?.desires && !catalog.desires.includes(desire as ScoredGame["desire"])) return;
     try {
-      await writer.save(game.id, { desire: desire as ScoredGame['desire'] });
+      await writer.save(game.id, { desire: desire as ScoredGame["desire"] });
     } catch {
       // GameWriter handles error reporting
     }
@@ -127,14 +127,14 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
   async function handleSaveNotes() {
     if (!game) return;
     setSavingNotes(true);
-    setNotesError('');
+    setNotesError("");
     try {
       await writer.save(game.id, { notes: notes.trim() });
       setNotesInput(null);
       setNotesSaved(true);
       setTimeout(() => setNotesSaved(false), 2000);
     } catch (e) {
-      setNotesError(e instanceof Error ? e.message : 'Não foi possível salvar.');
+      setNotesError(e instanceof Error ? e.message : "Não foi possível salvar.");
     } finally {
       setSavingNotes(false);
     }
@@ -148,8 +148,8 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
   return (
     <>
       <dialog
-        data-testid={`modal-game-${gameId?.toLowerCase() ?? 'empty'}`}
-        key={gameId ?? 'empty'}
+        data-testid={`modal-game-${gameId?.toLowerCase() ?? "empty"}`}
+        key={gameId ?? "empty"}
         ref={dialogRef}
         tabIndex={-1}
         onClick={(e) => {
@@ -190,10 +190,10 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
             <div className="py-12 text-center text-[var(--muted)]" role="alert">
               <p className="text-sm">
                 {!gameId
-                  ? 'Jogo não especificado.'
+                  ? "Jogo não especificado."
                   : gameQuery.isError
-                    ? 'Não foi possível carregar o jogo.'
-                    : 'Jogo não encontrado.'}
+                    ? "Não foi possível carregar o jogo."
+                    : "Jogo não encontrado."}
               </p>
               {gameQuery.isError && (
                 <button
@@ -216,7 +216,7 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
                       src={game.coverUrl}
                       alt=""
                       className="h-full w-full object-contain"
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                      onError={(e) => (e.currentTarget.style.display = "none")}
                     />
                   )}
                   <span className="select-none text-3xl font-bold opacity-30">
@@ -367,20 +367,20 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
                     <div>
                       <dt>Tempo no seu ritmo</dt>
                       <dd>
-                        {game.plannedHours === null ? 'A confirmar' : `${game.plannedHours} h`}
+                        {game.plannedHours === null ? "A confirmar" : `${game.plannedHours} h`}
                       </dd>
                     </div>
                     <div>
                       <dt>Horas na Steam</dt>
-                      <dd>{game.steamHours === null ? '—' : `${game.steamHours} h`}</dd>
+                      <dd>{game.steamHours === null ? "—" : `${game.steamHours} h`}</dd>
                     </div>
                     <div>
                       <dt>Horas para finalizar</dt>
-                      <dd>{game.actualHours === null ? '—' : `${game.actualHours} h`}</dd>
+                      <dd>{game.actualHours === null ? "—" : `${game.actualHours} h`}</dd>
                     </div>
                     <div>
                       <dt>Steam App ID</dt>
-                      <dd>{game.steamAppId ?? '—'}</dd>
+                      <dd>{game.steamAppId ?? "—"}</dd>
                     </div>
                   </dl>
                 </div>
@@ -398,14 +398,14 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
                     onChange={(e) => {
                       setNotesInput(e.target.value);
                       setNotesSaved(false);
-                      setNotesError('');
+                      setNotesError("");
                     }}
                     className="w-full flex-1 resize-none rounded-md border border-[var(--border)] bg-transparent p-2 text-sm text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                     placeholder="Escreva suas anotações aqui…"
                   />
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-xs text-[var(--muted)]" role="status">
-                      {notesSaved ? 'Salvo!' : notesError ? notesError : ''}
+                      {notesSaved ? "Salvo!" : notesError ? notesError : ""}
                     </span>
                     <button
                       data-testid="modal-notes-save"
@@ -417,7 +417,7 @@ export function GameDetailModal({ gameId, open, onOpenChange }: GameDetailModalP
                       {savingNotes ? (
                         <AppLoader variant="spinner" layout="inline" size="sm" label="Salvando…" />
                       ) : (
-                        'Salvar anotações'
+                        "Salvar anotações"
                       )}
                     </button>
                   </div>

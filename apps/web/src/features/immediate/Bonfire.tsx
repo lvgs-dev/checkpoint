@@ -1,9 +1,9 @@
-import './bonfire.css';
+import "./bonfire.css";
 
 /** Application bonfire icon; mono uses currentColor without a background, while the regular variant retains its palette. */
 export function Bonfire({ mono = false }: { mono?: boolean }) {
   return (
-    <span className={mono ? 'bonfire mono' : 'bonfire'}>
+    <span className={mono ? "bonfire mono" : "bonfire"}>
       <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
         {!mono && <rect className="bg" width="64" height="64" rx="14" />}
         <path

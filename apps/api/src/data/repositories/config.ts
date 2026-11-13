@@ -1,7 +1,7 @@
-import type { MetadataCategory } from '../../../../../packages/core/src/metadata.ts';
-import type { ConfigDriver } from '../drivers/types.ts';
-import type { ConfigRepository } from '../ports.ts';
-import { AppError } from '../../shared/errors.ts';
+import type { MetadataCategory } from "../../../../../packages/core/src/metadata.ts";
+import type { ConfigDriver } from "../drivers/types.ts";
+import type { ConfigRepository } from "../ports.ts";
+import { AppError } from "../../shared/errors.ts";
 
 export class ConfigRepositoryImpl implements ConfigRepository {
   private driver: ConfigDriver;
@@ -16,7 +16,7 @@ export class ConfigRepositoryImpl implements ConfigRepository {
   }
   async remove(category: MetadataCategory, name: string) {
     const result = await this.driver.remove(category, name);
-    if (result === 'used') throw new AppError('A opção está em uso', 409);
-    if (result === 'missing') throw new AppError('Opção não encontrada', 404);
+    if (result === "used") throw new AppError("A opção está em uso", 409);
+    if (result === "missing") throw new AppError("Opção não encontrada", 404);
   }
 }

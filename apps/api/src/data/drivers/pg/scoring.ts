@@ -1,8 +1,8 @@
 // Postgres: pesos + regras + filtros de cada lista em user_score_weights (chave list_id).
-import type { ScoringConfig } from '../../../../../../packages/core/src/models.ts';
-import type { Sql } from '../../db.ts';
-import type { ScoringDriver, ScoringRecord } from '../types.ts';
-import { isoTs, json, pgError, settingsJson } from './shared.ts';
+import type { ScoringConfig } from "../../../../../../packages/core/src/models.ts";
+import type { Sql } from "../../db.ts";
+import type { ScoringDriver, ScoringRecord } from "../types.ts";
+import { isoTs, json, pgError, settingsJson } from "./shared.ts";
 
 export class PgScoringDriver implements ScoringDriver {
   private sql: Sql;

@@ -7,39 +7,38 @@
 // follows GAMES_STORE. The one-query queue read is used only when games, lists, pins and scoring
 // are all `pg`. Releases exist only in `pg` (json means "no release registry").
 // To add a database: write its drivers under `drivers/<name>/`, then add a case here.
-import { join } from 'node:path';
-import { remoteEmailVerifier } from '../auth/auth.ts';
-import { db } from '../data/db.ts';
-import type { ReleaseStore } from '../data/ports.ts';
-import { PgReleaseDriver } from '../data/drivers/pg/releases.ts';
-import { createAppUserResolver } from '../services/auth-user.ts';
-import { GameRepositoryImpl } from '../data/repositories/games.ts';
-import { type GameRepository } from '../data/ports.ts';
-import { ListRepositoryImpl } from '../data/repositories/lists.ts';
-import { type ListRepository } from '../data/ports.ts';
-import { ManualAdjustmentRepositoryImpl } from '../data/repositories/manual.ts';
-import { type ManualAdjustmentRepository } from '../data/ports.ts';
-import { QueueInputsReaderImpl } from '../data/repositories/queue.ts';
-import { type QueueInputsReader } from '../data/ports.ts';
-import { ReleaseRepository } from '../data/repositories/releases.ts';
-import { ScoringConfigRepositoryImpl } from '../data/repositories/scoring.ts';
-import { type ScoringConfigRepository } from '../data/ports.ts';
-import { WishlistStoreImpl } from '../data/repositories/wishlist.ts';
-import { type WishlistStore } from '../data/ports.ts';
-import { ConfigRepositoryImpl } from '../data/repositories/config.ts';
-import { type ConfigRepository } from '../data/ports.ts';
-import { assertPrivateStores } from '../shared/request-guard.ts';
-import type { TrackDriver } from '../data/drivers/types.ts';
+import { join } from "node:path";
+import { db } from "../data/db.ts";
+import type { ReleaseStore } from "../data/ports.ts";
+import { PgReleaseDriver } from "../data/drivers/pg/releases.ts";
+import { createAppUserResolver } from "../services/auth-user.ts";
+import { GameRepositoryImpl } from "../data/repositories/games.ts";
+import { type GameRepository } from "../data/ports.ts";
+import { ListRepositoryImpl } from "../data/repositories/lists.ts";
+import { type ListRepository } from "../data/ports.ts";
+import { ManualAdjustmentRepositoryImpl } from "../data/repositories/manual.ts";
+import { type ManualAdjustmentRepository } from "../data/ports.ts";
+import { QueueInputsReaderImpl } from "../data/repositories/queue.ts";
+import { type QueueInputsReader } from "../data/ports.ts";
+import { ReleaseRepository } from "../data/repositories/releases.ts";
+import { ScoringConfigRepositoryImpl } from "../data/repositories/scoring.ts";
+import { type ScoringConfigRepository } from "../data/ports.ts";
+import { WishlistStoreImpl } from "../data/repositories/wishlist.ts";
+import { type WishlistStore } from "../data/ports.ts";
+import { ConfigRepositoryImpl } from "../data/repositories/config.ts";
+import { type ConfigRepository } from "../data/ports.ts";
+import { assertPrivateStores } from "../shared/request-guard.ts";
+import type { TrackDriver } from "../data/drivers/types.ts";
 
 type Env = Record<string, string | undefined>;
-type Kind = 'pg' | 'json';
+type Kind = "pg" | "json";
 const ENTITIES = [
-  'GAMES_STORE',
-  'LISTS_STORE',
-  'PINS_STORE',
-  'SCORING_STORE',
-  'APP_USERS_STORE',
-  'RELEASES_STORE',
+  "GAMES_STORE",
+  "LISTS_STORE",
+  "PINS_STORE",
+  "SCORING_STORE",
+  "APP_USERS_STORE",
+  "RELEASES_STORE",
 ] as const;
 
 interface DataOptions {
@@ -62,16 +61,16 @@ export interface Data {
   queue: QueueInputsReader | null;
   releases: ReleaseStore | null;
   track: TrackDriver | null;
-  storage: 'postgres' | 'json' | 'mixed';
+  storage: "postgres" | "json" | "mixed";
 }
 
 function kinds(env: Env): Record<(typeof ENTITIES)[number], Kind> {
-  const fallback: Kind = env.DATABASE_URL ? 'pg' : 'json';
+  const fallback: Kind = env.DATABASE_URL ? "pg" : "json";
   const out = {} as Record<(typeof ENTITIES)[number], Kind>;
   for (const name of ENTITIES) {
     const value = env[name] || fallback;
-    if (value !== 'pg' && value !== 'json') throw new Error(`${name} deve ser pg ou json`);
-    if (value === 'pg' && !env.DATABASE_URL) throw new Error(`${name}=pg exige DATABASE_URL`);
+    if (value !== "pg" && value !== "json") throw new Error(`${name} deve ser pg ou json`);
+    if (value === "pg" && !env.DATABASE_URL) throw new Error(`${name}=pg exige DATABASE_URL`);
     out[name] = value;
   }
   return out;
@@ -81,65 +80,63 @@ export async function createData({
   env = process.env,
   dataDir,
   devAppUserId,
-  countryCode = env.STEAM_COUNTRY || 'BR',
+  countryCode = env.STEAM_COUNTRY || "BR",
 }: DataOptions): Promise<Data> {
   const kind = kinds(env);
-  assertPrivateStores(kind, Boolean(env.SUPABASE_URL));
+  assertPrivateStores(kind, Boolean(env.DATABASE_URL) || env.NODE_ENV === "production");
   const used = new Set(Object.values(kind));
-  const sql = used.has('pg') ? db(env.DATABASE_URL) : null;
-  const pg = used.has('pg') ? await import('../data/drivers/pg/index.ts') : null;
-  const json = used.has('json') ? await import('../data/drivers/json/index.ts') : null;
+  const sql = used.has("pg") ? db(env.DATABASE_URL) : null;
+  const pg = used.has("pg") ? await import("../data/drivers/pg/index.ts") : null;
+  const json = used.has("json") ? await import("../data/drivers/json/index.ts") : null;
   // `sql`, `pg` and `json` are non-null exactly when some entity asked for that kind.
   const file = (envName: string, fallback: string) => env[envName] ?? join(dataDir, fallback);
 
   const appUserDriver =
-    kind.APP_USERS_STORE === 'pg' ? new pg!.PgAppUserDriver(sql!) : new json!.JsonAppUserDriver();
+    kind.APP_USERS_STORE === "pg" ? new pg!.PgAppUserDriver(sql!) : new json!.JsonAppUserDriver();
   const user = createAppUserResolver(appUserDriver, {
-    devAppUserId: kind.APP_USERS_STORE === 'json' ? (devAppUserId ?? 'local') : devAppUserId,
-    seedOwnerEmail: env.SEED_OWNER_EMAIL,
-    isEmailVerified: remoteEmailVerifier(env),
+    devAppUserId: kind.APP_USERS_STORE === "json" ? (devAppUserId ?? "local") : devAppUserId,
   });
 
   let gamesDriver;
   let wishlistDriver;
-  if (kind.GAMES_STORE === 'pg') {
+  if (kind.GAMES_STORE === "pg") {
     gamesDriver = new pg!.PgGamesDriver(sql!);
     wishlistDriver = new pg!.PgWishlistDriver(sql!, countryCode);
   } else {
-    const { seedGames } = await import('../data/seed.ts');
-    gamesDriver = new json!.JsonGamesDriver(seedGames, file('DATA_FILE', 'games.json'));
+    const { seedGames } = await import("../data/seed.ts");
+    gamesDriver = new json!.JsonGamesDriver(seedGames, file("DATA_FILE", "games.json"));
     wishlistDriver = new json!.JsonWishlistDriver(
       gamesDriver,
-      file('WISHLIST_FILE', 'wishlist.json'),
+      file("WISHLIST_FILE", "wishlist.json"),
     );
   }
 
   const configDriver =
-    kind.GAMES_STORE === 'pg'
+    kind.GAMES_STORE === "pg"
       ? new pg!.PgConfigDriver(sql!)
       : new json!.JsonConfigDriver(
-          file('CONFIG_FILE', 'config.json'),
+          file("CONFIG_FILE", "config.json"),
           gamesDriver,
-          kind.APP_USERS_STORE === 'json' ? (devAppUserId ?? 'local') : 'local',
+          kind.APP_USERS_STORE === "json" ? (devAppUserId ?? "local") : "local",
         );
   const config = new ConfigRepositoryImpl(configDriver);
   const games = new GameRepositoryImpl(gamesDriver, user, config);
 
   const listsDriver =
-    kind.LISTS_STORE === 'pg'
+    kind.LISTS_STORE === "pg"
       ? new pg!.PgListsDriver(sql!)
-      : new json!.JsonListsDriver(file('LISTS_FILE', 'lists.json'));
+      : new json!.JsonListsDriver(file("LISTS_FILE", "lists.json"));
   const pinsDriver =
-    kind.PINS_STORE === 'pg'
+    kind.PINS_STORE === "pg"
       ? new pg!.PgPinsDriver(sql!)
-      : new json!.JsonPinsDriver(file('MANUAL_FILE', 'manual-adjustments.json'));
+      : new json!.JsonPinsDriver(file("MANUAL_FILE", "manual-adjustments.json"));
   const scoringDriver =
-    kind.SCORING_STORE === 'pg'
+    kind.SCORING_STORE === "pg"
       ? new pg!.PgScoringDriver(sql!)
-      : new json!.JsonScoringDriver(file('SETTINGS_FILE', 'scoring-settings.json'));
+      : new json!.JsonScoringDriver(file("SETTINGS_FILE", "scoring-settings.json"));
 
   const allPg = [kind.GAMES_STORE, kind.LISTS_STORE, kind.PINS_STORE, kind.SCORING_STORE].every(
-    (k) => k === 'pg',
+    (k) => k === "pg",
   );
   return {
     games,
@@ -149,16 +146,16 @@ export async function createData({
     wishlist: new WishlistStoreImpl(wishlistDriver, user, games),
     config,
     queue: allPg ? new QueueInputsReaderImpl(new pg!.PgQueueInputsDriver(sql!), user) : null,
-    releases: kind.RELEASES_STORE === 'pg' ? releaseStoreFromEnv(env) : null,
+    releases: kind.RELEASES_STORE === "pg" ? releaseStoreFromEnv(env) : null,
     track: sql ? new pg!.PgTrackDriver(sql) : null,
-    storage: used.size > 1 ? 'mixed' : used.has('pg') ? 'postgres' : 'json',
+    storage: used.size > 1 ? "mixed" : used.has("pg") ? "postgres" : "json",
   };
 }
 
 /** Release registry for the HTTP server and scripts: null without a Postgres release store. */
 export function releaseStoreFromEnv(env: Env = process.env): ReleaseStore | null {
-  const kind = env.RELEASES_STORE || (env.DATABASE_URL ? 'pg' : 'json');
-  return kind === 'pg' && env.DATABASE_URL
+  const kind = env.RELEASES_STORE || (env.DATABASE_URL ? "pg" : "json");
+  return kind === "pg" && env.DATABASE_URL
     ? new ReleaseRepository(new PgReleaseDriver(db(env.DATABASE_URL)))
     : null;
 }

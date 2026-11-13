@@ -1,17 +1,17 @@
-import { useCallback, useMemo, useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
-import { ConfirmDialog, EmptyState, ErrorState } from '@checkpoint/ui-react';
-import { CircleDollarSign } from 'lucide-react';
-import type { Desire, SteamPrice, WishlistItem } from '../../../../../packages/core/src/models';
-import { badgeColor } from '../metadata';
-import { formatPrice, useSteamSearch, useWishlist, useWishlistActions } from './wishlist';
-import { GameDetailModal } from '../details';
-import { AppLoader } from '../loader/AppLoader';
-import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
-import './wishlist.css';
+import { useCallback, useMemo, useState, type FormEvent } from "react";
+import { Link } from "react-router";
+import { ConfirmDialog, EmptyState, ErrorState } from "@checkpoint/ui-react";
+import { CircleDollarSign } from "lucide-react";
+import type { Desire, SteamPrice, WishlistItem } from "../../../../../packages/core/src/models";
+import { badgeColor } from "../metadata";
+import { formatPrice, useSteamSearch, useWishlist, useWishlistActions } from "./wishlist";
+import { GameDetailModal } from "../details";
+import { AppLoader } from "../loader/AppLoader";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
+import "./wishlist.css";
 
-const DESIRES: Desire[] = ['Muito Alta', 'Alta', 'Média', 'Baixa', 'Muito Baixa'];
-import { compareWishlistItems, type WishlistSort } from '../../../../../packages/core/src/wishlist';
+const DESIRES: Desire[] = ["Muito Alta", "Alta", "Média", "Baixa", "Muito Baixa"];
+import { compareWishlistItems, type WishlistSort } from "../../../../../packages/core/src/wishlist";
 
 const original = (p: SteamPrice) => formatPrice({ ...p, finalCents: p.initialCents });
 const messageOf = (e: unknown, fallback: string) =>
@@ -21,15 +21,15 @@ export function WishlistScreen() {
   const { wishlist, genres } = useWishlist();
   const actions = useWishlistActions();
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
-  const [purchasingGame, setPurchasingGame] = useState<WishlistItem['game'] | null>(null);
-  const [q, setQ] = useState('');
-  const [desire, setDesire] = useState<Desire>('Média');
-  const [profile, setProfile] = useState('');
-  const [sort, setSort] = useState<WishlistSort>('recommendation');
+  const [purchasingGame, setPurchasingGame] = useState<WishlistItem["game"] | null>(null);
+  const [q, setQ] = useState("");
+  const [desire, setDesire] = useState<Desire>("Média");
+  const [profile, setProfile] = useState("");
+  const [sort, setSort] = useState<WishlistSort>("recommendation");
   const [visibleCount, setVisibleCount] = useState(24);
-  const [manual, setManual] = useState({ name: '', primaryGenre: '', mainHours: '' });
-  const [notice, setNotice] = useState('');
-  const [error, setError] = useState('');
+  const [manual, setManual] = useState({ name: "", primaryGenre: "", mainHours: "" });
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
   const search = useSteamSearch(q);
 
   const sorted = useMemo(
@@ -55,22 +55,22 @@ export function WishlistScreen() {
     actions.importSteam.isPending ||
     actions.refreshPrices.isPending;
   const shownError =
-    error || (search.error ? messageOf(search.error, 'Busca na Steam indisponível.') : '');
+    error || (search.error ? messageOf(search.error, "Busca na Steam indisponível.") : "");
 
   async function run(action: () => Promise<string>) {
-    setError('');
-    setNotice('');
+    setError("");
+    setNotice("");
     try {
       setNotice(await action());
     } catch (e) {
-      setError(messageOf(e, 'Algo deu errado. Tente de novo.'));
+      setError(messageOf(e, "Algo deu errado. Tente de novo."));
     }
   }
 
   const addFromSteam = (appId: number) =>
     run(async () => {
       const res = await actions.add.mutateAsync({ appId, desire });
-      setQ('');
+      setQ("");
       return res.created
         ? `${res.game.name} entrou na lista de desejos.`
         : `${res.game.name} já está no app (${res.game.status}).`;
@@ -80,10 +80,10 @@ export function WishlistScreen() {
     e.preventDefault();
     return run(async () => {
       const body: Record<string, unknown> = { name: manual.name, desire };
-      if (manual.primaryGenre.trim()) body['primaryGenre'] = manual.primaryGenre;
-      if (manual.mainHours !== '') body['mainHours'] = Number(manual.mainHours);
+      if (manual.primaryGenre.trim()) body["primaryGenre"] = manual.primaryGenre;
+      if (manual.mainHours !== "") body["mainHours"] = Number(manual.mainHours);
       const res = await actions.add.mutateAsync(body);
-      setManual({ name: '', primaryGenre: '', mainHours: '' });
+      setManual({ name: "", primaryGenre: "", mainHours: "" });
       return res.created ? `${res.game.name} cadastrado.` : `${res.game.name} já está no app.`;
     });
   };
@@ -91,14 +91,14 @@ export function WishlistScreen() {
   const importSteam = () =>
     run(async () => {
       const r = await actions.importSteam.mutateAsync(profile);
-      const failed = r.failed.length ? `, ${r.failed.length} fora da loja` : '';
+      const failed = r.failed.length ? `, ${r.failed.length} fora da loja` : "";
       return `Lista da Steam: ${r.total} itens, ${r.created} novos, ${r.existing} já estavam no app${failed}.`;
     });
 
   const refresh = () =>
     run(async () => {
       await actions.refreshPrices.mutateAsync();
-      return 'Preços atualizados.';
+      return "Preços atualizados.";
     });
 
   return (
@@ -277,7 +277,7 @@ export function WishlistScreen() {
             <Link
               data-testid={`wishlist-game-${i.game.id.toLowerCase()}`}
               to={`/jogos/${encodeURIComponent(i.game.id)}`}
-              style={{ color: 'inherit', textDecoration: 'none' }}
+              style={{ color: "inherit", textDecoration: "none" }}
               onClick={(e) => {
                 if (!e.metaKey && !e.ctrlKey && !e.shiftKey) {
                   e.preventDefault();
@@ -291,7 +291,7 @@ export function WishlistScreen() {
                     src={i.game.coverUrl}
                     alt=""
                     loading="lazy"
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                    onError={(e) => (e.currentTarget.style.display = "none")}
                   />
                 )}
                 <span className="cover-fallback">{i.game.name.slice(0, 1)}</span>
@@ -300,17 +300,17 @@ export function WishlistScreen() {
                 )}
               </div>
               <div className="card-body">
-                <div className="card-store">{i.game.store || 'Sem loja'}</div>
+                <div className="card-store">{i.game.store || "Sem loja"}</div>
                 <h2>{i.game.name}</h2>
                 {i.description && <p className="description">{i.description}</p>}
                 <div className="tags">
                   {i.game.primaryGenre && (
-                    <span className={'badge ' + badgeColor(i.game.primaryGenre)}>
+                    <span className={"badge " + badgeColor(i.game.primaryGenre)}>
                       {i.game.primaryGenre}
                     </span>
                   )}
                   {i.game.secondaryTags.slice(0, 2).map((t) => (
-                    <span key={t} className={'badge ' + badgeColor(t)}>
+                    <span key={t} className={"badge " + badgeColor(t)}>
                       {t}
                     </span>
                   ))}
@@ -325,7 +325,7 @@ export function WishlistScreen() {
                   <span className="score text-sm font-semibold text-foreground">
                     {`Pontuação: ${Math.round(i.game.score ?? i.game.baseScore)}`}
                   </span>
-                  <span className={'badge ' + badgeColor(i.game.desire)}>{i.game.desire}</span>
+                  <span className={"badge " + badgeColor(i.game.desire)}>{i.game.desire}</span>
                 </div>
               </div>
             </Link>
@@ -366,7 +366,7 @@ export function WishlistScreen() {
       ) : wishlist.isError && !wishlist.data ? (
         <ErrorState
           data-testid="wishlist-error"
-          message={messageOf(wishlist.error, 'Não foi possível carregar a lista de desejos.')}
+          message={messageOf(wishlist.error, "Não foi possível carregar a lista de desejos.")}
           retryLabel="Tentar novamente"
           onRetry={() => void wishlist.refetch()}
         />

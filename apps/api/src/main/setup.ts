@@ -1,16 +1,16 @@
 // Monta os serviços sobre a camada de dados (ver data/index.ts para escolher o driver de cada
 // entidade: GAMES_STORE, LISTS_STORE, ... = pg | json; padrão pg com DATABASE_URL, senão json).
-import { createData } from './data.ts';
-import { GameService } from '../services/games.ts';
-import { WishlistService } from '../services/wishlist.ts';
-import { ConfigService } from '../services/config.ts';
+import { createData } from "./data.ts";
+import { GameService } from "../services/games.ts";
+import { WishlistService } from "../services/wishlist.ts";
+import { ConfigService } from "../services/config.ts";
 import {
   steamClientFromEnv,
   steamProfileFromEnv,
   type SteamClient,
-} from '../integrations/steam/client.ts';
+} from "../integrations/steam/client.ts";
 
-import { TrackService } from '../services/track.ts';
+import { TrackService } from "../services/track.ts";
 
 type Env = Record<string, string | undefined>;
 
@@ -34,7 +34,7 @@ export async function createService({
   wishlist: WishlistService;
   config: ConfigService;
   track: TrackService | null;
-  storage: 'postgres' | 'json' | 'mixed';
+  storage: "postgres" | "json" | "mixed";
 }> {
   const data = await createData({ env, dataDir, devAppUserId });
   const service = new GameService(data.games, data.manual, data.queue, data.scoring, data.lists);

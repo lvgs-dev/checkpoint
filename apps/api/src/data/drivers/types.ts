@@ -15,15 +15,15 @@ import type {
   ScoringConfig,
   SteamApp,
   SteamPrice,
-} from '../../../../../packages/core/src/models.ts';
+} from "../../../../../packages/core/src/models.ts";
 import type {
   MetadataCatalog,
   MetadataCategory,
-} from '../../../../../packages/core/src/metadata.ts';
-import type { Release, DeployInput, Environment, NewRelease } from '../../domain/releases.ts';
+} from "../../../../../packages/core/src/metadata.ts";
+import type { Release, DeployInput, Environment, NewRelease } from "../../domain/releases.ts";
 
 /** Neutral storage failure; repositories translate it to the error their callers expect. */
-type DataErrorCode = 'invalid' | 'not_found' | 'conflict';
+type DataErrorCode = "invalid" | "not_found" | "conflict";
 export class DataError extends Error {
   code: DataErrorCode;
   /** Name of the violated constraint, when the store reports one. */
@@ -36,14 +36,14 @@ export class DataError extends Error {
 }
 
 /** Nome da lista criada automaticamente no primeiro acesso. */
-export const DEFAULT_LIST_NAME = 'Principal';
+export const DEFAULT_LIST_NAME = "Principal";
 
 export interface GameBrowseQuery {
   q?: string;
   status?: string;
   primaryGenre?: string;
   store?: string;
-  sort: 'name' | 'desire';
+  sort: "name" | "desire";
   page: number;
   pageSize: number;
 }
@@ -74,7 +74,7 @@ export interface ListsDriver {
   /** Throws DataError('conflict') on a repeated name; undefined when the list is not the owner's. */
   rename(owner: string, id: string, name: string): Promise<GameList | undefined>;
   /** Atomic: 'last' means the owner's only list was kept. */
-  remove(owner: string, id: string): Promise<'removed' | 'missing' | 'last'>;
+  remove(owner: string, id: string): Promise<"removed" | "missing" | "last">;
 }
 
 export interface PinsDriver {
@@ -159,13 +159,6 @@ export interface ReleaseDriver {
 
 export interface AppUserDriver {
   findByAuthId(authId: string): Promise<string | undefined>;
-  /** Links the seed account to `authId` when it is still unclaimed and the e-mail matches. */
-  claimSeed(
-    seedId: string,
-    authId: string,
-    email: string,
-    seedOwnerEmail: string,
-  ): Promise<string | undefined>;
   /** Creates the account; undefined when the id belongs to another identity. */
   create(authId: string, email: string | null): Promise<string | undefined>;
 }
@@ -173,11 +166,11 @@ export interface AppUserDriver {
 export interface ConfigDriver {
   list(): Promise<MetadataCatalog>;
   add(category: MetadataCategory, name: string): Promise<void>;
-  remove(category: MetadataCategory, name: string): Promise<'removed' | 'missing' | 'used'>;
+  remove(category: MetadataCategory, name: string): Promise<"removed" | "missing" | "used">;
 }
 
 export interface TrackEventRecord {
-  kind: 'page_view' | 'click';
+  kind: "page_view" | "click";
   screen: string;
   element?: string | null;
   occurredAt: Date;

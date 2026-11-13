@@ -1,10 +1,10 @@
 // Log destinations (Strategy) and the registry that selects them. Adding a destination means
 // writing one LogSink class and registering it; call sites never change.
-import { appendFile, mkdir, rename, stat } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import type { LogEvent, LogSink, SinkKind } from '../../../../packages/core/src/observability.ts';
-import { db } from '../data/db.ts';
-import type { DatabaseLogRow } from './types.ts';
+import { appendFile, mkdir, rename, stat } from "node:fs/promises";
+import { dirname } from "node:path";
+import type { LogEvent, LogSink, SinkKind } from "../../../../packages/core/src/observability.ts";
+import { db } from "../data/db.ts";
+import type { DatabaseLogRow } from "./types.ts";
 
 type Env = Record<string, string | undefined>;
 
@@ -26,7 +26,7 @@ export class NoopSink implements LogSink {
 /** JSON lines on stdout (stderr for errors). */
 export class ConsoleSink implements LogSink {
   write(e: LogEvent) {
-    (e.level === 'error' ? process.stderr : process.stdout).write(toJsonLine(e) + '\n');
+    (e.level === "error" ? process.stderr : process.stdout).write(toJsonLine(e) + "\n");
   }
 }
 
@@ -59,7 +59,7 @@ export class FileSink implements LogSink {
     this.maxBytes = maxBytes;
   }
   async write(e: LogEvent) {
-    const line = toJsonLine(e) + '\n';
+    const line = toJsonLine(e) + "\n";
     if (this.size === undefined) {
       await mkdir(dirname(this.path), { recursive: true });
       this.size = await stat(this.path).then(
@@ -70,7 +70,7 @@ export class FileSink implements LogSink {
     const bytes = Buffer.byteLength(line);
     if (this.size + bytes > this.maxBytes) {
       try {
-        await rename(this.path, this.path + '.1');
+        await rename(this.path, this.path + ".1");
         this.size = 0;
       } catch (e) {
         if (!this.rotationWarned) {
@@ -173,7 +173,7 @@ export class SafeSink implements LogSink {
 /** Extracts the function name from a V8 stack trace. */
 export function extractFunctionName(stack?: string | null): string | null {
   if (!stack) return null;
-  const lines = stack.split('\n');
+  const lines = stack.split("\n");
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i]?.trim();
     if (!line) continue;
@@ -182,7 +182,7 @@ export function extractFunctionName(stack?: string | null): string | null {
       return matchNamed[1];
     }
     if (/^at\s+/.test(line)) {
-      return 'anonymous';
+      return "anonymous";
     }
   }
   return null;
@@ -192,46 +192,46 @@ export function extractFunctionName(stack?: string | null): string | null {
 export function formatDatabaseLogRow(e: LogEvent): DatabaseLogRow {
   const fields = e.fields ?? {};
   const errorObj =
-    fields.error && typeof fields.error === 'object' && !Array.isArray(fields.error)
+    fields.error && typeof fields.error === "object" && !Array.isArray(fields.error)
       ? (fields.error as Record<string, unknown>)
       : null;
 
   const stack =
-    (typeof fields.stack === 'string' && fields.stack) ||
-    (typeof errorObj?.stack === 'string' && (errorObj.stack as string)) ||
+    (typeof fields.stack === "string" && fields.stack) ||
+    (typeof errorObj?.stack === "string" && (errorObj.stack as string)) ||
     null;
 
   const function_name =
-    (typeof fields.function_name === 'string' && fields.function_name) ||
-    (typeof fields.functionName === 'string' && fields.functionName) ||
-    (typeof errorObj?.function_name === 'string' && (errorObj.function_name as string)) ||
-    (typeof errorObj?.functionName === 'string' && (errorObj.functionName as string)) ||
+    (typeof fields.function_name === "string" && fields.function_name) ||
+    (typeof fields.functionName === "string" && fields.functionName) ||
+    (typeof errorObj?.function_name === "string" && (errorObj.function_name as string)) ||
+    (typeof errorObj?.functionName === "string" && (errorObj.functionName as string)) ||
     extractFunctionName(stack);
 
   const message =
-    (typeof fields.message === 'string' && fields.message) ||
-    (typeof errorObj?.message === 'string' && (errorObj.message as string)) ||
-    (typeof fields.error === 'string' && fields.error) ||
+    (typeof fields.message === "string" && fields.message) ||
+    (typeof errorObj?.message === "string" && (errorObj.message as string)) ||
+    (typeof fields.error === "string" && fields.error) ||
     e.event;
 
   const request_id =
     e.requestId ??
-    (typeof fields.requestId === 'string' ? fields.requestId : null) ??
-    (typeof fields.request_id === 'string' ? fields.request_id : null);
+    (typeof fields.requestId === "string" ? fields.requestId : null) ??
+    (typeof fields.request_id === "string" ? fields.request_id : null);
 
   const user_id =
     e.userId ??
-    (typeof fields.userId === 'string' ? fields.userId : null) ??
-    (typeof fields.user_id === 'string' ? fields.user_id : null);
+    (typeof fields.userId === "string" ? fields.userId : null) ??
+    (typeof fields.user_id === "string" ? fields.user_id : null);
 
   let payload: Record<string, unknown> | null = null;
-  if (fields.payload && typeof fields.payload === 'object' && !Array.isArray(fields.payload)) {
+  if (fields.payload && typeof fields.payload === "object" && !Array.isArray(fields.payload)) {
     payload = fields.payload as Record<string, unknown>;
   } else if (fields.payload !== undefined && fields.payload !== null) {
     payload = { value: fields.payload };
   } else if (
     errorObj?.payload &&
-    typeof errorObj.payload === 'object' &&
+    typeof errorObj.payload === "object" &&
     !Array.isArray(errorObj.payload)
   ) {
     payload = errorObj.payload as Record<string, unknown>;
@@ -263,7 +263,7 @@ export function formatDatabaseLogRow(e: LogEvent): DatabaseLogRow {
 }
 
 /**
- * Persists error-level and unhandled error logs to the Supabase `public.logs` table.
+ * Persists error-level and unhandled error logs to the PostgreSQL `public.logs` table.
  * Operations are non-blocking and caught so DB failures never affect the request path.
  */
 export class DatabaseSink implements LogSink {
@@ -275,7 +275,7 @@ export class DatabaseSink implements LogSink {
   }
 
   async write(e: LogEvent): Promise<void> {
-    if (e.level !== 'error' && !e.event.includes('unhandled_error')) return;
+    if (e.level !== "error" && !e.event.includes("unhandled_error")) return;
     const dbUrl = this.url ?? process.env.DATABASE_URL;
     if (!dbUrl) return;
 
@@ -346,36 +346,36 @@ export function createSink(kind: SinkKind | (string & {}), options: SinkOptions 
   return factory(options);
 }
 
-registerSink('console', () => new ConsoleSink());
-registerSink('noop', () => new NoopSink());
-registerSink('memory', () => new MemorySink());
-registerSink('db', ({ env = {} }) => new DatabaseSink(env.DATABASE_URL));
-registerSink('postgres', ({ env = {} }) => new DatabaseSink(env.DATABASE_URL));
-registerSink('database', ({ env = {} }) => new DatabaseSink(env.DATABASE_URL));
+registerSink("console", () => new ConsoleSink());
+registerSink("noop", () => new NoopSink());
+registerSink("memory", () => new MemorySink());
+registerSink("db", ({ env = {} }) => new DatabaseSink(env.DATABASE_URL));
+registerSink("postgres", ({ env = {} }) => new DatabaseSink(env.DATABASE_URL));
+registerSink("database", ({ env = {} }) => new DatabaseSink(env.DATABASE_URL));
 registerSink(
-  'file',
+  "file",
   ({ env = {} }) =>
-    new FileSink(env.LOG_FILE || 'logs/api.log', Number(env.LOG_FILE_MAX_BYTES) || undefined),
+    new FileSink(env.LOG_FILE || "logs/api.log", Number(env.LOG_FILE_MAX_BYTES) || undefined),
 );
-registerSink('fanout', (o) => {
-  const kinds = (o.kinds ?? []).filter((k) => k !== 'fanout');
-  if (!kinds.length) throw new Error('fanout needs at least one non-fanout sink');
+registerSink("fanout", (o) => {
+  const kinds = (o.kinds ?? []).filter((k) => k !== "fanout");
+  if (!kinds.length) throw new Error("fanout needs at least one non-fanout sink");
   return new FanoutSink(kinds.map((k) => new SafeSink(createSink(k, o))));
 });
 
 /** Sink selected by LOG_SINK (default `console`; a comma list fans out). Never throws. */
 export function createSinkFromEnv(env: Env = process.env): LogSink {
-  const kinds = (env.LOG_SINK ?? 'console')
-    .split(',')
+  const kinds = (env.LOG_SINK ?? "console")
+    .split(",")
     .map((k) => k.trim())
-    .filter((k) => k && k !== 'fanout');
+    .filter((k) => k && k !== "fanout");
   try {
     const sinks: LogSink[] = [];
     for (const kind of kinds) {
       sinks.push(new SafeSink(createSink(kind, { env })));
     }
-    const hasDbSink = kinds.some((k) => k === 'db' || k === 'postgres' || k === 'database');
-    if (env.DATABASE_URL && !hasDbSink && !kinds.includes('noop')) {
+    const hasDbSink = kinds.some((k) => k === "db" || k === "postgres" || k === "database");
+    if (env.DATABASE_URL && !hasDbSink && !kinds.includes("noop")) {
       sinks.push(new SafeSink(new DatabaseSink(env.DATABASE_URL)));
     }
     if (sinks.length === 1) return sinks[0]!;

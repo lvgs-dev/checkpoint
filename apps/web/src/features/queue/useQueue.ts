@@ -1,16 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Desire,
   ManualResetResult,
   Recommendations,
   ReorderAccepted,
-} from '../../../../../packages/core/src/models';
-import { api, listPath } from '../../api/http';
-import { useQueryKeys } from '../../query/keys';
-import { useGameWriter } from '../playing/gameWriter';
-import { useSyncScoringVersion } from '../scoring';
-import { moveEntry, withDesire } from './queue-model';
+} from "../../../../../packages/core/src/models";
+import { api, listPath } from "../../api/http";
+import { useQueryKeys } from "../../query/keys";
+import { useGameWriter } from "../playing/gameWriter";
+import { useSyncScoringVersion } from "../scoring";
+import { moveEntry, withDesire } from "./queue-model";
 
 const SETTLE_MS = 1200;
 const FLASH_MS = 2500;
@@ -30,21 +30,21 @@ export function useQueue(listId: string) {
   const query = useQuery({
     queryKey: key,
     queryFn: ({ signal }) =>
-      api.get<Recommendations>(listPath(listId) + '/recommendations', { signal }),
+      api.get<Recommendations>(listPath(listId) + "/recommendations", { signal }),
   });
   const data = query.data;
 
-  const [actionError, setActionError] = useState('');
+  const [actionError, setActionError] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [announcement, say] = useState('');
+  const [announcement, say] = useState("");
   const pendingMoves = useRef(0);
   const moveFailed = useRef(false);
   const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const nameOf = (id: string) => data?.items.find((i) => i.game.id === id)?.game.name ?? 'Jogo';
+  const nameOf = (id: string) => data?.items.find((i) => i.game.id === id)?.game.name ?? "Jogo";
   const refetchNow = useCallback(() => void qc.invalidateQueries({ queryKey: key }), [qc, key]);
   const refetchNowRef = useRef(refetchNow);
   refetchNowRef.current = refetchNow;
@@ -94,11 +94,11 @@ export function useQueue(listId: string) {
   useEffect(
     () =>
       writer.onPlaying((event) => {
-        if (event.phase === 'failed')
+        if (event.phase === "failed")
           setActionError(`Não foi possível mudar o status de ${event.game.name}.`);
-        if (event.phase === 'saved' && !writer.pendingPlaying)
+        if (event.phase === "saved" && !writer.pendingPlaying)
           setNotice(
-            event.game.status === 'Jogando'
+            event.game.status === "Jogando"
               ? `${event.game.name} está em andamento.`
               : `${event.game.name} voltou para a fila.`,
           );
@@ -123,17 +123,17 @@ export function useQueue(listId: string) {
   );
 
   const reorder = useMutation({
-    scope: { id: 'queue:' + listId },
+    scope: { id: "queue:" + listId },
     mutationFn: (v: { id: string; toPosition: number }) =>
-      api.post<ReorderAccepted>(listPath(listId) + '/queue/reorder', {
+      api.post<ReorderAccepted>(listPath(listId) + "/queue/reorder", {
         json: { gameId: v.id, toPosition: v.toPosition },
       }),
     onError: (e, v) => {
       moveFailed.current = true;
       setActionError(
-        `Não foi possível mover ${nameOf(v.id)}${e.message ? ': ' + e.message : ''}. A fila voltou à última ordem salva.`,
+        `Não foi possível mover ${nameOf(v.id)}${e.message ? ": " + e.message : ""}. A fila voltou à última ordem salva.`,
       );
-      say('Erro ao salvar. A ordem salva foi restaurada.');
+      say("Erro ao salvar. A ordem salva foi restaurada.");
     },
     onSettled: () => {
       if (--pendingMoves.current > 0) return;
@@ -157,7 +157,7 @@ export function useQueue(listId: string) {
   const resetMutation = useMutation({
     mutationFn: (id: string) =>
       api.delete<ManualResetResult>(
-        listPath(listId) + '/queue/adjustments/' + encodeURIComponent(id),
+        listPath(listId) + "/queue/adjustments/" + encodeURIComponent(id),
       ),
   });
 
@@ -167,16 +167,16 @@ export function useQueue(listId: string) {
     isFetching: query.isFetching,
     /** Pull the queue again (the "Recalcular a fila" action). */
     recalculate: () => {
-      setActionError('');
+      setActionError("");
       return query.refetch();
     },
     error:
       actionError ||
       (query.isError
         ? data
-          ? 'Sem conexão com a API: mostrando a última ordem salva neste aparelho.'
-          : 'Não foi possível calcular a ordem. Confira a API.'
-        : ''),
+          ? "Sem conexão com a API: mostrando a última ordem salva neste aparelho."
+          : "Não foi possível calcular a ordem. Confira a API."
+        : ""),
     setError: setActionError,
     notice,
     setNotice,
@@ -193,7 +193,7 @@ export function useQueue(listId: string) {
       qc.setQueryData<Recommendations>(key, moveEntry(data, fromIndex, toIndex));
       setNotice(null);
       showFlash(id);
-      setActionError('');
+      setActionError("");
       say(`${nameOf(id)} fixado na posição ${toIndex + 1}.`);
       if (settleTimer.current) {
         clearTimeout(settleTimer.current);
@@ -217,17 +217,17 @@ export function useQueue(listId: string) {
     async resetManual(id: string) {
       if (busyId || pendingMoves.current) return;
       setBusyId(id);
-      setActionError('');
+      setActionError("");
       try {
         const r = await resetMutation.mutateAsync(id);
         qc.setQueryData(key, r.recommendations);
         showFlash(id);
         const pos = r.recommendations.items.findIndex((i) => i.game.id === id) + 1;
-        const text = `${nameOf(id)} voltou à posição do algoritmo${pos ? ' (' + pos + 'ª)' : ''}.`;
+        const text = `${nameOf(id)} voltou à posição do algoritmo${pos ? " (" + pos + "ª)" : ""}.`;
         setNotice(text);
         say(text);
       } catch {
-        setActionError('Não foi possível soltar a posição fixa.');
+        setActionError("Não foi possível soltar a posição fixa.");
       } finally {
         setBusyId(null);
       }

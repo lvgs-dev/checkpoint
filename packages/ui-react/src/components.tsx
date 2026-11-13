@@ -1,13 +1,13 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 /** Neutral placeholder for "nothing here". */
 export function EmptyState({
   title,
   description,
-  'data-testid': testId,
+  "data-testid": testId,
   action,
 }: {
-  'data-testid'?: string;
+  "data-testid"?: string;
   title: string;
   description?: ReactNode;
   action?: ReactNode;
@@ -25,10 +25,10 @@ export function EmptyState({
 export function ErrorState({
   message,
   onRetry,
-  'data-testid': testId,
-  retryLabel = 'Tentar de novo',
+  "data-testid": testId,
+  retryLabel = "Tentar de novo",
 }: {
-  'data-testid'?: string;
+  "data-testid"?: string;
   message: string;
   onRetry?: () => void;
   retryLabel?: string;
@@ -52,25 +52,25 @@ export function ErrorState({
 
 /** Modal confirmation on the native <dialog> (focus trap and Escape come from the platform; a backdrop click cancels). */
 export function ConfirmDialog({
-  'data-testid': testId,
+  "data-testid": testId,
   open,
   title,
   description,
-  confirmLabel = 'Confirmar',
-  cancelLabel = 'Cancelar',
+  confirmLabel = "Confirmar",
+  cancelLabel = "Cancelar",
   destructive,
   defaultFocus,
   onConfirm,
   onCancel,
 }: {
-  'data-testid'?: string;
+  "data-testid"?: string;
   open: boolean;
   title: string;
   description?: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
-  defaultFocus?: 'confirm' | 'cancel';
+  defaultFocus?: "confirm" | "cancel";
   onConfirm(): void;
   onCancel(): void;
 }) {
@@ -78,7 +78,7 @@ export function ConfirmDialog({
   const cancelBtnRef = useRef<HTMLButtonElement>(null);
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
-  const focusConfirm = defaultFocus ? defaultFocus === 'confirm' : !destructive;
+  const focusConfirm = defaultFocus ? defaultFocus === "confirm" : !destructive;
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
@@ -118,7 +118,7 @@ export function ConfirmDialog({
           ref={confirmBtnRef}
           data-testid={testId && `${testId}-confirm`}
           type="button"
-          className={destructive ? 'button danger' : 'button primary'}
+          className={destructive ? "button danger" : "button primary"}
           onClick={onConfirm}
           autoFocus={focusConfirm}
         >

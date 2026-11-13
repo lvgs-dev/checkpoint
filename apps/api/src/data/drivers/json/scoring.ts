@@ -1,9 +1,9 @@
 // JSON local: configuração do algoritmo por lista, `{ lists: { [listId]: registro } }`.
 // Arquivo antigo (uma config só) vira a config da lista padrão. Um só usuário: `owner` é ignorado.
-import type { ScoringConfig } from '../../../../../../packages/core/src/models.ts';
-import type { ScoringDriver, ScoringRecord } from '../types.ts';
-import { JsonFile } from './file.ts';
-import { LOCAL_DEFAULT_LIST_ID } from './lists.ts';
+import type { ScoringConfig } from "../../../../../../packages/core/src/models.ts";
+import type { ScoringDriver, ScoringRecord } from "../types.ts";
+import { JsonFile } from "./file.ts";
+import { LOCAL_DEFAULT_LIST_ID } from "./lists.ts";
 
 interface StoredEntry {
   config: { weights: unknown; rules: unknown; filters: unknown };
@@ -18,7 +18,7 @@ const fromJson = (data: Record<string, unknown> | null | undefined): StoredEntry
   return {
     config: { weights: config?.weights, rules: config?.rules, filters: config?.filters },
     version: Number.isInteger(data?.version) ? (data!.version as number) : 0,
-    updatedAt: typeof data?.updatedAt === 'string' ? data.updatedAt : null,
+    updatedAt: typeof data?.updatedAt === "string" ? data.updatedAt : null,
   };
 };
 const toRecord = (e: StoredEntry): ScoringRecord => ({
@@ -38,7 +38,7 @@ export class JsonScoringDriver implements ScoringDriver {
   private async load() {
     const data = (await this.file.read()) as Record<string, unknown> | undefined;
     if (!data) return;
-    if (data.lists && typeof data.lists === 'object')
+    if (data.lists && typeof data.lists === "object")
       for (const [id, s] of Object.entries(data.lists))
         this.byList.set(id, fromJson(s as Record<string, unknown>));
     else this.byList.set(LOCAL_DEFAULT_LIST_ID, fromJson(data));

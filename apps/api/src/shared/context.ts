@@ -1,18 +1,17 @@
 // Contexto por requisição (AsyncLocalStorage): qualquer função chamada durante a
 // requisição — serviço, repositório — lê o usuário com getContext(), sem precisar
 // receber userId/token como parâmetro em toda a cadeia.
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { randomUUID } from 'node:crypto';
-import type { Role } from '../../../../packages/core/src/authorization.ts';
+import { AsyncLocalStorage } from "node:async_hooks";
+import { randomUUID } from "node:crypto";
+import type { Role } from "../../../../packages/core/src/authorization.ts";
 
 export interface RequestContext {
   requestId: string;
-  /** `sub` do JWT do Supabase (auth.users.id). Ausente em rotas públicas. */
+  /** Local authentication identity. Absent on public routes. */
   userId?: string;
-  /** JWT do usuário, para chamadas ao Supabase "como o usuário" (RLS). */
-  accessToken?: string;
-  /** Product role from the verified JWT `app_metadata.role` (never the Supabase DB role). */
+  /** Product role read from the identity record. */
   role?: Role;
+  emailVerified?: boolean;
   /** E-mail do token (usado só para vincular o app_user do seed no primeiro login). */
   email?: string;
   /** app_user.id resolvido (cache por requisição; scripts/testes podem defini-lo direto). */

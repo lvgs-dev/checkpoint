@@ -1,41 +1,43 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api, isApiError } from './http';
-import { authSession } from '../auth/session';
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-describe('HTTP client auth resilience', () => {
-  beforeEach(() => {
-    vi.stubGlobal('location', { origin: 'http://localhost:5173' });
-    vi.stubGlobal('window', { event: undefined });
-  });
+// Keep transport tests independent from network and browser globals.
+const transport = vi.hoisted(() => ({ send: vi.fn(), create: vi.fn() }));
+vi.mock("ky", () => ({
+  default: {
+    create: (options: unknown) => {
+      transport.create(options);
+      return transport.send;
+    },
+  },
+  isHTTPError: () => false,
+  isTimeoutError: () => false,
+}));
+vi.mock("./timing", () => ({
+  clickToSendMs: () => 0,
+  computeTiming: () => ({}),
+  recordTiming: () => {},
+}));
+import { api } from "./http";
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
-
-  it('times out and converts to 408 ApiError when auth token resolution hangs', async () => {
-    vi.spyOn(authSession, 'enabled', 'get').mockReturnValue(true);
-    // Never-resolving auth promise
-    vi.spyOn(authSession, 'accessToken').mockReturnValue(new Promise(() => {}));
-
-    const start = Date.now();
-    await expect(api.get('games', { timeout: 50 })).rejects.toSatisfy((err: unknown) => {
-      return isApiError(err) && err.status === 408;
-    });
-    expect(Date.now() - start).toBeLessThan(1000);
-  });
-
-  it('respects abort signal while waiting for auth token', async () => {
-    vi.spyOn(authSession, 'enabled', 'get').mockReturnValue(true);
-    vi.spyOn(authSession, 'accessToken').mockReturnValue(new Promise(() => {}));
-
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 20);
-
-    await expect(api.get('games', { signal: controller.signal })).rejects.toSatisfy(
-      (err: unknown) => {
-        return err instanceof DOMException && err.name === 'AbortError';
-      },
+afterEach(() => {
+  transport.send.mockReset();
+  vi.unstubAllGlobals();
+});
+describe("cookie API transport", () => {
+  it("includes browser credentials without bearer headers", async () => {
+    vi.stubGlobal("window", { event: undefined });
+    transport.send.mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+    // Evaluate the client inside the test so its ky.create call is observed here.
+    vi.resetModules();
+    const { api: fresh } = await import("./http");
+    expect(await fresh.get("games")).toEqual({ ok: true });
+    expect(transport.create).toHaveBeenCalledWith(
+      expect.objectContaining({ credentials: "include", retry: 0 }),
     );
+    expect(transport.send.mock.calls[0][1].headers.Authorization).toBeUndefined();
+  });
+  it("rejects absolute paths before transport", async () => {
+    await expect(api.get("https://foreign.example")).rejects.toThrow("API paths must be relative");
+    expect(transport.send).not.toHaveBeenCalled();
   });
 });

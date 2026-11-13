@@ -1,20 +1,20 @@
 // Helper para inicializar e encerrar o servidor da API em porta efêmera e modo JSON local.
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import type { AddressInfo } from 'node:net';
-import type { Server } from 'node:http';
-import { makeServer } from '../../src/main/server.ts';
-import { createService } from '../../src/main/setup.ts';
-import type { Authenticator, AuthUser } from '../../src/auth/auth.ts';
-import { Role } from '../../../../packages/core/src/authorization.ts';
-import { AppError } from '../../src/shared/errors.ts';
-import type { GameService } from '../../src/services/games.ts';
-import type { WishlistService } from '../../src/services/wishlist.ts';
-import type { ConfigService } from '../../src/services/config.ts';
-import type { TrackService } from '../../src/services/track.ts';
-import { SEED_APP_USER_ID } from '../../src/services/auth-user.ts';
-import { closeDb, db } from '../../src/data/db.ts';
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import type { AddressInfo } from "node:net";
+import type { Server } from "node:http";
+import { makeServer } from "../../src/main/server.ts";
+import { createService } from "../../src/main/setup.ts";
+import type { Authenticator, AuthUser } from "../../src/auth/auth.ts";
+import { Role } from "../../../../packages/core/src/authorization.ts";
+import { AppError } from "../../src/shared/errors.ts";
+import type { GameService } from "../../src/services/games.ts";
+import type { WishlistService } from "../../src/services/wishlist.ts";
+import type { ConfigService } from "../../src/services/config.ts";
+import type { TrackService } from "../../src/services/track.ts";
+import { SEED_APP_USER_ID } from "../../src/services/auth-user.ts";
+import { closeDb, db } from "../../src/data/db.ts";
 
 export interface TestServerContext {
   server: Server;
@@ -38,21 +38,19 @@ export interface MockUser {
 export function createMockAuthenticator(users: Record<string, MockUser> = {}): Authenticator {
   return {
     async authenticate(authorization: string | undefined): Promise<AuthUser> {
-      const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? '');
+      const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? "");
       if (!match) {
-        throw new AppError('Autenticação necessária', 401);
+        throw new AppError("Autenticação necessária", 401);
       }
       const token = match[1];
       const user = users[token];
       if (!user) {
-        throw new AppError('Token inválido', 401);
+        throw new AppError("Token inválido", 401);
       }
       return {
         id: user.id,
         email: user.email,
         role: user.role ?? Role.User,
-        accessToken: token,
-        claims: { sub: user.id },
       };
     },
   };
@@ -71,19 +69,19 @@ export async function startTestServer(
   const databaseUrl =
     options.initialUsers || options.postgres ? process.env.SECURITY_TEST_DATABASE_URL : undefined;
   if ((options.initialUsers || options.postgres) && !databaseUrl)
-    throw new Error('PostgreSQL tests require SECURITY_TEST_DATABASE_URL');
+    throw new Error("PostgreSQL tests require SECURITY_TEST_DATABASE_URL");
   if (databaseUrl) {
     const url = new URL(databaseUrl);
     if (
-      !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) ||
-      !url.pathname.startsWith('/checkpoint_security_')
+      !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
+      !url.pathname.startsWith("/checkpoint_security_")
     )
-      throw new Error('Security tests require a local checkpoint_security_ database');
+      throw new Error("Security tests require a local checkpoint_security_ database");
   }
-  const dataDir = await mkdtemp(join(tmpdir(), 'checkpoint-sec-'));
+  const dataDir = await mkdtemp(join(tmpdir(), "checkpoint-sec-"));
   // Do not inherit storage paths, driver overrides, credentials, or Steam configuration.
   const testEnv: Record<string, string | undefined> = {
-    NODE_ENV: 'test',
+    NODE_ENV: "test",
     DATABASE_URL: databaseUrl,
   };
 
@@ -98,9 +96,9 @@ export async function startTestServer(
       await sql`DELETE FROM game WHERE name LIKE 'Private game %'`;
     }
     for (const user of Object.values(options.initialUsers)) {
-      await sql`INSERT INTO auth.users (id, email) VALUES (${user.id}, ${user.email ?? null})
+      await sql`INSERT INTO auth_identity (id, email) VALUES (${user.id}, ${user.email ?? null})
                 ON CONFLICT (id) DO NOTHING`;
-      await sql`INSERT INTO app_user (id, auth_user_id, email) VALUES (${user.id}, ${user.id}, ${user.email ?? null})
+      await sql`INSERT INTO app_user (id, auth_identity_id, email) VALUES (${user.id}, ${user.id}, ${user.email ?? null})
                 ON CONFLICT (id) DO NOTHING`;
     }
   }
@@ -124,8 +122,8 @@ export async function startTestServer(
   const server = makeServer(service, auth, wishlist, null, config, track);
 
   await new Promise<void>((resolve, reject) => {
-    server.listen(0, '127.0.0.1', () => resolve());
-    server.once('error', reject);
+    server.listen(0, "127.0.0.1", () => resolve());
+    server.once("error", reject);
   });
 
   const address = server.address() as AddressInfo;
@@ -133,7 +131,7 @@ export async function startTestServer(
   const baseUrl = `http://127.0.0.1:${port}`;
 
   const close = async () => {
-    if (typeof server.closeAllConnections === 'function') {
+    if (typeof server.closeAllConnections === "function") {
       server.closeAllConnections();
     }
     await new Promise<void>((resolve, reject) => {
@@ -162,7 +160,7 @@ export async function testFetch(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const url = `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
+  const url = `${baseUrl}${path.startsWith("/") ? path : "/" + path}`;
   const signal = init.signal ?? AbortSignal.timeout(5000);
   return fetch(url, {
     ...init,

@@ -1,43 +1,43 @@
-import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
-import type { Catalog, ScoredGame } from '../../../../packages/core/src/models';
-import { api, isApiError } from '../api/http';
-import { DateTimePicker } from '@/components/ui/date-time-picker';
-import { FinishDialog } from '../features/finish-dialog';
-import { AppLoader } from '../features/loader/AppLoader';
-import { GameActionIcons, GameDetailTags } from '../features/details';
-import { MetadataSelect } from '../features/metadata';
-import { useGameWriter } from '../features/playing';
-import { PrerequisiteSearch } from '../features/prerequisite-search';
-import { useQueryKeys } from '../query/keys';
-import './detail.css';
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router";
+import type { Catalog, ScoredGame } from "../../../../packages/core/src/models";
+import { api, isApiError } from "../api/http";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
+import { FinishDialog } from "../features/finish-dialog";
+import { AppLoader } from "../features/loader/AppLoader";
+import { GameActionIcons, GameDetailTags } from "../features/details";
+import { MetadataSelect } from "../features/metadata";
+import { useGameWriter } from "../features/playing";
+import { PrerequisiteSearch } from "../features/prerequisite-search";
+import { useQueryKeys } from "../query/keys";
+import "./detail.css";
 
 /** Fields sent to PATCH /games/:id when they changed. */
 const FIELDS = [
-  'name',
-  'primaryGenre',
-  'status',
-  'desire',
-  'actualHours',
-  'finishedAt',
-  'startedAt',
-  'rating',
-  'notes',
-  'secondaryTags',
-  'pace',
-  'mechanic',
-  'structure',
-  'store',
-  'platform',
-  'mainHours',
-  'extraHours',
-  'completionistHours',
-  'prerequisiteId',
+  "name",
+  "primaryGenre",
+  "status",
+  "desire",
+  "actualHours",
+  "finishedAt",
+  "startedAt",
+  "rating",
+  "notes",
+  "secondaryTags",
+  "pace",
+  "mechanic",
+  "structure",
+  "store",
+  "platform",
+  "mainHours",
+  "extraHours",
+  "completionistHours",
+  "prerequisiteId",
 ] as const;
-const NULLABLE_WHEN_EMPTY = ['finishedAt', 'startedAt', 'prerequisiteId'];
+const NULLABLE_WHEN_EMPTY = ["finishedAt", "startedAt", "prerequisiteId"];
 const SHARED_FIELD_FORBIDDEN =
-  'Você não tem permissão para alterar dados compartilhados do catálogo.';
+  "Você não tem permissão para alterar dados compartilhados do catálogo.";
 
 function safeDecode(str: string): string {
   try {
@@ -48,19 +48,19 @@ function safeDecode(str: string): string {
 }
 
 export function DetailPage() {
-  const { id: rawId = '' } = useParams();
+  const { id: rawId = "" } = useParams();
   const id = safeDecode(rawId).trim();
-  const back = useSearchParams()[0].get('from') === 'ordem' ? '/ordem' : '/jogos';
+  const back = useSearchParams()[0].get("from") === "ordem" ? "/ordem" : "/jogos";
   const k = useQueryKeys();
   const writer = useGameWriter();
   const gameQuery = useQuery({
     queryKey: k.game(id),
-    queryFn: ({ signal }) => api.get<ScoredGame>('games/' + encodeURIComponent(id), { signal }),
+    queryFn: ({ signal }) => api.get<ScoredGame>("games/" + encodeURIComponent(id), { signal }),
     enabled: Boolean(id),
   });
   const catalogQuery = useQuery({
     queryKey: k.catalog(),
-    queryFn: ({ signal }) => api.get<Catalog>('catalog', { signal }),
+    queryFn: ({ signal }) => api.get<Catalog>("catalog", { signal }),
   });
   const game = gameQuery.data;
   const catalog = catalogQuery.data;
@@ -70,7 +70,7 @@ export function DetailPage() {
   const [autoFinish, setAutoFinish] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [saveError, setSaveError] = useState('');
+  const [saveError, setSaveError] = useState("");
   const [finishing, setFinishing] = useState(false);
 
   const isLoading = Boolean(id) && gameQuery.isLoading && !game;
@@ -80,40 +80,40 @@ export function DetailPage() {
   const error =
     saveError ||
     (!id
-      ? 'Jogo não encontrado.'
+      ? "Jogo não encontrado."
       : isGameError
         ? isApiError(gameQuery.error) && gameQuery.error.status === 404
-          ? 'Jogo não encontrado.'
-          : 'Não foi possível carregar o jogo.'
+          ? "Jogo não encontrado."
+          : "Não foi possível carregar o jogo."
         : isCatalogError
-          ? 'Não foi possível carregar os dados do catálogo.'
+          ? "Não foi possível carregar os dados do catálogo."
           : isNotFound
-            ? 'Jogo não encontrado.'
-            : '');
+            ? "Jogo não encontrado."
+            : "");
   const form = edits ?? game;
   const set = <K extends keyof ScoredGame>(key: K, value: ScoredGame[K]) =>
     game && setEdits({ ...(edits ?? game), [key]: value });
-  const num = (key: 'actualHours' | 'mainHours' | 'extraHours' | 'completionistHours') => ({
-    value: form?.[key] ?? '',
+  const num = (key: "actualHours" | "mainHours" | "extraHours" | "completionistHours") => ({
+    value: form?.[key] ?? "",
     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      set(key, e.target.value === '' ? null : Number(e.target.value)),
+      set(key, e.target.value === "" ? null : Number(e.target.value)),
   });
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (!game || !form) return;
     setSaving(true);
-    setSaveError('');
+    setSaveError("");
     setSaved(false);
     try {
-      if (form.secondaryTags.length > 3) throw new Error('Use até três tags secundárias.');
+      if (form.secondaryTags.length > 3) throw new Error("Use até três tags secundárias.");
       const patch: Record<string, unknown> = {};
       for (const key of FIELDS) {
         let v: unknown = form[key];
-        if (NULLABLE_WHEN_EMPTY.includes(key) && v === '') v = null;
+        if (NULLABLE_WHEN_EMPTY.includes(key) && v === "") v = null;
         if (JSON.stringify(v) !== JSON.stringify(game[key])) patch[key] = v;
       }
-      if (Object.hasOwn(patch, 'rating')) patch['autoFinish'] = autoFinish;
+      if (Object.hasOwn(patch, "rating")) patch["autoFinish"] = autoFinish;
       await writer.save(game.id, patch);
       setEdits(null);
       setSaved(true);
@@ -123,7 +123,7 @@ export function DetailPage() {
           ? SHARED_FIELD_FORBIDDEN
           : e instanceof Error
             ? e.message
-            : 'Não foi possível salvar.',
+            : "Não foi possível salvar.",
       );
     } finally {
       setSaving(false);
@@ -131,11 +131,11 @@ export function DetailPage() {
   }
 
   const g = game;
-  const formattedJson = useMemo(() => (g ? JSON.stringify(g, null, 2) : ''), [g]);
+  const formattedJson = useMemo(() => (g ? JSON.stringify(g, null, 2) : ""), [g]);
   return (
     <div className="detail-page">
       <Link data-testid="detail-back" className="back-link" to={back}>
-        ← {back === '/ordem' ? 'Voltar para a ordem de jogos' : 'Voltar para a biblioteca'}
+        ← {back === "/ordem" ? "Voltar para a ordem de jogos" : "Voltar para a biblioteca"}
       </Link>
       {error && (
         <div className="error" role="alert">
@@ -150,7 +150,7 @@ export function DetailPage() {
                 <img
                   src={g.coverUrl}
                   alt=""
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                  onError={(e) => (e.currentTarget.style.display = "none")}
                 />
               )}
               <span>{g.name.slice(0, 1)}</span>
@@ -179,7 +179,7 @@ export function DetailPage() {
                   <p className="muted">Sua avaliação ajuda a escolher os próximos jogos.</p>
                   <div className="field-label" id="rating-label">
                     Nota pessoal
-                    <span>{form.rating ?? 'Sem nota'} / 5</span>
+                    <span>{form.rating ?? "Sem nota"} / 5</span>
                   </div>
                   <div className="stars" role="group" aria-labelledby="rating-label">
                     {[1, 2, 3, 4, 5].map((n) => (
@@ -187,10 +187,10 @@ export function DetailPage() {
                         data-testid={`detail-rating-${n}`}
                         key={n}
                         type="button"
-                        className={(form.rating ?? 0) >= n ? 'selected' : undefined}
+                        className={(form.rating ?? 0) >= n ? "selected" : undefined}
                         aria-label={`Nota ${n} de 5`}
                         aria-pressed={form.rating === n}
-                        onClick={() => set('rating', n)}
+                        onClick={() => set("rating", n)}
                       >
                         ★
                       </button>
@@ -199,7 +199,7 @@ export function DetailPage() {
                       data-testid="detail-rating-clear"
                       className="clear-rating"
                       type="button"
-                      onClick={() => set('rating', null)}
+                      onClick={() => set("rating", null)}
                     >
                       Limpar
                     </button>
@@ -211,7 +211,7 @@ export function DetailPage() {
                       name="autoFinish"
                       checked={autoFinish}
                       onChange={(e) => setAutoFinish(e.target.checked)}
-                    />{' '}
+                    />{" "}
                     Ao dar uma nova nota, marcar como finalizado
                   </label>
                   <div className="form-grid">
@@ -222,8 +222,8 @@ export function DetailPage() {
                       options={catalog?.statuses ?? []}
                       value={form.status}
                       onValueChange={(v) =>
-                        catalog?.statuses.includes(v as ScoredGame['status']) &&
-                        set('status', v as ScoredGame['status'])
+                        catalog?.statuses.includes(v as ScoredGame["status"]) &&
+                        set("status", v as ScoredGame["status"])
                       }
                     />
                     <MetadataSelect
@@ -233,8 +233,8 @@ export function DetailPage() {
                       options={catalog?.desires ?? []}
                       value={form.desire}
                       onValueChange={(v) =>
-                        catalog?.desires.includes(v as ScoredGame['desire']) &&
-                        set('desire', v as ScoredGame['desire'])
+                        catalog?.desires.includes(v as ScoredGame["desire"]) &&
+                        set("desire", v as ScoredGame["desire"])
                       }
                     />
                     <label>
@@ -247,7 +247,7 @@ export function DetailPage() {
                         max={100000}
                         step={0.1}
                         placeholder="Seu tempo real"
-                        {...num('actualHours')}
+                        {...num("actualHours")}
                       />
                     </label>
                     <label>
@@ -258,7 +258,7 @@ export function DetailPage() {
                         mode="date"
                         placeholder="dd/mm/aaaa"
                         value={form.finishedAt || null}
-                        onChange={(v) => set('finishedAt', v ?? '')}
+                        onChange={(v) => set("finishedAt", v ?? "")}
                       />
                     </label>
                     <label>
@@ -269,7 +269,7 @@ export function DetailPage() {
                         mode="date"
                         placeholder="dd/mm/aaaa"
                         value={form.startedAt || null}
-                        onChange={(v) => set('startedAt', v ?? '')}
+                        onChange={(v) => set("startedAt", v ?? "")}
                       />
                     </label>
                   </div>
@@ -279,7 +279,7 @@ export function DetailPage() {
                       data-testid="detail-notes"
                       name="notes"
                       value={form.notes}
-                      onChange={(e) => set('notes', e.target.value)}
+                      onChange={(e) => set("notes", e.target.value)}
                       rows={5}
                       placeholder="O que vale lembrar sobre este jogo?"
                     />
@@ -294,7 +294,7 @@ export function DetailPage() {
                       kind="genre"
                       options={catalog?.genres ?? []}
                       value={form.primaryGenre}
-                      onValueChange={(v) => set('primaryGenre', v)}
+                      onValueChange={(v) => set("primaryGenre", v)}
                     />
                     <MetadataSelect
                       data-testid="detail-tags"
@@ -303,7 +303,7 @@ export function DetailPage() {
                       kind="tag"
                       options={catalog?.tags ?? []}
                       values={form.secondaryTags}
-                      onValuesChange={(v) => set('secondaryTags', v)}
+                      onValuesChange={(v) => set("secondaryTags", v)}
                     />
                   </div>
                 </section>
@@ -317,7 +317,7 @@ export function DetailPage() {
                         data-testid="detail-name"
                         name="name"
                         value={form.name}
-                        onChange={(e) => set('name', e.target.value)}
+                        onChange={(e) => set("name", e.target.value)}
                         required
                       />
                     </label>
@@ -327,7 +327,7 @@ export function DetailPage() {
                       kind="pace"
                       options={catalog?.paces ?? []}
                       value={form.pace}
-                      onValueChange={(v) => set('pace', v)}
+                      onValueChange={(v) => set("pace", v)}
                     />
                     <MetadataSelect
                       data-testid="detail-mechanic"
@@ -335,7 +335,7 @@ export function DetailPage() {
                       kind="mechanic"
                       options={catalog?.mechanics ?? []}
                       value={form.mechanic}
-                      onValueChange={(v) => set('mechanic', v)}
+                      onValueChange={(v) => set("mechanic", v)}
                     />
                     <MetadataSelect
                       data-testid="detail-structure"
@@ -343,7 +343,7 @@ export function DetailPage() {
                       kind="structure"
                       options={catalog?.structures ?? []}
                       value={form.structure}
-                      onValueChange={(v) => set('structure', v)}
+                      onValueChange={(v) => set("structure", v)}
                     />
                     <MetadataSelect
                       data-testid="detail-store"
@@ -351,7 +351,7 @@ export function DetailPage() {
                       kind="store"
                       options={catalog?.stores ?? []}
                       value={form.store}
-                      onValueChange={(v) => set('store', v)}
+                      onValueChange={(v) => set("store", v)}
                     />
                     <MetadataSelect
                       data-testid="detail-platform"
@@ -359,7 +359,7 @@ export function DetailPage() {
                       kind="platform"
                       options={catalog?.platforms ?? []}
                       value={form.platform}
-                      onValueChange={(v) => set('platform', v)}
+                      onValueChange={(v) => set("platform", v)}
                     />
                     <label>
                       Campanha principal (h)
@@ -369,7 +369,7 @@ export function DetailPage() {
                         name="main"
                         min={0}
                         step={0.1}
-                        {...num('mainHours')}
+                        {...num("mainHours")}
                       />
                     </label>
                     <label>
@@ -380,7 +380,7 @@ export function DetailPage() {
                         name="extra"
                         min={0}
                         step={0.1}
-                        {...num('extraHours')}
+                        {...num("extraHours")}
                       />
                     </label>
                     <label>
@@ -391,21 +391,21 @@ export function DetailPage() {
                         name="complete"
                         min={0}
                         step={0.1}
-                        {...num('completionistHours')}
+                        {...num("completionistHours")}
                       />
                     </label>
                     <PrerequisiteSearch
                       excludeId={g.id}
                       value={form.prerequisiteId}
-                      onValueChange={(v) => set('prerequisiteId', v)}
+                      onValueChange={(v) => set("prerequisiteId", v)}
                     />
                   </div>
                 </section>
                 <div className="save-bar">
                   <span role="status" data-testid="detail-save-status">
                     {saved
-                      ? 'Salvo. A ordem já foi recalculada.'
-                      : 'Salvar recalcula a ordem de todas as listas.'}
+                      ? "Salvo. A ordem já foi recalculada."
+                      : "Salvar recalcula a ordem de todas as listas."}
                   </span>
                   <button
                     data-testid="detail-notes-save"
@@ -416,7 +416,7 @@ export function DetailPage() {
                     {saving ? (
                       <AppLoader layout="inline" size="sm" label="Salvando…" />
                     ) : (
-                      'Salvar avaliação'
+                      "Salvar avaliação"
                     )}
                   </button>
                 </div>
@@ -435,15 +435,15 @@ export function DetailPage() {
                     </div>
                     <div>
                       <dt>Tempo no seu ritmo</dt>
-                      <dd>{g.plannedHours === null ? 'A confirmar' : g.plannedHours + ' h'}</dd>
+                      <dd>{g.plannedHours === null ? "A confirmar" : g.plannedHours + " h"}</dd>
                     </div>
                     <div>
                       <dt>Horas na Steam</dt>
-                      <dd>{g.steamHours === null ? '—' : g.steamHours + ' h'}</dd>
+                      <dd>{g.steamHours === null ? "—" : g.steamHours + " h"}</dd>
                     </div>
                     <div>
                       <dt>Steam App ID</dt>
-                      <dd>{g.steamAppId ?? '—'}</dd>
+                      <dd>{g.steamAppId ?? "—"}</dd>
                     </div>
                   </dl>
                   <p className="muted small">
@@ -457,7 +457,7 @@ export function DetailPage() {
                 <section className="panel">
                   <h3>Referências da planilha</h3>
                   <p className="muted small">
-                    {g.timeVerification || 'Estimativa sem verificação'} · {g.size}
+                    {g.timeVerification || "Estimativa sem verificação"} · {g.size}
                   </p>
                   {/^https?:\/\//.test(g.timeSource) && (
                     <a

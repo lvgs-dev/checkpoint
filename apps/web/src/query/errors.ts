@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { isApiError } from '../api/errors';
+import { useEffect } from "react";
+import { isApiError } from "../api/errors";
 
 /** Message safe to show to users for any thrown value. */
 export const errorMessage = (error: unknown) =>
-  isApiError(error) ? error.message : 'Algo deu errado. Tente de novo.';
+  isApiError(error) ? error.message : "Algo deu errado. Tente de novo.";
 
 type Listener = (message: string, error: unknown) => void;
 const listeners = new Set<Listener>();

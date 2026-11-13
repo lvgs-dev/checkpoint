@@ -1,23 +1,23 @@
-import { createRateLimiter } from '../auth/rate-limit.ts';
-import { AppError } from './errors.ts';
+import { createRateLimiter } from "../auth/rate-limit.ts";
+import { AppError } from "./errors.ts";
 
 /** Private stores share identity and foreign keys. JSON supports one local user only. */
 export function assertPrivateStores(
-  stores: Record<string, 'pg' | 'json'>,
+  stores: Record<string, "pg" | "json">,
   authenticated: boolean,
 ): void {
   const privateStores = [
-    'GAMES_STORE',
-    'LISTS_STORE',
-    'PINS_STORE',
-    'SCORING_STORE',
-    'APP_USERS_STORE',
+    "GAMES_STORE",
+    "LISTS_STORE",
+    "PINS_STORE",
+    "SCORING_STORE",
+    "APP_USERS_STORE",
   ];
   const selected = privateStores.map((name) => stores[name]);
   if (selected.some((kind) => kind !== selected[0]))
-    throw new Error('Private stores must use the same driver');
-  if (authenticated && selected.some((kind) => kind !== 'pg'))
-    throw new Error('Authenticated operation requires PostgreSQL for every private store');
+    throw new Error("Private stores must use the same driver");
+  if (authenticated && selected.some((kind) => kind !== "pg"))
+    throw new Error("Authenticated operation requires PostgreSQL for every private store");
 }
 
 /** shortcut: counters apply per process; use a shared store for limits across instances. */
@@ -26,8 +26,8 @@ export function createRequestAdmission(limit: number, windowMs: number, maxConcu
   const active = new Map<string, number>();
   return (key: string): (() => void) => {
     if (!allow(key) || (active.get(key) ?? 0) >= maxConcurrent)
-      throw new AppError('Muitas operações. Tente novamente mais tarde', 429, {
-        'Retry-After': String(Math.ceil(windowMs / 1000)),
+      throw new AppError("Muitas operações. Tente novamente mais tarde", 429, {
+        "Retry-After": String(Math.ceil(windowMs / 1000)),
       });
     active.set(key, (active.get(key) ?? 0) + 1);
     let released = false;
@@ -75,7 +75,7 @@ export const requestDeadlineMs = () => Number(process.env.API_DEADLINE_MS) || 15
  */
 export function withDeadline<T>(ms: number, work: () => Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new AppError('Tempo de resposta esgotado', 504)), ms);
+    const timer = setTimeout(() => reject(new AppError("Tempo de resposta esgotado", 504)), ms);
     work().then(
       (value) => (clearTimeout(timer), resolve(value)),
       (error) => (clearTimeout(timer), reject(error)),

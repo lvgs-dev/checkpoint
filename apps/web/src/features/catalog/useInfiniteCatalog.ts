@@ -1,9 +1,9 @@
-import { useQueries } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
-import type { GamePage, ScoredGame } from '../../../../../packages/core/src/models';
-import { api } from '../../api/http';
-import { useQueryKeys } from '../../query/keys';
+import { useQueries } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
+import type { GamePage, ScoredGame } from "../../../../../packages/core/src/models";
+import { api } from "../../api/http";
+import { useQueryKeys } from "../../query/keys";
 
 export interface LibraryFilters {
   status: string;
@@ -21,11 +21,11 @@ export function useInfiniteCatalog(options: UseInfiniteCatalogOptions = {}) {
   const k = useQueryKeys();
   const [params, setParams] = useSearchParams();
 
-  const urlQ = params.get('q') ?? '';
-  const urlStatus = params.get('status') ?? '';
-  const urlGenre = params.get('primaryGenre') ?? '';
-  const urlStore = params.get('store') ?? '';
-  const urlSort = params.get('sort') ?? 'name';
+  const urlQ = params.get("q") ?? "";
+  const urlStatus = params.get("status") ?? "";
+  const urlGenre = params.get("primaryGenre") ?? "";
+  const urlStore = params.get("store") ?? "";
+  const urlSort = params.get("sort") ?? "name";
 
   const [searchInput, setSearchInput] = useState(urlQ);
   const [debouncedSearch, setDebouncedSearch] = useState(urlQ);
@@ -40,11 +40,11 @@ export function useInfiniteCatalog(options: UseInfiniteCatalogOptions = {}) {
   const updateUrl = useCallback(
     (newSearch: string, newFilters: LibraryFilters, newSort: string) => {
       const next = new URLSearchParams();
-      if (newSearch) next.set('q', newSearch);
-      if (newFilters.status) next.set('status', newFilters.status);
-      if (newFilters.primaryGenre) next.set('primaryGenre', newFilters.primaryGenre);
-      if (newFilters.store) next.set('store', newFilters.store);
-      if (newSort && newSort !== 'name') next.set('sort', newSort);
+      if (newSearch) next.set("q", newSearch);
+      if (newFilters.status) next.set("status", newFilters.status);
+      if (newFilters.primaryGenre) next.set("primaryGenre", newFilters.primaryGenre);
+      if (newFilters.store) next.set("store", newFilters.store);
+      if (newSort && newSort !== "name") next.set("sort", newSort);
       setParams(next, { replace: true });
     },
     [setParams],
@@ -56,11 +56,11 @@ export function useInfiniteCatalog(options: UseInfiniteCatalogOptions = {}) {
     const currentParams = params.toString();
     if (currentParams !== prevParamsRef.current) {
       prevParamsRef.current = currentParams;
-      const q = params.get('q') ?? '';
-      const s = params.get('status') ?? '';
-      const g = params.get('primaryGenre') ?? '';
-      const st = params.get('store') ?? '';
-      const so = params.get('sort') ?? 'name';
+      const q = params.get("q") ?? "";
+      const s = params.get("status") ?? "";
+      const g = params.get("primaryGenre") ?? "";
+      const st = params.get("store") ?? "";
+      const so = params.get("sort") ?? "name";
 
       setSearchInput(q);
       setDebouncedSearch(q);
@@ -114,7 +114,7 @@ export function useInfiniteCatalog(options: UseInfiniteCatalogOptions = {}) {
       return {
         queryKey: [
           ...k.games(),
-          'page',
+          "page",
           {
             filters,
             search: debouncedSearch,
@@ -124,7 +124,7 @@ export function useInfiniteCatalog(options: UseInfiniteCatalogOptions = {}) {
           },
         ] as const,
         queryFn: ({ signal }: { signal: AbortSignal }) =>
-          api.get<GamePage>('games', {
+          api.get<GamePage>("games", {
             searchParams: {
               q: debouncedSearch,
               status: filters.status,

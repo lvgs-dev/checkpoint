@@ -1,8 +1,8 @@
 // Pure release and rollback helpers; no network or subprocess execution.
-export const ENVIRONMENTS = ['production', 'preview', 'development'];
+export const ENVIRONMENTS = ["production", "preview", "development"];
 
 export function normalizeEnv(value) {
-  return ENVIRONMENTS.includes(value) ? value : 'development';
+  return ENVIRONMENTS.includes(value) ? value : "development";
 }
 
 /** Read Vercel Git/build metadata; return null when SHA is absent. */
@@ -31,47 +31,47 @@ export function usage() {
 
 export function parseArgs(argv) {
   const opts = {
-    command: argv[0] ?? 'help',
+    command: argv[0] ?? "help",
     target: null,
     vercel: false,
     git: false,
     yes: false,
-    env: 'production',
+    env: "production",
     limit: 20,
   };
   for (let i = 1; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--vercel') opts.vercel = true;
-    else if (a === '--git') opts.git = true;
-    else if (a === '--yes' || a === '-y') opts.yes = true;
-    else if (a === '--env') opts.env = argv[++i];
-    else if (a === '--limit') opts.limit = Number(argv[++i]) || 20;
-    else if (a.startsWith('-')) throw new Error(`Opção desconhecida: ${a}`);
+    if (a === "--vercel") opts.vercel = true;
+    else if (a === "--git") opts.git = true;
+    else if (a === "--yes" || a === "-y") opts.yes = true;
+    else if (a === "--env") opts.env = argv[++i];
+    else if (a === "--limit") opts.limit = Number(argv[++i]) || 20;
+    else if (a.startsWith("-")) throw new Error(`Opção desconhecida: ${a}`);
     else if (opts.target === null) opts.target = a;
     else throw new Error(`Argumento extra: ${a}`);
   }
-  if (opts.env !== 'all' && !ENVIRONMENTS.includes(opts.env))
+  if (opts.env !== "all" && !ENVIRONMENTS.includes(opts.env))
     throw new Error(`--env inválido: ${opts.env}`);
-  if (opts.command === 'rollback') {
-    if (!opts.target) throw new Error('Informe o alvo (git_sha, version ou deployment_id).');
-    if (opts.vercel === opts.git) throw new Error('Escolha exatamente um modo: --vercel ou --git.');
+  if (opts.command === "rollback") {
+    if (!opts.target) throw new Error("Informe o alvo (git_sha, version ou deployment_id).");
+    if (opts.vercel === opts.git) throw new Error("Escolha exatamente um modo: --vercel ou --git.");
   }
   return opts;
 }
 
 const stripProtocol = (u) =>
-  String(u ?? '')
-    .replace(/^https?:\/\//, '')
-    .replace(/\/+$/, '');
+  String(u ?? "")
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
 
 /** Resolve a registered target by deployment, URL, unambiguous SHA prefix, or version within an environment. */
-export function resolveTarget(rows, query, environment = 'production') {
-  const q = String(query ?? '').trim();
+export function resolveTarget(rows, query, environment = "production") {
+  const q = String(query ?? "").trim();
   if (!q) return null;
-  const pool = environment === 'all' ? rows : rows.filter((r) => r.environment === environment);
+  const pool = environment === "all" ? rows : rows.filter((r) => r.environment === environment);
   const sorted = [...pool].sort((a, b) => Number(b.id) - Number(a.id));
 
-  if (q.startsWith('dpl_')) return sorted.find((r) => r.vercel_deployment_id === q) ?? null;
+  if (q.startsWith("dpl_")) return sorted.find((r) => r.vercel_deployment_id === q) ?? null;
   if (/\.vercel\.app/.test(q)) {
     const host = stripProtocol(q);
     return sorted.find((r) => stripProtocol(r.vercel_url) === host) ?? null;
@@ -79,41 +79,41 @@ export function resolveTarget(rows, query, environment = 'production') {
   if (/^[0-9a-f]{7,40}$/i.test(q)) {
     const hits = sorted.filter((r) => r.git_sha?.toLowerCase().startsWith(q.toLowerCase()));
     const shas = new Set(hits.map((r) => r.git_sha));
-    if (shas.size > 1) throw new Error(`SHA ambíguo: ${q} (${[...shas].join(', ')})`);
+    if (shas.size > 1) throw new Error(`SHA ambíguo: ${q} (${[...shas].join(", ")})`);
     if (hits.length) return hits[0];
   }
-  const version = q.replace(/^v/, '');
+  const version = q.replace(/^v/, "");
   return sorted.find((r) => r.version === version) ?? null;
 }
 
 /** Highest registered ID is latest; registration does not prove traffic promotion. */
-export function currentRelease(rows, environment = 'production') {
+export function currentRelease(rows, environment = "production") {
   return (
     [...rows]
-      .filter((r) => environment === 'all' || r.environment === environment)
+      .filter((r) => environment === "all" || r.environment === environment)
       .sort((a, b) => Number(b.id) - Number(a.id))[0] ?? null
   );
 }
 
 /** Generate Vercel rollback commands. @returns {[string, string[]][]} */
 export function vercelRollbackCommands(target) {
-  if (!target?.vercel_url) throw new Error('Release alvo sem vercel_url: use --git.');
-  return [['vercel', ['rollback', `https://${stripProtocol(target.vercel_url)}`, '--yes']]];
+  if (!target?.vercel_url) throw new Error("Release alvo sem vercel_url: use --git.");
+  return [["vercel", ["rollback", `https://${stripProtocol(target.vercel_url)}`, "--yes"]]];
 }
 
 /** Generate Git revert and push commands. @returns {[string, string[]][]} */
-export function gitRollbackCommands(targetSha, branch = 'main') {
-  if (!/^[0-9a-f]{7,40}$/i.test(String(targetSha ?? '')))
+export function gitRollbackCommands(targetSha, branch = "main") {
+  if (!/^[0-9a-f]{7,40}$/i.test(String(targetSha ?? "")))
     throw new Error(`SHA inválido: ${targetSha}`);
   return [
-    ['git', ['revert', '--no-edit', `${targetSha}..HEAD`]],
-    ['git', ['push', 'origin', branch]],
+    ["git", ["revert", "--no-edit", `${targetSha}..HEAD`]],
+    ["git", ["push", "origin", branch]],
   ];
 }
 
 /** Application rollback does not reverse migrations. */
 export function migrationWarning(current, target) {
-  const base = 'Atenção: migrations de banco NÃO são revertidas automaticamente.';
+  const base = "Atenção: migrations de banco NÃO são revertidas automaticamente.";
   const a = current?.db_migration_version ?? null;
   const b = target?.db_migration_version ?? null;
   if (a && b && a !== b)
@@ -123,33 +123,33 @@ export function migrationWarning(current, target) {
 
 /** @param {[string, string[]]} command */
 export function formatCommand([cmd, args]) {
-  return [cmd, ...args].join(' ');
+  return [cmd, ...args].join(" ");
 }
 
 /** Format registrations for release:list. */
 export function formatTable(rows) {
   const cols = [
-    ['id', (r) => r.id],
-    ['created_at', (r) => new Date(r.created_at).toISOString().slice(0, 19).replace('T', ' ')],
-    ['env', (r) => r.environment],
-    ['version', (r) => r.version],
-    ['sha', (r) => r.git_sha?.slice(0, 7)],
-    ['ref', (r) => r.git_ref],
-    ['kind', (r) => r.kind + (r.rollback_to ? `->#${r.rollback_to}` : '')],
-    ['db_mig', (r) => r.db_migration_version],
-    ['deployment', (r) => r.vercel_deployment_id],
-    ['description', (r) => (r.name ? `[${r.name}] ` : '') + (r.description ?? '').slice(0, 60)],
+    ["id", (r) => r.id],
+    ["created_at", (r) => new Date(r.created_at).toISOString().slice(0, 19).replace("T", " ")],
+    ["env", (r) => r.environment],
+    ["version", (r) => r.version],
+    ["sha", (r) => r.git_sha?.slice(0, 7)],
+    ["ref", (r) => r.git_ref],
+    ["kind", (r) => r.kind + (r.rollback_to ? `->#${r.rollback_to}` : "")],
+    ["db_mig", (r) => r.db_migration_version],
+    ["deployment", (r) => r.vercel_deployment_id],
+    ["description", (r) => (r.name ? `[${r.name}] ` : "") + (r.description ?? "").slice(0, 60)],
   ];
-  const cells = rows.map((r) => cols.map(([, f]) => String(f(r) ?? '')));
+  const cells = rows.map((r) => cols.map(([, f]) => String(f(r) ?? "")));
   const widths = cols.map(([h], i) => Math.max(h.length, ...cells.map((c) => c[i].length)));
   const line = (vals) =>
     vals
       .map((v, i) => v.padEnd(widths[i]))
-      .join('  ')
+      .join("  ")
       .trimEnd();
   return [
     line(cols.map(([h]) => h)),
-    line(widths.map((w) => '-'.repeat(w))),
+    line(widths.map((w) => "-".repeat(w))),
     ...cells.map(line),
-  ].join('\n');
+  ].join("\n");
 }

@@ -10,8 +10,8 @@ import type {
   SteamApp,
   SteamPrice,
   SteamSearchItem,
-} from '../../../../../packages/core/src/models.ts';
-import { retry } from '../../shared/retry.ts';
+} from "../../../../../packages/core/src/models.ts";
+import { retry } from "../../shared/retry.ts";
 
 type Fetch = typeof fetch;
 
@@ -33,9 +33,9 @@ export interface SteamClientOptions {
   sleep?: (ms: number) => Promise<void>;
 }
 
-const STORE = 'https://store.steampowered.com';
-const API = 'https://api.steampowered.com';
-const CDN = 'https://shared.akamai.steamstatic.com/store_item_assets/';
+const STORE = "https://store.steampowered.com";
+const API = "https://api.steampowered.com";
+const CDN = "https://shared.akamai.steamstatic.com/store_item_assets/";
 /** GetItems aceita muitos ids por chamada; 50 mantém a URL curta. */
 const BATCH = 50;
 const TAGS_TTL_MS = 24 * 3600_000;
@@ -82,7 +82,7 @@ export function priceFromPurchase(
       discountPercent: 0,
       discountEndsAt: null,
       isFree: true,
-      formatted: 'Gratuito',
+      formatted: "Gratuito",
       fetchedAt: now(),
     };
   if (!option?.final_price_in_cents) return null;
@@ -111,7 +111,7 @@ export function parseSteamProfile(
   if (/^7656\d{13}$/.test(p)) return { steamId: p };
   const url = p.match(/steamcommunity\.com\/(id|profiles)\/([^/?#\s]+)/i);
   if (url) {
-    if (url[1].toLowerCase() === 'profiles')
+    if (url[1].toLowerCase() === "profiles")
       return /^7656\d{13}$/.test(url[2]) ? { steamId: url[2] } : null;
     return /^[A-Za-z0-9_-]{2,64}$/.test(url[2]) ? { vanity: url[2] } : null;
   }
@@ -133,16 +133,16 @@ export class SteamClient {
 
   constructor({
     apiKey,
-    countryCode = 'BR',
+    countryCode = "BR",
     fetch: fetchImpl = fetch,
     timeoutMs = 8000,
     sleep,
   }: SteamClientOptions = {}) {
     this.apiKey = apiKey || undefined;
     this.countryCode = countryCode.toUpperCase();
-    if (this.countryCode !== 'BR' && this.countryCode !== 'US')
+    if (this.countryCode !== "BR" && this.countryCode !== "US")
       throw new Error(`País não suportado: ${this.countryCode} (apenas BR e US são aceitos)`);
-    this.currency = this.countryCode === 'BR' ? 'BRL' : 'USD';
+    this.currency = this.countryCode === "BR" ? "BRL" : "USD";
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
     this.sleep = sleep;
@@ -186,11 +186,11 @@ export class SteamClient {
         price?: { currency: string; initial: number; final: number };
       }[];
     }>(
-      'busca',
+      "busca",
       `${STORE}/api/storesearch/?term=${encodeURIComponent(q)}&l=portuguese&cc=${this.countryCode}`,
     );
     return (data.items ?? [])
-      .filter((i) => i.type === 'app')
+      .filter((i) => i.type === "app")
       .map((i) => ({
         appId: i.id,
         name: i.name,
@@ -217,7 +217,7 @@ export class SteamClient {
   private async tagNames(): Promise<Map<number, string>> {
     if (this.tags && Date.now() - this.tags.at < TAGS_TTL_MS) return this.tags.names;
     const data = await this.getJson<{ response?: { tags?: { tagid: number; name: string }[] } }>(
-      'tags',
+      "tags",
       `${API}/IStoreService/GetTagList/v1/?language=brazilian`,
     );
     const names = new Map((data.response?.tags ?? []).map((t) => [t.tagid, t.name]));
@@ -230,7 +230,7 @@ export class SteamClient {
     for (let i = 0; i < appIds.length; i += BATCH) {
       const input = {
         ids: appIds.slice(i, i + BATCH).map((appid) => ({ appid })),
-        context: { language: 'brazilian', country_code: this.countryCode },
+        context: { language: "brazilian", country_code: this.countryCode },
         data_request: {
           include_basic_info: true,
           include_tag_count: 20,
@@ -239,7 +239,7 @@ export class SteamClient {
         },
       };
       const data = await this.getJson<{ response?: { store_items?: RawStoreItem[] } }>(
-        'detalhes',
+        "detalhes",
         `${API}/IStoreBrowseService/GetItems/v1/?input_json=${encodeURIComponent(JSON.stringify(input))}`,
       );
       out.push(...(data.response?.store_items ?? []));
@@ -259,22 +259,22 @@ export class SteamClient {
         const asset = (name: string) => {
           const file = i.assets?.[name];
           const format = i.assets?.asset_url_format;
-          return typeof file === 'string' && format
-            ? CDN + format.replace('${FILENAME}', file)
+          return typeof file === "string" && format
+            ? CDN + format.replace("${FILENAME}", file)
             : null;
         };
         const release = i.release?.steam_release_date;
         return {
           appId,
           name: i.name!,
-          shortDescription: i.basic_info?.short_description ?? '',
+          shortDescription: i.basic_info?.short_description ?? "",
           tags: (i.tagids ?? []).map((t) => tags.get(t)).filter((t): t is string => !!t),
           developers: (i.basic_info?.developers ?? []).map((d) => d.name),
           publishers: (i.basic_info?.publishers ?? []).map((d) => d.name),
           releaseDate: release ? new Date(release * 1000).toISOString().slice(0, 10) : null,
-          headerUrl: asset('header'),
-          capsuleUrl: asset('main_capsule') ?? asset('small_capsule'),
-          heroUrl: asset('library_hero'),
+          headerUrl: asset("header"),
+          capsuleUrl: asset("main_capsule") ?? asset("small_capsule"),
+          heroUrl: asset("library_hero"),
           storeUrl: `${STORE}/app/${appId}`,
           price: priceFromPurchase(i.best_purchase_option, !!i.is_free, this.currency),
         };
@@ -301,17 +301,17 @@ export class SteamClient {
   /** SteamID64 a partir de id, URL ou nome personalizado (este último exige a chave). */
   async resolveSteamId(profile: string): Promise<string> {
     const parsed = parseSteamProfile(profile);
-    if (!parsed) throw new SteamError('Perfil da Steam inválido', 400);
-    if ('steamId' in parsed) return parsed.steamId;
+    if (!parsed) throw new SteamError("Perfil da Steam inválido", 400);
+    if ("steamId" in parsed) return parsed.steamId;
     if (!this.apiKey)
-      throw new SteamError('Configure STEAM_API_KEY ou informe o SteamID64 do perfil', 400);
+      throw new SteamError("Configure STEAM_API_KEY ou informe o SteamID64 do perfil", 400);
     const data = await this.getJson<{ response?: { success: number; steamid?: string } }>(
-      'perfil',
+      "perfil",
       `${API}/ISteamUser/ResolveVanityURL/v1/?key=${encodeURIComponent(this.apiKey)}&vanityurl=${encodeURIComponent(parsed.vanity)}`,
     );
     if (data.response?.success !== 1 || !data.response.steamid)
       throw new SteamError(
-        'Perfil da Steam não encontrado: use o SteamID64 ou a URL do perfil',
+        "Perfil da Steam não encontrado: use o SteamID64 ou a URL do perfil",
         404,
       );
     return data.response.steamid;
@@ -322,11 +322,11 @@ export class SteamClient {
    * a Steam não distingue "privada" de "vazia".
    */
   async wishlist(steamId: string): Promise<number[]> {
-    if (!/^7656\d{13}$/.test(steamId)) throw new SteamError('Perfil da Steam inválido', 400);
+    if (!/^7656\d{13}$/.test(steamId)) throw new SteamError("Perfil da Steam inválido", 400);
     const data = await this.getJson<{
       response?: { items?: { appid: number; priority?: number }[] };
     }>(
-      'lista de desejos',
+      "lista de desejos",
       `${API}/IWishlistService/GetWishlist/v1/?steamid=${encodeURIComponent(steamId)}`,
     );
     return (data.response?.items ?? [])
@@ -338,7 +338,7 @@ export class SteamClient {
 
 /** Perfil padrão do dono (STEAM_PROFILE; aceita os nomes antigos do .env). */
 export const steamProfileFromEnv = (env: Record<string, string | undefined> = process.env) =>
-  env.STEAM_PROFILE || env.STEAM_DOMAIN || env.STEAM_DOMIAN || '';
+  env.STEAM_PROFILE || env.STEAM_DOMAIN || env.STEAM_DOMIAN || "";
 
 export const steamClientFromEnv = (env: Record<string, string | undefined> = process.env) =>
-  new SteamClient({ apiKey: env.STEAM_API_KEY, countryCode: env.STEAM_COUNTRY || 'BR' });
+  new SteamClient({ apiKey: env.STEAM_API_KEY, countryCode: env.STEAM_COUNTRY || "BR" });

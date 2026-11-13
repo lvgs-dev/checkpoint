@@ -1,9 +1,9 @@
 // Postgres: entradas da fila numa única consulta (jogos, lista, pins e config da lista).
 // Um round trip e leitura consistente; vale só quando jogos, listas, pins e config estão
 // no mesmo banco.
-import type { Game, GameList } from '../../../../../../packages/core/src/models.ts';
-import type { Sql } from '../../db.ts';
-import type { QueueInputsDriver, QueueInputsRecord, ScoringRecord } from '../types.ts';
+import type { Game, GameList } from "../../../../../../packages/core/src/models.ts";
+import type { Sql } from "../../db.ts";
+import type { QueueInputsDriver, QueueInputsRecord, ScoringRecord } from "../types.ts";
 import {
   gameFrom,
   gameJson,
@@ -12,7 +12,7 @@ import {
   settingsJson,
   toGame,
   type RawGame,
-} from './shared.ts';
+} from "./shared.ts";
 
 export class PgQueueInputsDriver implements QueueInputsDriver {
   private sql: Sql;

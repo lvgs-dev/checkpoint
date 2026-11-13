@@ -1,13 +1,13 @@
 // POST /api/v1/track: authenticated, rate-limited, schema-validated user tracking collector.
 // Returns 202 immediately and persists events in background via waitUntil.
-import { getContext } from '../shared/context.ts';
-import { logger } from '../observability/logger.ts';
-import { createRateLimiter } from '../auth/rate-limit.ts';
-import { AppError } from '../shared/errors.ts';
-import { ApiPath, HttpMethod, type ReadJson, type RouteResult } from './http.ts';
-import { runInBackground } from './background.ts';
-import { trackBatchSchema } from './validation/track.ts';
-import type { TrackService } from '../services/track.ts';
+import { getContext } from "../shared/context.ts";
+import { logger } from "../observability/logger.ts";
+import { createRateLimiter } from "../auth/rate-limit.ts";
+import { AppError } from "../shared/errors.ts";
+import { ApiPath, HttpMethod, type ReadJson, type RouteResult } from "./http.ts";
+import { runInBackground } from "./background.ts";
+import { trackBatchSchema } from "./validation/track.ts";
+import type { TrackService } from "../services/track.ts";
 
 const TRACK_MAX_BYTES = 16 * 1024;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -29,17 +29,17 @@ export async function trackRoute(
 
   const userId = getContext()?.userId;
   if (!userId) {
-    throw new AppError('Autenticação necessária', 401);
+    throw new AppError("Autenticação necessária", 401);
   }
 
   if (!allow(userId)) {
-    throw new AppError('Muitas requisições de tracking', 429, { 'Retry-After': '60' });
+    throw new AppError("Muitas requisições de tracking", 429, { "Retry-After": "60" });
   }
 
   const raw = await readJson(TRACK_MAX_BYTES);
   const parsed = trackBatchSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new AppError('Dados de tracking inválidos', 400);
+    throw new AppError("Dados de tracking inválidos", 400);
   }
 
   const now = new Date();
@@ -64,9 +64,9 @@ export async function trackRoute(
         events,
       })
       .catch((error) => {
-        logger.warn('track.insert_failed', { error, userId });
+        logger.warn("track.insert_failed", { error, userId });
       }),
   );
 
-  return { status: 202, data: { status: 'accepted' } };
+  return { status: 202, data: { status: "accepted" } };
 }

@@ -1,8 +1,8 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 /* The legacy stylesheet keeps the current look (tokens, themes, page classes). It sits in the base
    layer after Tailwind's preflight, so Tailwind utilities on new components still win. */
-@import './styles.css' layer(base);
+@import "./styles.css" layer(base);
 
 /* The app themes with data-theme on <html> (see appearance.ts), not with a .dark class. */
 @custom-variant dark (&:is([data-theme='dark'], [data-theme='dark'] *));
@@ -42,7 +42,7 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 14px;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
 }
 
 /* Kit components (packages/ui-react) use Tailwind classes; scan their sources. */

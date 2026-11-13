@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import {
   type MetadataCatalog,
   metadataFields,
   normalizeMetadata,
-} from '../../../../packages/core/src/metadata.ts';
+} from "../../../../packages/core/src/metadata.ts";
 import {
   type Catalog,
   type Game,
@@ -18,20 +18,20 @@ import {
   type ScoringSettings,
   Desire,
   GameStatus,
-} from '../../../../packages/core/src/models.ts';
+} from "../../../../packages/core/src/models.ts";
 
 export interface ScoredLibraryCacheEntry {
   version: number;
   data: readonly ScoredGame[];
   updatedAt: number;
 }
-import type { GameRepository } from '../data/ports.ts';
-import type { ListRepository } from '../data/ports.ts';
-import type { ManualAdjustmentRepository } from '../data/ports.ts';
-import type { QueueInputs, QueueInputsReader } from '../data/ports.ts';
-import type { ScoringConfigRepository, StoredScoringConfig } from '../data/ports.ts';
-import { AppError } from '../shared/errors.ts';
-import { normalizeText } from '../domain/text.ts';
+import type { GameRepository } from "../data/ports.ts";
+import type { ListRepository } from "../data/ports.ts";
+import type { ManualAdjustmentRepository } from "../data/ports.ts";
+import type { QueueInputs, QueueInputsReader } from "../data/ports.ts";
+import type { ScoringConfigRepository, StoredScoringConfig } from "../data/ports.ts";
+import { AppError } from "../shared/errors.ts";
+import { normalizeText } from "../domain/text.ts";
 import {
   scoreGames,
   recommendGames,
@@ -40,34 +40,34 @@ import {
   filterOptions,
   type ManualPin,
   type MovePlan,
-} from '../domain/scoring.ts';
-import { getContext, runWithContext } from '../shared/context.ts';
-import { logger } from '../observability/logger.ts';
-import { can, Permission } from '../../../../packages/core/src/authorization.ts';
-import { retry, type RetryOptions } from '../shared/retry.ts';
-import { parseScoringConfig, scoringFactors } from '../domain/scoring-config.ts';
+} from "../domain/scoring.ts";
+import { getContext, runWithContext } from "../shared/context.ts";
+import { logger } from "../observability/logger.ts";
+import { can, Permission } from "../../../../packages/core/src/authorization.ts";
+import { retry, type RetryOptions } from "../shared/retry.ts";
+import { parseScoringConfig, scoringFactors } from "../domain/scoring-config.ts";
 export const statuses: string[] = Object.values(GameStatus);
 export const desires: string[] = Object.values(Desire);
 /** Fields stored on the shared `game` row (and its tags), as opposed to the user's library entry. */
 const CATALOG_FIELDS = [
-  'name',
-  'primaryGenre',
-  'mechanic',
-  'pace',
-  'structure',
-  'coop',
-  'size',
-  'mainHours',
-  'extraHours',
-  'completionistHours',
-  'previousEstimatedHours',
-  'timeVerification',
-  'timeSource',
-  'reviewNotes',
-  'prerequisiteId',
-  'secondaryTags',
+  "name",
+  "primaryGenre",
+  "mechanic",
+  "pace",
+  "structure",
+  "coop",
+  "size",
+  "mainHours",
+  "extraHours",
+  "completionistHours",
+  "previousEstimatedHours",
+  "timeVerification",
+  "timeSource",
+  "reviewNotes",
+  "prerequisiteId",
+  "secondaryTags",
 ] as const;
-const USER_EDITABLE_CATALOG_FIELDS = new Set<string>(['secondaryTags', 'primaryGenre']);
+const USER_EDITABLE_CATALOG_FIELDS = new Set<string>(["secondaryTags", "primaryGenre"]);
 const catalogChanged = (a: Game, b: Game) =>
   CATALOG_FIELDS.filter((f) => !USER_EDITABLE_CATALOG_FIELDS.has(f)).some(
     (f) => JSON.stringify(a[f]) !== JSON.stringify(b[f]),
@@ -99,12 +99,12 @@ export interface ReorderTicket {
   done: Promise<void>;
 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const listNotFound = () => new AppError('Lista não encontrada', 404);
+const listNotFound = () => new AppError("Lista não encontrada", 404);
 /** Nome de lista: texto de 1 a 60 caracteres (espaços nas pontas são removidos). */
 function listName(body: Record<string, unknown>): string {
-  const name = typeof body.name === 'string' ? body.name.trim().replace(/\s+/g, ' ') : '';
+  const name = typeof body.name === "string" ? body.name.trim().replace(/\s+/g, " ") : "";
   if (!name || name.length > 60)
-    throw new AppError('O nome da lista deve ter de 1 a 60 caracteres');
+    throw new AppError("O nome da lista deve ter de 1 a 60 caracteres");
   return name;
 }
 /**
@@ -127,7 +127,7 @@ export class GameService {
 
   private userKey(): string {
     const ctx = getContext();
-    return ctx?.appUserId ?? ctx?.userId ?? '';
+    return ctx?.appUserId ?? ctx?.userId ?? "";
   }
 
   private getCache(key: string): ScoredLibraryCacheEntry | undefined {
@@ -217,7 +217,7 @@ export class GameService {
    */
   private serial<T>(fn: () => Promise<T>): Promise<T> {
     const ctx = getContext();
-    const key = ctx?.userId ?? ctx?.appUserId ?? '';
+    const key = ctx?.userId ?? ctx?.appUserId ?? "";
     const run = (this.chains.get(key) ?? Promise.resolve()).catch(() => {}).then(fn);
     this.chains.set(key, run);
     const cleanup = () => {
@@ -240,9 +240,9 @@ export class GameService {
     return list;
   }
   async deleteList(listId: string): Promise<void> {
-    const result = UUID.test(listId) ? await this.lists.remove(listId) : 'missing';
-    if (result === 'missing') throw listNotFound();
-    if (result === 'last') throw new AppError('Não é possível apagar a única lista', 409);
+    const result = UUID.test(listId) ? await this.lists.remove(listId) : "missing";
+    if (result === "missing") throw listNotFound();
+    if (result === "last") throw new AppError("Não é possível apagar a única lista", 409);
     this.invalidateUserCache(listId);
   }
 
@@ -272,18 +272,18 @@ export class GameService {
   /** Um jogo pontuado. A pontuação depende da biblioteca inteira, então ela é lida toda. */
   async game(id: string, listId?: string) {
     const game = (await this.all(listId)).find((g) => g.id === id);
-    if (!game) throw new AppError('Jogo não encontrado', 404);
+    if (!game) throw new AppError("Jogo não encontrado", 404);
     return game;
   }
   /** Biblioteca filtrada, ordenada e paginada (parâmetros crus da query string). */
   async browse(query: GameQuery, listId?: string) {
     for (const [k, v] of Object.entries(query)) {
-      if (typeof v === 'string' && v.includes('\0')) throw new AppError('Parâmetro inválido: ' + k);
+      if (typeof v === "string" && v.includes("\0")) throw new AppError("Parâmetro inválido: " + k);
     }
     const page = Math.max(1, Number(query.page) || 1),
       pageSize = Math.max(1, Math.min(100, Number(query.pageSize) || 24));
 
-    if (query.sort === 'name' || query.sort === 'desire') {
+    if (query.sort === "name" || query.sort === "desire") {
       const result = await this.repository.browse({
         q: query.q?.trim() || undefined,
         status: query.status?.trim() || undefined,
@@ -301,11 +301,11 @@ export class GameService {
       };
     }
 
-    const q = normalizeText(query.q ?? '');
+    const q = normalizeText(query.q ?? "");
     let games = (await this.all(listId)).filter((g) =>
-      normalizeText(g.name + ' ' + g.secondaryTags.join(' ')).includes(q),
+      normalizeText(g.name + " " + g.secondaryTags.join(" ")).includes(q),
     );
-    for (const field of ['status', 'primaryGenre', 'store'] as const) {
+    for (const field of ["status", "primaryGenre", "store"] as const) {
       const v = query[field];
       if (v) games = games.filter((g) => g[field] === v);
     }
@@ -357,8 +357,8 @@ export class GameService {
     const metadata = await this.repository.metadataCatalog();
     return {
       ...metadata,
-      statuses: statuses as Catalog['statuses'],
-      desires: desires as Catalog['desires'],
+      statuses: statuses as Catalog["statuses"],
+      desires: desires as Catalog["desires"],
       counts: {
         total: games.length,
         completed: games.filter((g) => g.status === GameStatus.Finished).length,
@@ -372,7 +372,7 @@ export class GameService {
     return this.serial(async () => {
       const { list, games, pins, settings } = await this.inputs(listId);
       if (games.length > 2000)
-        throw new AppError('A biblioteca excede o limite de 2000 jogos para recomendações', 400);
+        throw new AppError("A biblioteca excede o limite de 2000 jogos para recomendações", 400);
       return queue(list.id, games, pins, settings);
     });
   }
@@ -390,17 +390,17 @@ export class GameService {
    * tentativas (retry.ts). Erros de validação rejeitam a própria chamada (4xx).
    */
   async reorder(gameId: unknown, toPosition: unknown, listId?: string): Promise<ReorderTicket> {
-    if (typeof gameId !== 'string' || !gameId || gameId.includes('\0') || gameId.length > 200)
-      throw new AppError('gameId inválido');
+    if (typeof gameId !== "string" || !gameId || gameId.includes("\0") || gameId.length > 200)
+      throw new AppError("gameId inválido");
     if (
-      typeof toPosition !== 'number' ||
+      typeof toPosition !== "number" ||
       !Number.isInteger(toPosition) ||
       toPosition < 1 ||
       toPosition > 100000
     )
-      throw new AppError('toPosition deve ser um inteiro a partir de 1');
+      throw new AppError("toPosition deve ser um inteiro a partir de 1");
     const existing = await this.repository.get(gameId);
-    if (!existing) throw new AppError('Jogo não encontrado', 404);
+    if (!existing) throw new AppError("Jogo não encontrado", 404);
     // Usuário capturado agora: o job roda depois da resposta, ainda como ele.
     const ctx = getContext() ?? {};
     let accept!: (a: ReorderAccepted) => void, refuse!: (e: unknown) => void;
@@ -425,12 +425,12 @@ export class GameService {
     return { accepted: await accepted, done };
   }
   private planReorder({ games, pins, settings }: QueueInputs, gameId: string, to: number) {
-    if (!games.some((g) => g.id === gameId)) throw new AppError('Jogo não encontrado', 404);
+    if (!games.some((g) => g.id === gameId)) throw new AppError("Jogo não encontrado", 404);
     if (!settings.config.rules.manual)
-      throw new AppError('O ajuste manual está desativado nas configurações', 409);
+      throw new AppError("O ajuste manual está desativado nas configurações", 409);
     const current = recommendGames(games, settings.config, pins);
     if (!current.items.some((i) => i.game.id === gameId))
-      throw new AppError('O jogo não está na fila', 409);
+      throw new AppError("O jogo não está na fila", 409);
     try {
       return planMove(current, gameId, to);
     } catch (e) {
@@ -443,7 +443,7 @@ export class GameService {
     const move: ManualMove = {
       id: randomUUID(),
       gameId: plan.gameId,
-      kind: 'reorder',
+      kind: "reorder",
       fromPosition: plan.fromPosition,
       toPosition: plan.toPosition,
       createdAt: new Date().toISOString(),
@@ -463,7 +463,7 @@ export class GameService {
           ...this.retryOptions,
           shouldRetry: (e) => !(e instanceof AppError),
           onRetry: (e, attempt, delay) =>
-            logger.warn('reorder.persist_retry', {
+            logger.warn("reorder.persist_retry", {
               gameId: plan.gameId,
               attempt,
               retryInMs: delay,
@@ -472,7 +472,7 @@ export class GameService {
         },
       );
     } catch (e) {
-      logger.error('reorder.persist_failed', {
+      logger.error("reorder.persist_failed", {
         gameId: plan.gameId,
         toPosition: plan.toPosition,
         error: e,
@@ -483,7 +483,7 @@ export class GameService {
   resetManual(gameId: string, listId?: string): Promise<ManualResetResult> {
     return this.serial(async () => {
       const { list, games, pins, settings } = await this.inputs(listId);
-      if (!games.some((g) => g.id === gameId)) throw new AppError('Jogo não encontrado', 404);
+      if (!games.some((g) => g.id === gameId)) throw new AppError("Jogo não encontrado", 404);
       const before = queue(list.id, games, pins, settings);
       const rest = pins.filter((p) => p.gameId !== gameId);
       const removed =
@@ -491,7 +491,7 @@ export class GameService {
         (await this.manual.remove(list.id, gameId, {
           id: randomUUID(),
           gameId,
-          kind: 'reset',
+          kind: "reset",
           fromPosition: before.items.find((i) => i.game.id === gameId)?.position ?? null,
           toPosition: null,
           createdAt: new Date().toISOString(),
@@ -505,11 +505,11 @@ export class GameService {
   }
   /** Name search is bounded and delegated to the repository. */
   async searchGames(query: string, excludeId?: string) {
-    if (query.includes('\0') || (excludeId && excludeId.includes('\0')))
-      throw new AppError('Termo de busca inválido');
+    if (query.includes("\0") || (excludeId && excludeId.includes("\0")))
+      throw new AppError("Termo de busca inválido");
     const text = query.trim();
     if (text.length < 3) return [];
-    if (text.length > 120) throw new AppError('Busque usando até 120 caracteres');
+    if (text.length > 120) throw new AppError("Busque usando até 120 caracteres");
     const scored = await this.all();
     const byId = new Map(scored.map((g) => [g.id, g]));
     const found = await this.repository.searchByName(text, excludeId);
@@ -518,10 +518,10 @@ export class GameService {
   async purchase(id: string) {
     return this.serial(async () => {
       const game = await this.repository.get(id);
-      if (!game) throw new AppError('Jogo não encontrado', 404);
+      if (!game) throw new AppError("Jogo não encontrado", 404);
       if (game.purchasedAt && game.status !== GameStatus.Wishlist) return this.game(id);
       if (game.status !== GameStatus.Wishlist)
-        throw new AppError('O jogo não está na lista de desejos', 409);
+        throw new AppError("O jogo não está na lista de desejos", 409);
       await this.repository.save({
         ...game,
         status: GameStatus.NotStarted,
@@ -535,7 +535,7 @@ export class GameService {
   async unpurchase(id: string) {
     return this.serial(async () => {
       const game = await this.repository.get(id);
-      if (!game) throw new AppError('Jogo não encontrado', 404);
+      if (!game) throw new AppError("Jogo não encontrado", 404);
       await this.repository.save({
         ...game,
         status: GameStatus.Wishlist,
@@ -549,129 +549,129 @@ export class GameService {
   async patch(id: string, body: Record<string, unknown>) {
     return this.serial(async () => {
       const old = await this.repository.get(id);
-      if (!old) throw new AppError('Jogo não encontrado', 404);
+      if (!old) throw new AppError("Jogo não encontrado", 404);
       const next = structuredClone(old);
       const numbers = [
-        'actualHours',
-        'mainHours',
-        'extraHours',
-        'completionistHours',
-        'previousEstimatedHours',
+        "actualHours",
+        "mainHours",
+        "extraHours",
+        "completionistHours",
+        "previousEstimatedHours",
       ];
       const strings = [
-        'name',
-        'primaryGenre',
-        'store',
-        'platform',
-        'pace',
-        'structure',
-        'notes',
-        'size',
-        'timeVerification',
-        'timeSource',
-        'reviewNotes',
-        'coop',
-        'mechanic',
+        "name",
+        "primaryGenre",
+        "store",
+        "platform",
+        "pace",
+        "structure",
+        "notes",
+        "size",
+        "timeVerification",
+        "timeSource",
+        "reviewNotes",
+        "coop",
+        "mechanic",
       ];
-      const dates = ['startedAt', 'finishedAt'];
+      const dates = ["startedAt", "finishedAt"];
       const controlledFields = Object.fromEntries(
         Object.entries(metadataFields).map(([catalogKey, field]) => [field, catalogKey]),
       ) as Record<string, keyof MetadataCatalog>;
       const metadata = await this.repository.metadataCatalog();
       for (const [key, value] of Object.entries(body)) {
-        if (key === 'autoFinish') {
-          if (typeof value !== 'boolean') throw new AppError('autoFinish precisa ser booleano');
+        if (key === "autoFinish") {
+          if (typeof value !== "boolean") throw new AppError("autoFinish precisa ser booleano");
           continue;
         }
         if (numbers.includes(key)) {
           if (
             value !== null &&
-            (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100000)
+            (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 100000)
           )
-            throw new AppError('Horas inválidas');
+            throw new AppError("Horas inválidas");
         } else if (strings.includes(key)) {
           if (
-            typeof value !== 'string' ||
-            value.includes('\0') ||
+            typeof value !== "string" ||
+            value.includes("\0") ||
             value.length > 10000 ||
-            (key === 'name' && !value.trim())
+            (key === "name" && !value.trim())
           )
-            throw new AppError('Texto inválido: ' + key);
+            throw new AppError("Texto inválido: " + key);
         } else if (dates.includes(key)) {
           if (
             value !== null &&
-            (typeof value !== 'string' ||
+            (typeof value !== "string" ||
               !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
               !Number.isFinite(Date.parse(value)) ||
               new Date(value).toISOString().slice(0, 10) !== value)
           )
-            throw new AppError('Data inválida');
-        } else if (key === 'status') {
-          if (!statuses.includes(value as string)) throw new AppError('Status inválido');
-        } else if (key === 'desire') {
-          if (!desires.includes(value as string)) throw new AppError('Vontade inválida');
-        } else if (key === 'rating') {
+            throw new AppError("Data inválida");
+        } else if (key === "status") {
+          if (!statuses.includes(value as string)) throw new AppError("Status inválido");
+        } else if (key === "desire") {
+          if (!desires.includes(value as string)) throw new AppError("Vontade inválida");
+        } else if (key === "rating") {
           if (
             value !== null &&
-            (typeof value !== 'number' || !Number.isFinite(value) || value < 1 || value > 5)
+            (typeof value !== "number" || !Number.isFinite(value) || value < 1 || value > 5)
           )
-            throw new AppError('A nota deve ser de 1 a 5');
-        } else if (key === 'secondaryTags') {
+            throw new AppError("A nota deve ser de 1 a 5");
+        } else if (key === "secondaryTags") {
           if (
             !Array.isArray(value) ||
             value.length > 3 ||
             value.some(
-              (t) => typeof t !== 'string' || !t.trim() || t.includes('\0') || t.length > 80,
+              (t) => typeof t !== "string" || !t.trim() || t.includes("\0") || t.length > 80,
             )
           )
-            throw new AppError('Use até três tags secundárias');
-        } else if (key === 'prerequisiteId') {
+            throw new AppError("Use até três tags secundárias");
+        } else if (key === "prerequisiteId") {
           if (
             value !== null &&
-            (typeof value !== 'string' ||
+            (typeof value !== "string" ||
               !value ||
-              value.includes('\0') ||
+              value.includes("\0") ||
               value.length > 200 ||
               value === id)
           )
-            throw new AppError('Predecessor inválido');
-          if (typeof value === 'string') {
+            throw new AppError("Predecessor inválido");
+          if (typeof value === "string") {
             const seen = new Set([id]);
             let predecessorId: string | null = value;
             while (predecessorId) {
               if (seen.has(predecessorId))
-                throw new AppError('O predecessor criaria uma sequência circular');
+                throw new AppError("O predecessor criaria uma sequência circular");
               seen.add(predecessorId);
               const predecessor = await this.repository.get(predecessorId);
               if (!predecessor) {
-                if (predecessorId === value) throw new AppError('Predecessor não encontrado', 404);
+                if (predecessorId === value) throw new AppError("Predecessor não encontrado", 404);
                 break;
               }
               predecessorId = predecessor.prerequisiteId;
             }
           }
-        } else throw new AppError('Campo não editável: ' + key);
+        } else throw new AppError("Campo não editável: " + key);
         const catalogKey = controlledFields[key];
         if (catalogKey) {
           const canonical = (entry: string) =>
             metadata[catalogKey].find(
               (option) => normalizeMetadata(option) === normalizeMetadata(entry),
             );
-          if (key === 'secondaryTags') {
+          if (key === "secondaryTags") {
             const tags = (value as string[]).map(canonical);
             if (tags.some((tag) => !tag) || new Set(tags).size !== tags.length)
-              throw new AppError('Tags secundárias inválidas');
+              throw new AppError("Tags secundárias inválidas");
             Object.assign(next, { secondaryTags: tags });
           } else {
             const entry = (value as string).trim();
-            const option = entry ? canonical(entry) : '';
-            if (option === undefined) throw new AppError('Opção inválida: ' + key);
+            const option = entry ? canonical(entry) : "";
+            if (option === undefined) throw new AppError("Opção inválida: " + key);
             Object.assign(next, { [key]: option });
           }
         } else Object.assign(next, { [key]: value });
       }
       if (
-        Object.hasOwn(body, 'rating') &&
+        Object.hasOwn(body, "rating") &&
         next.rating !== null &&
         next.rating !== old.rating &&
         body.autoFinish !== false
@@ -690,7 +690,7 @@ export class GameService {
       if (
         body.status &&
         body.status !== GameStatus.Finished &&
-        !Object.hasOwn(body, 'finishedAt') &&
+        !Object.hasOwn(body, "finishedAt") &&
         next.status !== GameStatus.Finished
       )
         next.finishedAt = null;
@@ -700,7 +700,7 @@ export class GameService {
       }
       // Work data (game rows and tags) is shared by every library; only admins may change it.
       if (!can(getContext()?.role, Permission.CatalogUpdate) && catalogChanged(old, next))
-        throw new AppError('Somente administradores editam dados do catálogo', 403);
+        throw new AppError("Somente administradores editam dados do catálogo", 403);
       next.updatedAt = new Date().toISOString();
       await this.repository.save(next);
       this.invalidateUserCache();
@@ -714,7 +714,7 @@ export class GameService {
             this.manual.remove(list.id, id, {
               id: randomUUID(),
               gameId: id,
-              kind: 'reset',
+              kind: "reset",
               fromPosition: null,
               toPosition: null,
               createdAt: next.updatedAt!,

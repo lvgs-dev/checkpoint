@@ -1,5 +1,5 @@
 // Release registration use cases over a ReleaseStore.
-import type { ReleaseStore } from '../data/ports.ts';
+import type { ReleaseStore } from "../data/ports.ts";
 import {
   ReleaseAlreadyExists,
   VersionTaken,
@@ -9,7 +9,7 @@ import {
   type Environment,
   type Release,
   type ReleaseInput,
-} from '../domain/releases.ts';
+} from "../domain/releases.ts";
 
 /** Ordinary registrations are idempotent by commit/environment; rollbacks always create an event. Retry allocation and return existing registrations accurately. */
 export async function createRelease(
@@ -17,7 +17,7 @@ export async function createRelease(
   input: ReleaseInput,
 ): Promise<{ release: Release; created: boolean }> {
   input = { ...input, gitSha: normalizeGitSha(input.gitSha) };
-  if (input.kind !== 'rollback') {
+  if (input.kind !== "rollback") {
     const existing = await store.bySha(input.environment, input.gitSha);
     if (existing) return { release: existing, created: false };
   }
@@ -43,11 +43,11 @@ export async function ensureRelease(
     environment: Environment;
     commitMessage: string | null;
   },
-  deploy: Omit<DeployInput, 'gitSha' | 'environment'>,
+  deploy: Omit<DeployInput, "gitSha" | "environment">,
 ): Promise<{ release: Release; created: boolean }> {
   const gitSha = normalizeGitSha(base.gitSha);
   const existing = await store.bySha(base.environment, gitSha, true);
-  const firstLine = base.commitMessage?.split('\n')[0]?.trim() ?? '';
+  const firstLine = base.commitMessage?.split("\n")[0]?.trim() ?? "";
   const description = (
     firstLine.length >= 3 ? firstLine : `Deploy ${base.gitSha.slice(0, 7)}`
   ).slice(0, 500);
@@ -55,15 +55,15 @@ export async function ensureRelease(
     ? { release: existing, created: false }
     : await createRelease(store, {
         description,
-        kind: 'chore',
+        kind: "chore",
         name: null,
         gitSha,
         gitRef: base.gitRef,
         environment: base.environment,
-        bump: 'patch',
+        bump: "patch",
         version: null,
         rollbackTo: null,
-        createdBy: 'vercel-build',
+        createdBy: "vercel-build",
       });
   await store.recordDeploy(result.release.id, {
     ...deploy,

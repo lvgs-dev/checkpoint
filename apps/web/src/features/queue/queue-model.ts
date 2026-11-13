@@ -1,7 +1,7 @@
-import type { Desire, Recommendations, ScoredGame } from '../../../../../packages/core/src/models';
+import type { Desire, Recommendations, ScoredGame } from "../../../../../packages/core/src/models";
 
 /** Lowercase without accents ("acao" finds "Ação"). */
-export const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+export const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 export const PAGE_SIZE = 30;
 
@@ -29,12 +29,12 @@ export function withDesire(queue: Recommendations, id: string, desire: Desire): 
     i.game.id === id ? { ...i, game: { ...i.game, desire } } : i,
   );
   const from = items.findIndex((i) => i.game.id === id);
-  if (desire === 'Imediata' && from >= 0 && !items[from]!.pinnedPosition) {
+  if (desire === "Imediata" && from >= 0 && !items[from]!.pinnedPosition) {
     const [moved] = items.splice(from, 1);
     let to = 0;
     while (
       to < items.length &&
-      (items[to]!.game.desire === 'Imediata' || items[to]!.pinnedPosition)
+      (items[to]!.game.desire === "Imediata" || items[to]!.pinnedPosition)
     )
       to++;
     items.splice(to, 0, moved!);
@@ -43,4 +43,4 @@ export function withDesire(queue: Recommendations, id: string, desire: Desire): 
   return { ...queue, items, playing };
 }
 
-export const displayDate = (date: string) => date.split('-').reverse().join('/');
+export const displayDate = (date: string) => date.split("-").reverse().join("/");

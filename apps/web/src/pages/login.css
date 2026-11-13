@@ -32,7 +32,7 @@
 .auth-page .auth-brand small {
   display: block;
   font:
-    600 8px 'DM Sans',
+    600 8px "DM Sans",
     sans-serif;
   letter-spacing: 1.3px;
   margin-top: 5px;
@@ -113,7 +113,7 @@
 .auth-page .password-toggle:hover {
   color: var(--text);
 }
-.auth-page .field input[aria-invalid='true'] {
+.auth-page .field input[aria-invalid="true"] {
   border-color: var(--danger-line);
 }
 .auth-page .field-error {
@@ -161,7 +161,7 @@
 }
 .auth-page .divider::before,
 .auth-page .divider::after {
-  content: '';
+  content: "";
   flex: 1;
   border-top: 1px solid var(--border);
 }

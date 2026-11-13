@@ -1,16 +1,16 @@
-import type { Game } from '../../../../../packages/core/src/models.ts';
-import type { AppUserResolver, GameRepository } from '../ports.ts';
+import type { Game } from "../../../../../packages/core/src/models.ts";
+import type { AppUserResolver, GameRepository } from "../ports.ts";
 import {
   metadataFields,
   normalizeMetadata,
   type MetadataCatalog,
-} from '../../../../../packages/core/src/metadata.ts';
-import { can, Permission } from '../../../../../packages/core/src/authorization.ts';
-import { getContext } from '../../shared/context.ts';
-import type { GamesDriver, GameBrowseQuery, GameBrowseResult } from '../drivers/types.ts';
-import { defaultMetadata } from '../config-seed.ts';
-import type { ConfigRepository } from '../ports.ts';
-import { toAppError } from './errors.ts';
+} from "../../../../../packages/core/src/metadata.ts";
+import { can, Permission } from "../../../../../packages/core/src/authorization.ts";
+import { getContext } from "../../shared/context.ts";
+import type { GamesDriver, GameBrowseQuery, GameBrowseResult } from "../drivers/types.ts";
+import { defaultMetadata } from "../config-seed.ts";
+import type { ConfigRepository } from "../ports.ts";
+import { toAppError } from "./errors.ts";
 
 export class GameRepositoryImpl implements GameRepository {
   private driver: GamesDriver;
@@ -43,7 +43,7 @@ export class GameRepositoryImpl implements GameRepository {
       const options = catalog[category as keyof MetadataCatalog];
       const known = new Set(options.map(normalizeMetadata));
       for (const game of games) {
-        const values = field === 'secondaryTags' ? game.secondaryTags : [game[field]];
+        const values = field === "secondaryTags" ? game.secondaryTags : [game[field]];
         for (const value of values) {
           const key = normalizeMetadata(value);
           if (key && !known.has(key)) {

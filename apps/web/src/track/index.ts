@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { useLocation, useMatches } from 'react-router';
-import { authSession } from '../auth/session';
-import { createTrackQueue, type TrackEvent } from './queue';
+import { useEffect } from "react";
+import { useLocation, useMatches } from "react-router";
+import { authSession } from "../auth/session";
+import { createTrackQueue, type TrackEvent } from "./queue";
 
-const SESSION_KEY = 'checkpoint:track-session';
+const SESSION_KEY = "checkpoint:track-session";
 const SCREEN_RE = /^\/[a-z0-9/:_.-]*$/;
 const SCREEN_MAX = 120;
 
@@ -27,12 +27,12 @@ function sessionId(): string {
 
 /** Fire and forget: the queue retries once and swallows errors. Anonymous batches are dropped. */
 async function send(events: TrackEvent[]): Promise<void> {
-  const token = await authSession.accessToken();
-  if (!token) return;
-  const res = await fetch('/api/v1/track', {
-    method: 'POST',
+  if (!authSession.getState().session) return;
+  const res = await fetch("/api/v1/track", {
+    method: "POST",
     keepalive: true,
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       sessionId: sessionId(),
       automated: navigator.webdriver === true,
@@ -44,7 +44,7 @@ async function send(events: TrackEvent[]): Promise<void> {
 
 const queue = createTrackQueue({ send });
 
-function record(event: Omit<TrackEvent, 'occurredAt'>): void {
+function record(event: Omit<TrackEvent, "occurredAt">): void {
   if (!authSession.getState().session) return;
   queue.push({ ...event, occurredAt: new Date().toISOString() });
 }
@@ -63,10 +63,10 @@ export function patternFor(
   params: Record<string, string | undefined>,
 ): string | undefined {
   const entries = Object.entries(params).filter(
-    (e): e is [string, string] => typeof e[1] === 'string' && e[1].length > 0,
+    (e): e is [string, string] => typeof e[1] === "string" && e[1].length > 0,
   );
 
-  const segments = pathname.split('/').map((segment) => {
+  const segments = pathname.split("/").map((segment) => {
     if (!segment) return segment;
     const decoded = safeDecode(segment);
     for (const [key, value] of entries) {
@@ -77,7 +77,7 @@ export function patternFor(
     return segment;
   });
 
-  const screen = segments.join('/').toLowerCase();
+  const screen = segments.join("/").toLowerCase();
   return screen.length <= SCREEN_MAX && SCREEN_RE.test(screen) ? screen : undefined;
 }
 
@@ -92,7 +92,7 @@ export function useTrackPageViews(): void {
       if (m.params) Object.assign(allParams, m.params);
     }
     currentScreen = patternFor(pathname, allParams);
-    if (currentScreen) record({ kind: 'page_view', screen: currentScreen });
+    if (currentScreen) record({ kind: "page_view", screen: currentScreen });
   }, [matches, pathname]);
 }
 
@@ -100,20 +100,20 @@ export function useTrackPageViews(): void {
 export function startTracking(): () => void {
   const onClick = (event: MouseEvent) => {
     if (!currentScreen || !(event.target instanceof Element)) return;
-    const element = event.target.closest('[data-testid]')?.getAttribute('data-testid');
-    if (element) record({ kind: 'click', screen: currentScreen, element });
+    const element = event.target.closest("[data-testid]")?.getAttribute("data-testid");
+    if (element) record({ kind: "click", screen: currentScreen, element });
   };
   const onVisibility = () => {
-    if (document.visibilityState === 'hidden') queue.flush();
+    if (document.visibilityState === "hidden") queue.flush();
   };
   const onPageHide = () => queue.flush();
 
-  document.addEventListener('click', onClick, true);
-  document.addEventListener('visibilitychange', onVisibility);
-  window.addEventListener('pagehide', onPageHide);
+  document.addEventListener("click", onClick, true);
+  document.addEventListener("visibilitychange", onVisibility);
+  window.addEventListener("pagehide", onPageHide);
   return () => {
-    document.removeEventListener('click', onClick, true);
-    document.removeEventListener('visibilitychange', onVisibility);
-    window.removeEventListener('pagehide', onPageHide);
+    document.removeEventListener("click", onClick, true);
+    document.removeEventListener("visibilitychange", onVisibility);
+    window.removeEventListener("pagehide", onPageHide);
   };
 }

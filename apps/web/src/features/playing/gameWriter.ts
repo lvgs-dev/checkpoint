@@ -1,15 +1,15 @@
-import { useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import type {
   Catalog,
   Desire,
   QueueEntry,
   Recommendations,
   ScoredGame,
-} from '../../../../../packages/core/src/models';
-import { api } from '../../api/http';
-import { useAuth } from '../../auth/AuthProvider';
-import { queryKeys } from '../../query/keys';
-import { PlayingUpdates, updatePlayingQueue, type PlayingEvent } from './playingUpdates';
+} from "../../../../../packages/core/src/models";
+import { api } from "../../api/http";
+import { useAuth } from "../../auth/AuthProvider";
+import { queryKeys } from "../../query/keys";
+import { PlayingUpdates, updatePlayingQueue, type PlayingEvent } from "./playingUpdates";
 
 /**
  * Single writer for game PATCHes (port of Api.save / setDesire / togglePlaying).
@@ -29,7 +29,7 @@ export interface GameWriter {
 }
 
 type PageLike = { items: ScoredGame[] };
-const gamePath = (id: string) => 'games/' + encodeURIComponent(id);
+const gamePath = (id: string) => "games/" + encodeURIComponent(id);
 
 function createGameWriter(qc: QueryClient, userId: string): GameWriter {
   const k = queryKeys(userId);
@@ -44,7 +44,7 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => {
       void Promise.all([
-        qc.invalidateQueries({ queryKey: [userId, 'queue'] }),
+        qc.invalidateQueries({ queryKey: [userId, "queue"] }),
         qc.invalidateQueries({ queryKey: k.catalog() }),
       ]);
     }, 300);
@@ -57,7 +57,7 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
         qc.invalidateQueries({
           queryKey,
           predicate: (q) =>
-            !(exceptGameId && q.queryKey[1] === 'game' && q.queryKey[2] === exceptGameId),
+            !(exceptGameId && q.queryKey[1] === "game" && q.queryKey[2] === exceptGameId),
         }),
       ),
     );
@@ -74,10 +74,10 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
   /** Mirrors a playing event into every cache that shows the game. */
   async function applyPlaying(event: PlayingEvent) {
     const { game } = event;
-    const confirmed = event.phase !== 'changed';
+    const confirmed = event.phase !== "changed";
     // Cancel in-flight reads so a late response cannot overwrite the optimistic patch.
     await Promise.all(
-      [k.games(), k.catalog(), [userId, 'queue'], k.game(game.id)].map((queryKey) =>
+      [k.games(), k.catalog(), [userId, "queue"], k.game(game.id)].map((queryKey) =>
         qc.cancelQueries({ queryKey }),
       ),
     );
@@ -103,8 +103,8 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
             ...c,
             counts: {
               ...c.counts,
-              playing: c.counts.playing + delta('Jogando'),
-              pending: c.counts.pending + delta('Não iniciado'),
+              playing: c.counts.playing + delta("Jogando"),
+              pending: c.counts.pending + delta("Não iniciado"),
             },
           },
       );
@@ -112,19 +112,19 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
     // Remember each queue entry on the first change so a failure restores its old position.
     const originals = (originalEntries.get(game.id) ?? new Map()) as Map<string, QueueEntry>;
     originalEntries.set(game.id, originals);
-    for (const [key, q] of qc.getQueriesData<Recommendations>({ queryKey: [userId, 'queue'] })) {
+    for (const [key, q] of qc.getQueriesData<Recommendations>({ queryKey: [userId, "queue"] })) {
       if (!q) continue;
       const hash = JSON.stringify(key);
-      if (event.phase === 'changed' && !originals.has(hash)) {
+      if (event.phase === "changed" && !originals.has(hash)) {
         const entry = q.items.find((e) => e.game.id === game.id);
         if (entry) originals.set(hash, entry);
       }
       qc.setQueryData(
         key,
-        updatePlayingQueue(q, game, event.phase === 'failed' ? originals.get(hash) : undefined),
+        updatePlayingQueue(q, game, event.phase === "failed" ? originals.get(hash) : undefined),
       );
     }
-    if (event.phase !== 'changed') originalEntries.delete(game.id);
+    if (event.phase !== "changed") originalEntries.delete(game.id);
   }
 
   async function write(id: string, patch: Record<string, unknown>) {
@@ -145,9 +145,9 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
       // Events apply in order; listeners run after the cache patch; failures invalidate dependents.
       applying = applying.then(async () => {
         await applyPlaying(event);
-        if (event.phase === 'changed') clearTimeout(settleTimer);
-        if (event.phase === 'failed' && !playing.pending) void invalidateDependents();
-        if (event.phase === 'saved' && !playing.pending) scheduleSettleInvalidation();
+        if (event.phase === "changed") clearTimeout(settleTimer);
+        if (event.phase === "failed" && !playing.pending) void invalidateDependents();
+        if (event.phase === "saved" && !playing.pending) scheduleSettleInvalidation();
         listeners.forEach((l) => l(event));
       });
     },
@@ -185,7 +185,7 @@ function createGameWriter(qc: QueryClient, userId: string): GameWriter {
       qc.invalidateQueries({ queryKey: k.games() }),
       qc.invalidateQueries({ queryKey: k.wishlist() }),
       qc.invalidateQueries({ queryKey: k.game(id) }),
-      qc.invalidateQueries({ queryKey: [...k.all, 'queue'] }),
+      qc.invalidateQueries({ queryKey: [...k.all, "queue"] }),
       qc.invalidateQueries({ queryKey: k.catalog() }),
     ]);
     return game;

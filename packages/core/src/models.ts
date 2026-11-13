@@ -1,20 +1,20 @@
 /** 'Desejado' = lista de desejos (ainda não tem o jogo); nunca entra na fila. */
 export const GameStatus = {
-  NotStarted: 'Não iniciado',
-  Playing: 'Jogando',
-  Abandoned: 'Abandonado',
-  Finished: 'Finalizado',
-  Wishlist: 'Desejado',
+  NotStarted: "Não iniciado",
+  Playing: "Jogando",
+  Abandoned: "Abandonado",
+  Finished: "Finalizado",
+  Wishlist: "Desejado",
 } as const;
 export type GameStatus = (typeof GameStatus)[keyof typeof GameStatus];
 /** "Imediata" vai para o topo da fila por pontuação (ver recommendGames). */
 export const Desire = {
-  Immediate: 'Imediata',
-  VeryHigh: 'Muito Alta',
-  High: 'Alta',
-  Medium: 'Média',
-  Low: 'Baixa',
-  VeryLow: 'Muito Baixa',
+  Immediate: "Imediata",
+  VeryHigh: "Muito Alta",
+  High: "Alta",
+  Medium: "Média",
+  Low: "Baixa",
+  VeryLow: "Muito Baixa",
 } as const;
 export type Desire = (typeof Desire)[keyof typeof Desire];
 export interface Game {
@@ -88,29 +88,29 @@ export interface ScoreWeights {
  */
 export type ScoringRuleId =
   // score base
-  | 'desire'
-  | 'affinity'
-  | 'duration'
-  | 'timeFactor'
+  | "desire"
+  | "affinity"
+  | "duration"
+  | "timeFactor"
   // ajustes contextuais
-  | 'inProgress'
-  | 'repeatGenre'
-  | 'repeatGenreTwoBack'
-  | 'repeatMechanic'
-  | 'repeatTag'
-  | 'repeatTagTwoBack'
-  | 'consecutiveLong'
-  | 'longAfterHeavy'
-  | 'repeatPace'
-  | 'contrastingPace'
-  | 'shortAfterLong'
+  | "inProgress"
+  | "repeatGenre"
+  | "repeatGenreTwoBack"
+  | "repeatMechanic"
+  | "repeatTag"
+  | "repeatTagTwoBack"
+  | "consecutiveLong"
+  | "longAfterHeavy"
+  | "repeatPace"
+  | "contrastingPace"
+  | "shortAfterLong"
   // elegibilidade
-  | 'excludeEndless'
-  | 'excludeAbandoned'
-  | 'excludeCompetitive'
-  | 'prerequisites'
+  | "excludeEndless"
+  | "excludeAbandoned"
+  | "excludeCompetitive"
+  | "prerequisites"
   // ajuste manual (reordenação)
-  | 'manual';
+  | "manual";
 export type ScoringRules = Record<ScoringRuleId, boolean>;
 /**
  * Filtros de conteúdo da fila (quem entra). Padrão neutro: listas vazias, limites null
@@ -157,7 +157,7 @@ export interface FilterOptions {
   /** Horas previstas de cada candidato (null = sem tempo), para contar o efeito dos limites. */
   hours: (number | null)[];
 }
-export type ScoringSection = 'base' | 'context' | 'filter' | 'manual' | 'params';
+export type ScoringSection = "base" | "context" | "filter" | "manual" | "params";
 /** Uma linha da tabela de configuração (fator, regra e/ou parâmetro). */
 export interface ScoringFactor {
   id: string;
@@ -216,7 +216,7 @@ export interface ManualAdjustment {
 export interface ManualMove {
   id: string;
   gameId: string;
-  kind: 'reorder' | 'reset';
+  kind: "reorder" | "reset";
   fromPosition: number | null;
   toPosition: number | null;
   createdAt: string;

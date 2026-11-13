@@ -1,10 +1,10 @@
 // Postgres: listas do usuário em game_list.
-import type { GameList } from '../../../../../../packages/core/src/models.ts';
-import type { Sql } from '../../db.ts';
-import type { ListsDriver } from '../types.ts';
-import { pgError } from './shared.ts';
+import type { GameList } from "../../../../../../packages/core/src/models.ts";
+import type { Sql } from "../../db.ts";
+import type { ListsDriver } from "../types.ts";
+import { pgError } from "./shared.ts";
 
-type RawList = Omit<GameList, 'createdAt'> & { createdAt: Date };
+type RawList = Omit<GameList, "createdAt"> & { createdAt: Date };
 const toList = (r: RawList): GameList => ({ ...r, createdAt: r.createdAt.toISOString() });
 
 export class PgListsDriver implements ListsDriver {
@@ -42,7 +42,7 @@ export class PgListsDriver implements ListsDriver {
    * Duas exclusões simultâneas das duas últimas listas poderiam passar juntas; o caso é
    * inofensivo (a próxima leitura recria a padrão).
    */
-  async remove(owner: string, id: string): Promise<'removed' | 'missing' | 'last'> {
+  async remove(owner: string, id: string): Promise<"removed" | "missing" | "last"> {
     const [row] = await this.sql<{ found: boolean; deleted: boolean }[]>`
       WITH target AS (SELECT id FROM game_list WHERE id = ${id} AND user_id = ${owner}),
            d AS (
@@ -51,6 +51,6 @@ export class PgListsDriver implements ListsDriver {
                 AND (SELECT count(*) FROM game_list WHERE user_id = ${owner}) > 1
              RETURNING id)
       SELECT EXISTS (SELECT 1 FROM target) AS found, EXISTS (SELECT 1 FROM d) AS deleted`;
-    return !row.found ? 'missing' : row.deleted ? 'removed' : 'last';
+    return !row.found ? "missing" : row.deleted ? "removed" : "last";
   }
 }

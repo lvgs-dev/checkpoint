@@ -1,6 +1,6 @@
 // Esquemas Zod para as rotas de configurações do algoritmo (/api/v1/settings/scoring).
-import { z } from 'zod';
-import { Desire } from '../../../../../packages/core/src/models.ts';
+import { z } from "zod";
+import { Desire } from "../../../../../packages/core/src/models.ts";
 
 const filterDesires = [
   Desire.VeryHigh,
@@ -77,7 +77,7 @@ export const scoringFiltersSchema = z
     if (val.minHours !== null && val.maxHours !== null && val.minHours > val.maxHours) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Filtro de horas: o mínimo passa do máximo',
+        message: "Filtro de horas: o mínimo passa do máximo",
       });
     }
   });

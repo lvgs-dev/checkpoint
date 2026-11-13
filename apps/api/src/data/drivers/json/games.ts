@@ -1,9 +1,9 @@
 // JSON local: jogos. O seed vem embutido; os jogos cadastrados no app (lista de desejos) e as
 // edições ficam no arquivo e sobrepõem o seed. Um só usuário: `owner` é ignorado.
-import { Desire, type Game } from '../../../../../../packages/core/src/models.ts';
-import { normalizeText } from '../../../domain/text.ts';
-import type { GamesDriver, GameBrowseQuery, GameBrowseResult } from '../types.ts';
-import { JsonFile } from './file.ts';
+import { Desire, type Game } from "../../../../../../packages/core/src/models.ts";
+import { normalizeText } from "../../../domain/text.ts";
+import type { GamesDriver, GameBrowseQuery, GameBrowseResult } from "../types.ts";
+import { JsonFile } from "./file.ts";
 
 const DESIRE_ORDER: Record<string, number> = {
   [Desire.Immediate]: 0,
@@ -21,11 +21,11 @@ const DESIRE_ORDER: Record<string, number> = {
 };
 
 const STATUS_ALIASES: Record<string, string> = {
-  not_started: 'Não iniciado',
-  playing: 'Jogando',
-  abandoned: 'Abandonado',
-  finished: 'Finalizado',
-  wishlist: 'Desejado',
+  not_started: "Não iniciado",
+  playing: "Jogando",
+  abandoned: "Abandonado",
+  finished: "Finalizado",
+  wishlist: "Desejado",
 };
 
 export class JsonGamesDriver implements GamesDriver {
@@ -53,7 +53,7 @@ export class JsonGamesDriver implements GamesDriver {
     if (query.q) {
       const wanted = normalizeText(query.q);
       games = games.filter((g) =>
-        normalizeText(g.name + ' ' + g.secondaryTags.join(' ')).includes(wanted),
+        normalizeText(g.name + " " + g.secondaryTags.join(" ")).includes(wanted),
       );
     }
     if (query.status) {
@@ -67,16 +67,16 @@ export class JsonGamesDriver implements GamesDriver {
       games = games.filter((g) => g.store === query.store);
     }
 
-    if (query.sort === 'desire') {
+    if (query.sort === "desire") {
       games.sort((a, b) => {
         const orderA = DESIRE_ORDER[a.desire] ?? 99;
         const orderB = DESIRE_ORDER[b.desire] ?? 99;
         if (orderA !== orderB) return orderA - orderB;
-        return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'pt-BR');
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "pt-BR");
       });
     } else {
       games.sort((a, b) => {
-        const nameCmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'pt-BR');
+        const nameCmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase(), "pt-BR");
         if (nameCmp !== 0) return nameCmp;
         return a.id.localeCompare(b.id);
       });
@@ -97,7 +97,7 @@ export class JsonGamesDriver implements GamesDriver {
     const wanted = normalizeText(query);
     return (await this.list(owner))
       .filter((g) => g.id !== excludeId && normalizeText(g.name).includes(wanted))
-      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+      .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
       .slice(0, 12);
   }
   /** Sem tabelas de vocabulário: o repositório monta o catálogo a partir dos jogos. */

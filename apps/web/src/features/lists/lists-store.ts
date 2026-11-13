@@ -1,17 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import type { GameList } from '../../../../../packages/core/src/models';
-import { api } from '../../api/http';
-import { useAuth } from '../../auth/AuthProvider';
-import { useQueryKeys } from '../../query/keys';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router";
+import type { GameList } from "../../../../../packages/core/src/models";
+import { api } from "../../api/http";
+import { useAuth } from "../../auth/AuthProvider";
+import { useQueryKeys } from "../../query/keys";
 
 /** User lists (every list sees every game; rules and manual order are per list). The API creates "Principal" when there is none. */
 export function useLists() {
   const k = useQueryKeys();
   return useQuery({
     queryKey: k.lists(),
-    queryFn: ({ signal }) => api.get<GameList[]>('lists', { signal }),
+    queryFn: ({ signal }) => api.get<GameList[]>("lists", { signal }),
   });
 }
 
@@ -21,10 +21,10 @@ export function useListMutations() {
   const k = useQueryKeys();
   const update = (change: (lists: GameList[]) => GameList[]) =>
     qc.setQueryData<GameList[]>(k.lists(), (lists) => change(lists ?? []));
-  const id = (listId: string) => 'lists/' + encodeURIComponent(listId);
+  const id = (listId: string) => "lists/" + encodeURIComponent(listId);
   return {
     create: useMutation({
-      mutationFn: (name: string) => api.post<GameList>('lists', { json: { name } }),
+      mutationFn: (name: string) => api.post<GameList>("lists", { json: { name } }),
       onSuccess: (list) => update((lists) => [...lists, list]),
     }),
     rename: useMutation({
@@ -46,17 +46,17 @@ export function useListMutations() {
 /** Last list opened, per user (for when the URL carries none, e.g. queue to settings). */
 const lastOpened = new Map<string, string>();
 
-export type RouteListStatus = 'loading' | 'error' | 'empty' | 'ready';
+export type RouteListStatus = "loading" | "error" | "empty" | "ready";
 
 /** Why there is no list id yet. A known id is `ready` even while the lists still load (no waterfall). */
 export function routeListStatus(
   listId: string | null,
   lists: { isError: boolean; data?: readonly unknown[] },
 ): RouteListStatus {
-  if (listId !== null) return 'ready';
-  if (lists.isError) return 'error';
-  if (lists.data?.length === 0) return 'empty';
-  return 'loading'; // pending, or one render while the effect redirects to a valid list
+  if (listId !== null) return "ready";
+  if (lists.isError) return "error";
+  if (lists.data?.length === 0) return "empty";
+  return "loading"; // pending, or one render while the effect redirects to a valid list
 }
 
 /**

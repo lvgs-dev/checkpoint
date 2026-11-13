@@ -1,2 +1,2 @@
-export { FinishDialog, type FinishGame } from './FinishDialog';
-export { FinishIcon } from './FinishIcon';
+export { FinishDialog, type FinishGame } from "./FinishDialog";
+export { FinishIcon } from "./FinishIcon";

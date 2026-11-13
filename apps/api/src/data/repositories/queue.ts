@@ -1,7 +1,7 @@
-import type { QueueInputsReader } from '../ports.ts';
-import type { QueueInputsDriver } from '../drivers/types.ts';
-import type { AppUserResolver } from '../ports.ts';
-import { toStoredScoring } from './scoring.ts';
+import type { QueueInputsReader } from "../ports.ts";
+import type { QueueInputsDriver } from "../drivers/types.ts";
+import type { AppUserResolver } from "../ports.ts";
+import { toStoredScoring } from "./scoring.ts";
 
 export class QueueInputsReaderImpl implements QueueInputsReader {
   private driver: QueueInputsDriver;

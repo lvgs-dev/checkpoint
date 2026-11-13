@@ -1,11 +1,11 @@
 // JSON local: listas. Um só usuário: `owner` é ignorado. Sem `path`, só em memória.
-import { randomUUID } from 'node:crypto';
-import type { GameList } from '../../../../../../packages/core/src/models.ts';
-import { DataError, DEFAULT_LIST_NAME, type ListsDriver } from '../types.ts';
-import { JsonFile } from './file.ts';
+import { randomUUID } from "node:crypto";
+import type { GameList } from "../../../../../../packages/core/src/models.ts";
+import { DataError, DEFAULT_LIST_NAME, type ListsDriver } from "../types.ts";
+import { JsonFile } from "./file.ts";
 
 /** Id fixo da lista padrão no modo JSON local: arquivos antigos (sem lista) caem nela. */
-export const LOCAL_DEFAULT_LIST_ID = '00000000-0000-4000-8000-0000000000a1';
+export const LOCAL_DEFAULT_LIST_ID = "00000000-0000-4000-8000-0000000000a1";
 
 export class JsonListsDriver implements ListsDriver {
   private lists: GameList[] = [];
@@ -43,7 +43,7 @@ export class JsonListsDriver implements ListsDriver {
   }
   async create(_owner: string, name: string) {
     await this.ready;
-    if (this.taken(name)) throw new DataError('conflict');
+    if (this.taken(name)) throw new DataError("conflict");
     const list = { id: randomUUID(), name, createdAt: new Date().toISOString() };
     this.lists.push(list);
     await this.file.write(this.lists);
@@ -53,17 +53,17 @@ export class JsonListsDriver implements ListsDriver {
     await this.ready;
     const list = this.lists.find((l) => l.id === id);
     if (!list) return undefined;
-    if (this.taken(name, id)) throw new DataError('conflict');
+    if (this.taken(name, id)) throw new DataError("conflict");
     list.name = name;
     await this.file.write(this.lists);
     return structuredClone(list);
   }
   async remove(_owner: string, id: string) {
     await this.ready;
-    if (!this.lists.some((l) => l.id === id)) return 'missing' as const;
-    if (this.lists.length === 1) return 'last' as const;
+    if (!this.lists.some((l) => l.id === id)) return "missing" as const;
+    if (this.lists.length === 1) return "last" as const;
     this.lists = this.lists.filter((l) => l.id !== id);
     await this.file.write(this.lists);
-    return 'removed' as const;
+    return "removed" as const;
   }
 }

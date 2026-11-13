@@ -1,28 +1,28 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ConfirmDialog, EmptyState, ErrorState } from '@checkpoint/ui-react';
-import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router';
-import type { Catalog, Desire, ScoredGame } from '../../../../packages/core/src/models';
-import { api } from '../api/http';
-import { GameCard, useInfiniteCatalog, type LibraryFilters } from '../features/catalog';
-import { FinishDialog } from '../features/finish-dialog';
-import { AppLoader } from '../features/loader/AppLoader';
-import { useGameWriter } from '../features/playing';
-import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import { useQueryKeys } from '../query/keys';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ConfirmDialog, EmptyState, ErrorState } from "@checkpoint/ui-react";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
+import type { Catalog, Desire, ScoredGame } from "../../../../packages/core/src/models";
+import { api } from "../api/http";
+import { GameCard, useInfiniteCatalog, type LibraryFilters } from "../features/catalog";
+import { FinishDialog } from "../features/finish-dialog";
+import { AppLoader } from "../features/loader/AppLoader";
+import { useGameWriter } from "../features/playing";
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
+import { useQueryKeys } from "../query/keys";
 
 export function LibraryPage() {
   const k = useQueryKeys();
   const qc = useQueryClient();
   const writer = useGameWriter();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [purchasingGame, setPurchasingGame] = useState<ScoredGame | null>(null);
   const [unpurchasingGame, setUnpurchasingGame] = useState<ScoredGame | null>(null);
   const [finishingGame, setFinishingGame] = useState<ScoredGame | null>(null);
 
   const catalog = useQuery({
     queryKey: k.catalog(),
-    queryFn: ({ signal }) => api.get<Catalog>('catalog', { signal }),
+    queryFn: ({ signal }) => api.get<Catalog>("catalog", { signal }),
   });
 
   const {
@@ -57,7 +57,7 @@ export function LibraryPage() {
     () =>
       writer.onPlaying(
         (e) =>
-          e.phase === 'failed' && setError(`Não foi possível mudar o status de ${e.game.name}.`),
+          e.phase === "failed" && setError(`Não foi possível mudar o status de ${e.game.name}.`),
       ),
     [writer],
   );
@@ -87,7 +87,7 @@ export function LibraryPage() {
     values: string[] = [],
   ) => (
     <select
-      data-testid={`library-filter-${name === 'primaryGenre' ? 'genre' : name}`}
+      data-testid={`library-filter-${name === "primaryGenre" ? "genre" : name}`}
       aria-label={label}
       value={filters[name]}
       onChange={(e) => setFilter(name, e.target.value)}
@@ -147,9 +147,9 @@ export function LibraryPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </label>
-        {select('Filtrar status', 'status', 'Status: todos', catalog.data?.statuses)}
-        {select('Filtrar gênero', 'primaryGenre', 'Gênero: todos', catalog.data?.genres)}
-        {select('Filtrar loja', 'store', 'Loja: todas', catalog.data?.stores)}
+        {select("Filtrar status", "status", "Status: todos", catalog.data?.statuses)}
+        {select("Filtrar gênero", "primaryGenre", "Gênero: todos", catalog.data?.genres)}
+        {select("Filtrar loja", "store", "Loja: todas", catalog.data?.stores)}
       </section>
       <div className="list-toolbar">
         <span>
@@ -176,8 +176,8 @@ export function LibraryPage() {
       </div>
       {error && (
         <div className="error" role="alert">
-          {error}{' '}
-          <button data-testid="library-retry" onClick={() => (setError(''), void refetch())}>
+          {error}{" "}
+          <button data-testid="library-retry" onClick={() => (setError(""), void refetch())}>
             Tentar novamente
           </button>
         </div>
@@ -221,11 +221,11 @@ export function LibraryPage() {
               className="infinite-scroll-loading"
               role="status"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1.5rem',
-                color: 'var(--muted)',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "1.5rem",
+                color: "var(--muted)",
               }}
             >
               <AppLoader
@@ -241,11 +241,11 @@ export function LibraryPage() {
               className="load-more-error"
               role="alert"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.75rem',
-                padding: '1rem',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.75rem",
+                padding: "1rem",
               }}
             >
               <span>Não foi possível carregar mais jogos.</span>

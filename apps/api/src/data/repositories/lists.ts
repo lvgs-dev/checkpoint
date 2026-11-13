@@ -1,13 +1,13 @@
-import type { ListRepository } from '../ports.ts';
-import { AppError } from '../../shared/errors.ts';
-import { DataError, DEFAULT_LIST_NAME, type ListsDriver } from '../drivers/types.ts';
-import type { AppUserResolver } from '../ports.ts';
-import { toAppError } from './errors.ts';
+import type { ListRepository } from "../ports.ts";
+import { AppError } from "../../shared/errors.ts";
+import { DataError, DEFAULT_LIST_NAME, type ListsDriver } from "../drivers/types.ts";
+import type { AppUserResolver } from "../ports.ts";
+import { toAppError } from "./errors.ts";
 
 /** Nome repetido → 409; o resto segue a tradução comum. */
 function listError(e: unknown): never {
-  if (e instanceof DataError && e.code === 'conflict')
-    throw new AppError('Já existe uma lista com esse nome', 409);
+  if (e instanceof DataError && e.code === "conflict")
+    throw new AppError("Já existe uma lista com esse nome", 409);
   return toAppError(e);
 }
 
@@ -26,7 +26,7 @@ export class ListRepositoryImpl implements ListRepository {
     try {
       return [await this.driver.create(owner, DEFAULT_LIST_NAME)];
     } catch (e) {
-      if (e instanceof DataError && e.code === 'conflict') return this.driver.list(owner);
+      if (e instanceof DataError && e.code === "conflict") return this.driver.list(owner);
       throw e;
     }
   }

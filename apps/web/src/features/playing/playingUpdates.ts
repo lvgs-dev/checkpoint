@@ -2,12 +2,12 @@ import type {
   QueueEntry,
   Recommendations,
   ScoredGame,
-} from '../../../../../packages/core/src/models';
-import { localToday } from '@/lib/utils';
+} from "../../../../../packages/core/src/models";
+import { localToday } from "@/lib/utils";
 
 export interface PlayingEvent {
   game: ScoredGame;
-  phase: 'changed' | 'saved' | 'failed';
+  phase: "changed" | "saved" | "failed";
 }
 
 export class PlayingUpdates {
@@ -22,9 +22,9 @@ export class PlayingUpdates {
   private notify: (event: PlayingEvent) => void;
   private reconcile?: (id: string) => Promise<ScoredGame>;
   constructor(
-    save: PlayingUpdates['save'],
-    notify: PlayingUpdates['notify'],
-    reconcile?: PlayingUpdates['reconcile'],
+    save: PlayingUpdates["save"],
+    notify: PlayingUpdates["notify"],
+    reconcile?: PlayingUpdates["reconcile"],
   ) {
     this.save = save;
     this.notify = notify;
@@ -39,23 +39,23 @@ export class PlayingUpdates {
     const startedAt = current.startedAt ?? localToday();
     const desired: ScoredGame = {
       ...current,
-      status: current.status === 'Jogando' ? 'Não iniciado' : 'Jogando',
+      status: current.status === "Jogando" ? "Não iniciado" : "Jogando",
       startedAt,
       finishedAt: null,
     };
     if (state) {
       state.desired = desired;
       state.revision++;
-      this.notify({ game: desired, phase: 'changed' });
+      this.notify({ game: desired, phase: "changed" });
       return state.done;
     }
     state = { confirmed: game, desired, revision: 0, done: Promise.resolve() };
     this.states.set(game.id, state);
-    this.notify({ game: desired, phase: 'changed' });
+    this.notify({ game: desired, phase: "changed" });
     state.done = this.drain(state);
     return state.done;
   }
-  private async drain(state: NonNullable<ReturnType<PlayingUpdates['states']['get']>>) {
+  private async drain(state: NonNullable<ReturnType<PlayingUpdates["states"]["get"]>>) {
     while (true) {
       const { desired, revision } = state;
       try {
@@ -73,12 +73,12 @@ export class PlayingUpdates {
         }
         if (state.revision !== revision) continue;
         this.states.delete(desired.id);
-        this.notify({ game: state.confirmed, phase: 'failed' });
+        this.notify({ game: state.confirmed, phase: "failed" });
         return;
       }
       if (state.revision !== revision) continue;
       this.states.delete(desired.id);
-      this.notify({ game: state.confirmed, phase: 'saved' });
+      this.notify({ game: state.confirmed, phase: "saved" });
       return;
     }
   }
@@ -103,10 +103,10 @@ export function updatePlayingQueue(
     };
   const playing = (queue.playing ?? []).filter((entry) => entry.id !== game.id);
   const items = queue.items.filter((entry) => entry.game.id !== game.id);
-  if (game.status === 'Jogando') playing.push(game);
+  if (game.status === "Jogando") playing.push(game);
   else if (
-    game.status === 'Não iniciado' ||
-    (game.status === 'Abandonado' && !queue.rules.excludeAbandoned)
+    game.status === "Não iniciado" ||
+    (game.status === "Abandonado" && !queue.rules.excludeAbandoned)
   ) {
     const entry: QueueEntry = {
       position: 1,

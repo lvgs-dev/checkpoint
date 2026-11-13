@@ -149,7 +149,7 @@
     background: var(--surface-2);
   }
   .cover:not(:has(img)),
-  .cover:has(img[style*='none']) {
+  .cover:has(img[style*="none"]) {
     background: linear-gradient(130deg, var(--cover-a), var(--cover-b));
   }
   .cover img {

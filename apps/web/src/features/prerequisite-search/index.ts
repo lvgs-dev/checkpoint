@@ -1,1 +1,1 @@
-export { PrerequisiteSearch } from './PrerequisiteSearch';
+export { PrerequisiteSearch } from "./PrerequisiteSearch";

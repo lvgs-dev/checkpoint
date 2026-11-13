@@ -1,6 +1,6 @@
 /** One tracked event, in the shape the POST /api/v1/track body expects. */
 export interface TrackEvent {
-  kind: 'page_view' | 'click';
+  kind: "page_view" | "click";
   screen: string;
   element?: string;
   occurredAt: string;

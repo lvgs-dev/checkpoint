@@ -8,32 +8,32 @@
 //   --profile <p>    SteamID64, URL do perfil ou nome personalizado (padrão: STEAM_PROFILE)
 //   --export [file]  grava o snapshot (apps com tags, imagens e preço) e sai
 //   --from [file]    importa do snapshot em vez da Steam
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { SEED_APP_USER_ID } from '../services/auth-user.ts';
-import { createService } from './setup.ts';
-import type { SteamApp } from '../../../../packages/core/src/models.ts';
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { SEED_APP_USER_ID } from "../services/auth-user.ts";
+import { createService } from "./setup.ts";
+import type { SteamApp } from "../../../../packages/core/src/models.ts";
 import {
   SteamClient,
   steamClientFromEnv,
   steamProfileFromEnv,
-} from '../integrations/steam/client.ts';
-import { gameFromSteamApp } from '../integrations/steam/mapping.ts';
+} from "../integrations/steam/client.ts";
+import { gameFromSteamApp } from "../integrations/steam/mapping.ts";
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
-const SNAPSHOT = resolve(root, 'infra/data/wishlist/steam-wishlist.json');
+const root = fileURLToPath(new URL("../../", import.meta.url));
+const SNAPSHOT = resolve(root, "infra/data/wishlist/steam-wishlist.json");
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(name);
 const option = (name: string, fallback?: string) => {
   const i = args.indexOf(name);
   if (i < 0) return undefined;
   const next = args[i + 1];
-  return next && !next.startsWith('--') ? next : fallback;
+  return next && !next.startsWith("--") ? next : fallback;
 };
-const profile = option('--profile') ?? steamProfileFromEnv();
+const profile = option("--profile") ?? steamProfileFromEnv();
 const money = (cents: number | null) =>
-  cents === null ? '—' : (cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  cents === null ? "—" : (cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
 interface Snapshot {
   steamId: string;
@@ -61,8 +61,8 @@ class SnapshotSteam extends SteamClient {
   }
 }
 
-process.on('uncaughtException', (e) => {
-  console.error('Erro:', e.message);
+process.on("uncaughtException", (e) => {
+  console.error("Erro:", e.message);
   process.exit(1);
 });
 
@@ -73,7 +73,7 @@ async function fetchFromSteam() {
   return { steamId, appIds, apps: await steam.apps(appIds) };
 }
 
-if (flag('--dry-run')) {
+if (flag("--dry-run")) {
   const { appIds, apps } = await fetchFromSteam();
   console.log(`Lista de desejos: ${appIds.length} itens`);
   console.log(`Encontrados na loja: ${apps.length}`);
@@ -82,33 +82,33 @@ if (flag('--dry-run')) {
   for (const a of apps.slice(0, 5)) {
     const g = gameFromSteamApp(a);
     console.log(
-      `- ${a.name} | ${g.primaryGenre} | ${g.secondaryTags.join(', ')} | ` +
+      `- ${a.name} | ${g.primaryGenre} | ${g.secondaryTags.join(", ")} | ` +
         (a.price
           ? `${a.price.currency} ${money(a.price.finalCents)}` +
-            (a.price.discountPercent ? ` (-${a.price.discountPercent}%)` : '')
-          : 'sem preço'),
+            (a.price.discountPercent ? ` (-${a.price.discountPercent}%)` : "")
+          : "sem preço"),
     );
   }
-} else if (flag('--export')) {
-  const file = resolve(option('--export', SNAPSHOT)!);
+} else if (flag("--export")) {
+  const file = resolve(option("--export", SNAPSHOT)!);
   const { steamId, appIds, apps } = await fetchFromSteam();
   const snap: Snapshot = { steamId, exportedAt: new Date().toISOString(), appIds, apps };
   await mkdir(dirname(file), { recursive: true });
-  await writeFile(file, JSON.stringify(snap, null, 2) + '\n');
+  await writeFile(file, JSON.stringify(snap, null, 2) + "\n");
   console.log(`Snapshot: ${apps.length}/${appIds.length} apps em ${file}`);
 } else {
-  const from = flag('--from') ? resolve(option('--from', SNAPSHOT)!) : null;
+  const from = flag("--from") ? resolve(option("--from", SNAPSHOT)!) : null;
   const steam = from
-    ? new SnapshotSteam(JSON.parse(await readFile(from, 'utf8')) as Snapshot)
+    ? new SnapshotSteam(JSON.parse(await readFile(from, "utf8")) as Snapshot)
     : undefined;
-  const env = flag('--json') ? { ...process.env, DATABASE_URL: undefined } : process.env;
+  const env = flag("--json") ? { ...process.env, DATABASE_URL: undefined } : process.env;
   const { wishlist, storage } = await createService({
     env,
-    dataDir: resolve(root, 'data'),
+    dataDir: resolve(root, "data"),
     devAppUserId: SEED_APP_USER_ID,
     steam,
   });
-  const result = await wishlist.importSteam({ profile: from ? 'snapshot' : profile });
-  console.log(`(${storage}${from ? ', snapshot' : ''})`, JSON.stringify(result, null, 2));
+  const result = await wishlist.importSteam({ profile: from ? "snapshot" : profile });
+  console.log(`(${storage}${from ? ", snapshot" : ""})`, JSON.stringify(result, null, 2));
   process.exit(0);
 }

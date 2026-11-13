@@ -1,0 +1,18 @@
+services:
+  game-list:
+    networks:
+      internal: {}
+      edge:
+        aliases:
+          - ${APP_ALIAS:?set APP_ALIAS to the DNS alias on the edge network}
+networks:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:-edge}
+secrets:
+  db_password:
+    file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/db_password
+  smtp_password:
+    file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/smtp_password
+  github_client_secret:
+    file: ${SECRETS_DIR:?set SECRETS_DIR to this environment's secrets directory}/github_client_secret

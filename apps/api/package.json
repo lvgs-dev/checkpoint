@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run --root ../.. --project api",
-    "test:security": "vitest run --root ../.. --project api test/security/"
+    "test:security": "vitest run --root ../.. --project api test/security/",
+    "db:migrate": "node --env-file-if-exists=../../.env src/data/migrate.ts"
   },
   "dependencies": {
     "@vercel/functions": "^3.9.11",

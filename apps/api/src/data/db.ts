@@ -1,10 +1,4 @@
-// Conexão Postgres (Supabase) — singleton por processo/instância serverless.
-//
-// Driver `postgres` (porsager): tagged templates parametrizados, pipelining e pool próprio.
-// DATABASE_URL aponta para o pooler Supavisor em modo TRANSAÇÃO (porta 6543): cada
-// transação pode cair numa conexão de servidor diferente, então prepared statements
-// nomeados são desligados (`prepare: false`). O pool local é pequeno porque, na Vercel,
-// cada instância da função abre o seu — quem multiplexa de verdade é o Supavisor.
+// Process-local PostgreSQL connection pool.
 import postgres from 'postgres';
 import { timed } from '../observability/timing.ts';
 

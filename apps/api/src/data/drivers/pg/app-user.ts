@@ -9,27 +9,27 @@ export class PgAppUserDriver implements AppUserDriver {
   }
   async findByAuthId(authId: string) {
     const [found] = await this.sql<{ id: string }[]>`
-      SELECT id FROM app_user WHERE auth_user_id = ${authId}`;
+      SELECT id FROM app_user WHERE auth_identity_id = ${authId}`;
     return found?.id;
   }
   async claimSeed(seedId: string, authId: string, email: string, seedOwnerEmail: string) {
     const [claimed] = await this.sql<{ id: string }[]>`
       UPDATE app_user
-         SET auth_user_id = ${authId}, email = coalesce(email, ${email})
+         SET auth_identity_id = ${authId}, email = coalesce(email, ${email})
        WHERE id = ${seedId}
-         AND auth_user_id IS NULL
+         AND auth_identity_id IS NULL
          AND (lower(email) = lower(${email}) OR lower(${email}) = lower(${seedOwnerEmail}))
       RETURNING id`;
     return claimed?.id;
   }
   async create(authId: string, email: string | null) {
     const [created] = await this.sql<{ id: string }[]>`
-      INSERT INTO app_user (id, auth_user_id, email)
+      INSERT INTO app_user (id, auth_identity_id, email)
       VALUES (${authId}, ${authId},
               CASE WHEN NOT EXISTS (SELECT 1 FROM app_user WHERE lower(email) = lower(${email}))
                    THEN ${email}::text END)
-      ON CONFLICT (id) DO UPDATE SET auth_user_id = EXCLUDED.auth_user_id
-        WHERE app_user.auth_user_id IS NULL OR app_user.auth_user_id = EXCLUDED.auth_user_id
+      ON CONFLICT (id) DO UPDATE SET auth_identity_id = EXCLUDED.auth_identity_id
+        WHERE app_user.auth_identity_id IS NULL OR app_user.auth_identity_id = EXCLUDED.auth_identity_id
       RETURNING id`;
     return created?.id;
   }

@@ -3,8 +3,8 @@
 // A API conecta direto no banco (RLS não se aplica), então todo repositório filtra por este
 // id. Ordem de resolução:
 //   1. contexto já resolvido (`appUserId`) — também é o atalho de scripts/testes;
-//   2. app_user com auth_user_id = sub do JWT;
-//   3. primeiro login do dono: vincula o app_user do seed (sem auth_user_id) se o e-mail,
+//   2. app_user com auth_identity_id = sub do JWT;
+//   3. primeiro login do dono: vincula o app_user do seed (sem auth_identity_id) se o e-mail,
 //      confirmado no Supabase (email_confirmed_at), for igual ao e-mail do seed ou a SEED_OWNER_EMAIL;
 //   4. senão cria um app_user vazio (equivalente a ensure_app_user(), que depende de
 //      auth.uid() e por isso não serve para uma conexão direta).

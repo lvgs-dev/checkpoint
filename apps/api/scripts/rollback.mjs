@@ -25,8 +25,8 @@ function run(cmd, args, { capture = false } = {}) {
 }
 
 async function openDb() {
-  const url = process.env.DATABASE_URL_SESSION || process.env.DATABASE_URL;
-  if (!url) throw new Error('Defina DATABASE_URL_SESSION ou DATABASE_URL (.env).');
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('Defina DATABASE_URL (.env).');
   const { default: postgres } = await import('postgres');
   return postgres(url, {
     prepare: false,

@@ -98,9 +98,7 @@ export async function startTestServer(
       await sql`DELETE FROM game WHERE name LIKE 'Private game %'`;
     }
     for (const user of Object.values(options.initialUsers)) {
-      await sql`INSERT INTO auth.users (id, email) VALUES (${user.id}, ${user.email ?? null})
-                ON CONFLICT (id) DO NOTHING`;
-      await sql`INSERT INTO app_user (id, auth_user_id, email) VALUES (${user.id}, ${user.id}, ${user.email ?? null})
+      await sql`INSERT INTO app_user (id, auth_identity_id, email) VALUES (${user.id}, ${user.id}, ${user.email ?? null})
                 ON CONFLICT (id) DO NOTHING`;
     }
   }

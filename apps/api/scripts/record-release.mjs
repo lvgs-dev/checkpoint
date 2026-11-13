@@ -28,10 +28,10 @@ async function main() {
   });
   try {
     const [{ exists }] = await sql`
-      SELECT to_regclass('supabase_migrations.schema_migrations') IS NOT NULL AS exists`;
+      SELECT to_regclass('public.schema_migration') IS NOT NULL AS exists`;
     let v = null;
     if (exists) {
-      const [row] = await sql`SELECT max(version) AS v FROM supabase_migrations.schema_migrations`;
+      const [row] = await sql`SELECT max(version) AS v FROM public.schema_migration`;
       v = row?.v ?? null;
     }
     const { release, created } = await ensureRelease(

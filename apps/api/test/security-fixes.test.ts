@@ -196,7 +196,7 @@ it('createData applies the private-store guard before opening storage', async ()
   const { createData } = await import('../src/main/data.ts');
   const { closeDb } = await import('../src/data/db.ts');
   const names = ['GAMES_STORE', 'LISTS_STORE', 'PINS_STORE', 'SCORING_STORE', 'APP_USERS_STORE'];
-  const auth = { SUPABASE_URL: 'https://auth.example.test' };
+  const auth = { NODE_ENV: 'production' };
   try {
     await expect(
       createData({ dataDir: '/unavailable-security-test-path', env: auth }),

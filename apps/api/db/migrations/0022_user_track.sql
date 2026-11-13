@@ -1,5 +1,6 @@
-BEGIN;
+-- The migration runner supplies one transaction for this file.
 SET LOCAL lock_timeout = '5s';
+
 SET LOCAL statement_timeout = '60s';
 
 CREATE TABLE IF NOT EXISTS public.user_track (
@@ -20,26 +21,11 @@ CREATE TABLE IF NOT EXISTS public.user_track (
   deleted_by uuid REFERENCES public.app_user(id) ON DELETE SET NULL
 );
 
--- Per-user history.
 CREATE INDEX IF NOT EXISTS user_track_user_occurred_idx
   ON public.user_track (user_id, occurred_at DESC);
 
--- Per-screen history.
 CREATE INDEX IF NOT EXISTS user_track_screen_occurred_idx
   ON public.user_track (screen, occurred_at DESC);
-
-ALTER TABLE public.user_track ENABLE ROW LEVEL SECURITY;
-
-DO $user_track_grants$
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'anon') THEN
-    REVOKE ALL ON public.user_track FROM anon;
-  END IF;
-  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'authenticated') THEN
-    REVOKE ALL ON public.user_track FROM authenticated;
-  END IF;
-END
-$user_track_grants$;
 
 COMMENT ON TABLE public.user_track IS 'Append-only user event log. Element stores a data-testid, never button text.';
 
@@ -58,21 +44,7 @@ CREATE TABLE IF NOT EXISTS public.page_track (
   PRIMARY KEY (screen, day)
 );
 
--- Per-day page history.
 CREATE INDEX IF NOT EXISTS page_track_day_idx ON public.page_track (day DESC);
-
-ALTER TABLE public.page_track ENABLE ROW LEVEL SECURITY;
-
-DO $page_track_grants$
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'anon') THEN
-    REVOKE ALL ON public.page_track FROM anon;
-  END IF;
-  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'authenticated') THEN
-    REVOKE ALL ON public.page_track FROM authenticated;
-  END IF;
-END
-$page_track_grants$;
 
 COMMENT ON TABLE public.page_track IS 'Daily access and click counts by screen.';
 
@@ -147,5 +119,3 @@ BEGIN
   END IF;
 END
 $user_track_cron$;
-
-COMMIT;

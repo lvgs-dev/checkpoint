@@ -7,8 +7,9 @@ area: jobs
 
 # Docs and knowledge checklist
 
-Apply this checklist to the changed scope. Mark unrelated items as not applicable.
-Fix issues in scope. Record other gaps in `bd`.
+Start with [AGENTS.md](../../AGENTS.md). Read this checklist only when its role applies to the task.
+
+Answer each item with yes, no or not applicable. Review each no before you report done.
 
 ## Before
 
@@ -21,8 +22,7 @@ Fix issues in scope. Record other gaps in `bd`.
 - [ ] Does the note start with the four frontmatter keys: name, description, type, area?
 - [ ] Does the description say what question the note answers?
 - [ ] Does the note answer one question only?
-- [ ] Does each sentence stay at 20 words in steps and 25 words in descriptions?
-- [ ] Do sentences use active voice and simple present tense?
+- [ ] Are sentences short and active, with one idea each?
 - [ ] Does the note use one word for one meaning?
 - [ ] Do procedures use numbered steps that end in a check?
 - [ ] Does the note state facts that code cannot show, and not repeat the code?
@@ -31,21 +31,15 @@ Fix issues in scope. Record other gaps in `bd`.
 
 ## Structure
 
-- [ ] Does the note stay under 150 lines, with session state at 60 lines or fewer?
+- [ ] Does the note stay under 150 lines?
 - [ ] Is the note linked from a hub or a sibling note?
-- [ ] Does the note have described Related links, using the session-memory exception where applicable?
+- [ ] Does the note end with a Related section?
 - [ ] Does each link have a short description?
-- [ ] Do Markdown files stay in `AI/`, except allowed root files and `.agents/` orchestration?
+- [ ] Do you create no `.md` file outside `AI/`, except the directories and root files allowed by `AGENTS.md`?
 
 ## Before you report done
 
 - [ ] If a note contradicted the code, did you trust the code and fix the note?
 - [ ] Did you delete or mark outdated lines?
-- [ ] Did you put follow-up work in `bd` and not in a TODO list?
-- [ ] Did you put a short operational fact in `bd remember`?
+- [ ] Did you follow the [Beads workflow](../architecture/beads.md) for follow-up work?
 - [ ] Does the final report hold the result, and not a file with a report?
-
-## Related
-
-- [[AI/jobs/index]]: Role checklists for task review.
-- [[AI/index]]: Entry point: pick the area you change and follow one link.

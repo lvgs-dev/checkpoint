@@ -7,30 +7,22 @@ area: jobs
 
 # Role checklists
 
-Each file supports review of the changed scope. These checklists do not describe implemented features.
-Use [[AGENTS]]: the shared workflow and required checks.
+Start with [AGENTS.md](../../AGENTS.md). Read this checklist only when its role applies to the task.
+
+Each file is a self-review gate. Agents run the checklist of each role that the task touches. Most tasks touch more than one role.
 
 1. Pick the roles from the table.
 2. Open each file and answer every item.
-3. Fix issues in scope. Record other gaps in `bd`. Report checks and limitations.
+3. Fix each no, then run the verification gate in `AGENTS.md` and report done.
 
-| Role                | File                       | When to use                                                   |
-| ------------------- | -------------------------- | ------------------------------------------------------------- |
-| Frontend            | [[AI/jobs/frontend]]       | You change React or Vite code in `apps/web`                   |
-| Backend             | [[AI/jobs/backend]]        | You change routes, use cases or services in `apps/api`        |
-| Database            | [[AI/jobs/database]]       | You change tables, migrations, RLS or queries                 |
-| Security            | [[AI/jobs/security]]       | You touch auth, input, secrets, uploads or dependencies       |
-| DevOps              | [[AI/jobs/devops]]         | You change CI, deploy, scripts or environment variables       |
-| Infrastructure      | [[AI/jobs/infra]]          | You add or change a hosted service, region, storage or limit  |
-| Design and UX       | [[AI/jobs/design-ux]]      | You change what the user sees or does                         |
-| QA and testing      | [[AI/jobs/qa-testing]]     | You write or change tests, or fix a bug                       |
-| Performance         | [[AI/jobs/performance]]    | You add a hot path, a list, a large asset or a heavy query    |
-| Observability       | [[AI/jobs/observability]]  | You add logs, metrics, errors, alerts or health checks        |
-| Data privacy (LGPD) | [[AI/jobs/data-privacy]]   | You handle personal data                                      |
-| API contract        | [[AI/jobs/api-contract]]   | You change a type or schema in `packages/core` or an endpoint |
-| Docs and knowledge  | [[AI/jobs/docs-knowledge]] | You write or edit a note in `AI/`                             |
-| Code review         | [[AI/jobs/code-review]]    | You review a change, yours or from another agent              |
 
-## Related
+| Role               | File                | When to use                                              |
+| ------------------ | ------------------- | -------------------------------------------------------- |
+| Architecture       | `architecture.md`   | You change module boundaries, layers or data flow        |
+| QA and testing     | `qa-testing.md`     | You write or change tests, or fix a bug                  |
+| Security           | `security.md`       | You touch auth, input, secrets, uploads, dependencies, workflows, Compose, Environments, runners or Cloudflare |
+| Docs and knowledge | `docs-knowledge.md` | You write or edit a note in `AI/`                        |
+| Code review        | `code-review.md`    | You review a change, yours or from another agent         |
 
-- [[AI/index]]: Entry point for repository knowledge.
+Add one file per extra role your project needs (for example frontend, database or DevOps).
+Copy the front matter of an existing file. Add a row to the table.

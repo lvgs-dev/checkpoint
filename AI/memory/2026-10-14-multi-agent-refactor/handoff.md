@@ -62,7 +62,7 @@ Related: [[AI/memory/2026-10-14-multi-agent-refactor/index]]: Session hub.
 5. ConfigRepositoryImpl(driver) supplies the third GameRepositoryImpl constructor argument.
 6. ConfigService(data.config) becomes setup.config. makeServer receives optional fifth config argument.
 7. Route configRoute after auth. Keep /api/v1/config public auth fields unchanged.
-8. Call assertPrivateStores(kind, Boolean(env.SUPABASE_URL)) after store selection in main/data.ts.
+8. Call assertPrivateStores(kind, env.NODE_ENV === 'production') after store selection in main/data.ts.
 9. Central server uses socket.remoteAddress for auth limiter. Ignore unverified X-Forwarded-For.
 10. Guard expensive requests through shared/request-guard.ts. Reorder has route-local admission until background completion.
 11. Recommendations reject libraries above 2000 games. Wishlist import rejects above 1000 app IDs.

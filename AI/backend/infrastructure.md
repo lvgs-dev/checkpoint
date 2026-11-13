@@ -9,17 +9,31 @@ area: backend
 
 ## Layout
 
-| Path                      | Holds                                                                |
-| ------------------------- | -------------------------------------------------------------------- |
-| `apps/api/src`            | Server, services, repositories, drivers, auth, observability         |
-| `apps/api/src/data`       | Ports, repositories, and drivers (Postgres and JSON)                 |
-| `apps/api/index.mjs`      | Vercel Function entry; plain JS that loads the `.ts` sources         |
-| `apps/api/openapi.json`   | API contract, served at `/api/v1/openapi.json`                       |
-| `apps/api/infra/db`       | Plain-Postgres migrations and the seed generator                     |
-| `apps/api/infra/supabase` | Supabase CLI project; its `migrations` folder is canonical to deploy |
-| `apps/api/infra/data`     | Seed inputs (metadata, wishlist snapshot)                            |
-| `apps/api/scripts`        | Release, rollback, metadata and master-user scripts                  |
-| `scripts/dev.mjs`         | Starts API and web together for `pnpm dev`                           |
+| Path                    | Holds                                                        |
+| ----------------------- | ------------------------------------------------------------ |
+| `apps/api/src`          | Server, services, repositories, drivers, auth, observability |
+| `apps/api/src/data`     | Ports, repositories, and drivers (Postgres and JSON)         |
+| `apps/api/index.mjs`    | Vercel Function entry; plain JS that loads the `.ts` sources |
+| `apps/api/openapi.json` | API contract, served at `/api/v1/openapi.json`               |
+| `apps/api/infra/db`     | Legacy SQL snapshots and the seed generator                  |
+| `apps/api/infra/data`   | Seed inputs (metadata, wishlist snapshot)                    |
+| `apps/api/scripts`      | Release, rollback, metadata and master-user scripts          |
+| `scripts/dev.mjs`       | Starts API and web together for `pnpm dev`                   |
+
+## PostgreSQL migrations
+
+The canonical migration folder is apps/api/db/migrations.
+The API applies pending files before it listens when DATABASE_URL is set.
+Run pnpm --filter @checkpoint/api db:migrate to apply them separately.
+The runner reserves one connection and takes a session advisory lock.
+Each SQL file and its SHA-256 checksum commit together in public.schema_migration.
+The runner rejects changed checksums, missing files, and older pending migrations.
+These files initialize a new local database. They do not import provider data.
+Use a new migration for every later schema change.
+The optional seed is apps/api/db/seed.sql.
+No provider schema, client roles, or RLS policies are installed.
+API queries enforce user ownership. They do not set a database identity per request.
+Local authentication provisions identities separately. app_user.auth_identity_id has no auth-schema dependency.
 
 ## Storage modes
 
@@ -42,7 +56,7 @@ Environment variables select the driver for each entity:
 
 When `DATABASE_URL` is present, entities default to `pg`.
 Otherwise, entities default to `json`.
-Private stores must use the same driver. With `SUPABASE_URL`, every private store must use `pg`.
+Private stores must use the same driver. In production, every private store must use `pg`.
 The local server uses `apps/api/data`. The Vercel entry uses `DATA_DIR` or the temporary `checkpoint` directory.
 Explicit file variables, such as `DATA_FILE`, override paths in that directory.
 Use local JSON storage for development only.
@@ -66,40 +80,40 @@ The API loads metadata vocabularies through `ConfigRepository`.
 
 `.env.example` lists the main variables.
 Search `process.env` and `env.` in `apps/api` for other variables.
-Variable groups include Supabase (`SUPABASE_URL`), database (`DATABASE_URL`), storage drivers (`GAMES_STORE`), logging (`LOG_SINK`), and release tooling.
+Variable groups include database (`DATABASE_URL`), storage drivers (`GAMES_STORE`), logging (`LOG_SINK`), and release tooling.
 `API_DEADLINE_MS` (default 15000) sets the request deadline; see "Pooler and deadlines" below.
 
 ## Hosting
 
 Vercel builds the web app (`apps/web/dist`) and runs the API as one function through `vercel.json`.
-Without `SUPABASE_URL`, production uses an authenticator that returns 503 on protected routes.
+Until local authentication is configured, production returns 503 on protected routes.
 System and release routes run before that authenticator. Release registration still requires its separate token and a release store.
 The Vercel entry passes no release store, so release endpoints return 503 there.
 The local executable permits no-auth mode only on a loopback host outside production.
-With `SUPABASE_URL`, JSON private stores prevent startup.
+Production rejects JSON private stores.
 
 ## Release and account commands
 
 Run these commands from the repository root. Root scripts load environment files.
-Database release tools prefer `DATABASE_URL_SESSION`, then `DATABASE_URL`. HTTP release registration uses its configured endpoint and token.
+Database release tools use `DATABASE_URL`. HTTP release registration uses its configured endpoint and token.
 
-| Command                                      | What it does                                                                                                  |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `pnpm release:note -- "text" --kind feature` | Registers a release note. Options: `--name`, `--bump minor\|major`, `--version X.Y.Z`                         |
-| `pnpm release:list`                          | Lists registered releases                                                                                     |
-| `pnpm release:rollback`                      | Shows the rollback plan. Add `--yes` to run it and register a new release                                     |
-| `pnpm release:tag`                           | Tags a registered release in git                                                                              |
-| `pnpm master:create`                         | Creates an ordinary account and writes its credentials to `local-env.env`. `--reset` clears only that account |
+| Command                                      | What it does                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `pnpm release:note -- "text" --kind feature` | Registers a release note. Options: `--name`, `--bump minor\|major`, `--version X.Y.Z` |
+| `pnpm release:list`                          | Lists registered releases                                                             |
+| `pnpm release:rollback`                      | Shows the rollback plan. Add `--yes` to run it and register a new release             |
+| `pnpm release:tag`                           | Tags a registered release in git                                                      |
+| `pnpm master:create`                         | Requires the local authentication module; remote provisioning is retired              |
 
 `vercel-build` runs `apps/api/scripts/record-release.mjs` after the web build to register the deployed commit.
 
 ## Pooler and deadlines (lesson from the catalog hang)
 
-- `DATABASE_URL` uses the Supavisor transaction pooler (port 6543). The `postgres` pool has `max: 5`.
+- `DATABASE_URL` connects to local PostgreSQL 17. The `postgres` pool has `max: 5`.
 - Never fire more queries in parallel than the pool has slots. Seven parallel option queries stalled `GET /api/v1/catalog` and `PATCH /api/v1/games/:id` for 20 s or more on Vercel. The SQL itself ran in under 1 ms.
 - Read related rows with ONE statement (`json_build_object`). `PgConfigDriver.list()` does this and caches the result for 10 s. `add` and `remove` clear the cache.
 - Every request has a deadline: `withDeadline` in `apps/api/src/shared/request-guard.ts` returns 504 after `API_DEADLINE_MS` (default 15000). It sits inside `createRequestGuard`, so a hung route frees its guard slot.
-- Do not rely on `statement_timeout` here. A session-level `SET` does not work in transaction mode (Supabase "Timeouts" guide), and a stalled client read is not a slow statement.
+- Do not rely on `statement_timeout` here. A stalled client read is not a slow statement.
 - Proven: the catalog SQL is fast and the old code issued 7 parallel statements with no deadline. Inferred: the exact Supavisor stall mechanism.
 
 ## Related

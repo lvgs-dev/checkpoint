@@ -44,8 +44,8 @@ try {
 
 let release, created;
 if (opts.db) {
-  const url = process.env.DATABASE_URL_SESSION || process.env.DATABASE_URL;
-  if (!url) throw new Error('Defina DATABASE_URL_SESSION ou DATABASE_URL para --db.');
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('Defina DATABASE_URL para --db.');
   const [{ default: postgres }, domain, service, { ReleaseRepository }, { PgReleaseDriver }] =
     await Promise.all([
       import('postgres'),

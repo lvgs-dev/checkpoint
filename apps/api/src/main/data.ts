@@ -84,7 +84,7 @@ export async function createData({
   countryCode = env.STEAM_COUNTRY || 'BR',
 }: DataOptions): Promise<Data> {
   const kind = kinds(env);
-  assertPrivateStores(kind, Boolean(env.SUPABASE_URL));
+  assertPrivateStores(kind, env.NODE_ENV === 'production');
   const used = new Set(Object.values(kind));
   const sql = used.has('pg') ? db(env.DATABASE_URL) : null;
   const pg = used.has('pg') ? await import('../data/drivers/pg/index.ts') : null;

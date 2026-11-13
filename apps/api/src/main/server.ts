@@ -1,3 +1,4 @@
+import { migrate } from '../data/migrate.ts';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
@@ -50,7 +51,7 @@ const need = (permission: Permission) => {
   if (!can(getContext()?.role, permission)) throw new AppError('Acesso negado', 403);
 };
 
-// auth: null desliga a autenticação (dev/testes sem SUPABASE_URL). Ver api/src/auth.ts.
+// auth: null desliga a autenticação (local development). Ver api/src/auth.ts.
 export function makeServer(
   service: GameService,
   auth: Authenticator | null = authenticatorFromEnv(),
@@ -247,6 +248,7 @@ export function makeServer(
   });
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (process.env.DATABASE_URL) await migrate();
   const auth = authenticatorFromEnv();
   const host = process.env.HOST ?? '127.0.0.1';
   if (!auth) assertNoAuthAllowed(process.env, host);
@@ -258,7 +260,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const server = makeServer(service, auth, wishlist, releaseStoreFromEnv(), config, track);
   if (!auth)
     logger.warn('server.no_auth', {
-      note: 'SUPABASE_URL is unset: running WITHOUT authentication (local dev only)',
+      note: 'Running without authentication (local development only)',
     });
   for (const signal of ['SIGTERM', 'SIGINT'] as const)
     process.on(signal, () => void flushLogs().finally(() => process.exit(0)));

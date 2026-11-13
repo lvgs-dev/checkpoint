@@ -1,16 +1,5 @@
-// Autenticação da API com JWT do Supabase Auth.
-//
-// Caminho principal: verificação LOCAL da assinatura com as chaves públicas do projeto
-// (JWKS em <SUPABASE_URL>/auth/v1/.well-known/jwks.json, chaves assimétricas ES256/RS256).
-// `jose` baixa o JWKS uma vez, guarda em cache e só busca de novo quando aparece um `kid`
-// desconhecido (rotação de chaves) — nenhuma chamada de rede por requisição.
-//
-// Fallback: projetos que ainda assinam com o segredo HS256 legado não publicam a chave no
-// JWKS. Para esses tokens (alg HS256) a API pergunta ao próprio Supabase Auth
-// (GET /auth/v1/user — o mesmo que `supabase.auth.getUser(token)` faz), ao custo de uma
-// chamada de rede por requisição. Migre para "JWT Signing Keys" no painel para evitar isso.
+// JWT verification helpers remain available during the local authentication cutover.
 import {
-  createRemoteJWKSet,
   decodeJwt,
   decodeProtectedHeader,
   errors,
@@ -41,7 +30,7 @@ export interface Authenticator {
 export interface AuthenticatorOptions {
   /** Chave(s) de verificação — em produção, createRemoteJWKSet(...). */
   key: JWTVerifyGetKey;
-  /** `iss` esperado: <SUPABASE_URL>/auth/v1 */
+  /** `iss` esperado: <the configured authentication provider>/auth/v1 */
   issuer?: string;
   /** `aud` esperado; o Supabase usa "authenticated" para usuários logados. */
   audience?: string;
@@ -165,15 +154,9 @@ export function remoteUserFallback(supabaseUrl: string, apiKey: string) {
   };
 }
 
-/**
- * Whether Supabase reports the user's e-mail as confirmed. JWT `user_metadata` is editable by the
- * user, so the server-controlled `email_confirmed_at` is read from Supabase instead.
- */
-export function remoteEmailVerifier(env: Env = process.env) {
-  const { url, publishableKey } = supabaseKeys(env);
-  if (!url || !publishableKey) return undefined;
-  return async (token: string) =>
-    Boolean((await fetchSupabaseUser(url, publishableKey, token)).email_confirmed_at);
+/** Local authentication supplies email verification in the next task. */
+export function remoteEmailVerifier(_env: Env = process.env) {
+  return undefined;
 }
 
 const LOOPBACK = /^(localhost|::1|\[::1\]|127(\.\d{1,3}){3})$/;
@@ -182,52 +165,22 @@ const LOOPBACK = /^(localhost|::1|\[::1\]|127(\.\d{1,3}){3})$/;
 export function assertNoAuthAllowed(env: Env, host: string): void {
   if (env.NODE_ENV === 'production' || env.VERCEL || !LOOPBACK.test(host))
     throw new Error(
-      'Refusing to start without authentication: set SUPABASE_URL, or run with NODE_ENV != production, VERCEL unset and HOST bound to loopback.',
+      'Refusing to start without authentication: configure authentication, or run with NODE_ENV != production, VERCEL unset and HOST bound to loopback.',
     );
 }
 
 type Env = Record<string, string | undefined>;
 
-const supabaseKeys = (env: Env) => ({
-  url: env.SUPABASE_URL?.replace(/\/+$/, ''),
-  publishableKey: env.SUPABASE_PUBLISHABLE_KEY ?? env.SUPABASE_ANON_KEY,
-});
-
-/**
- * Autenticador a partir das variáveis de ambiente.
- * - SUPABASE_URL definido → JWT obrigatório nas rotas /api/* protegidas.
- * - Sem SUPABASE_URL em produção (NODE_ENV=production ou Vercel) → falha fechada (503).
- * - Sem SUPABASE_URL em desenvolvimento/testes → null (auth desligada, com aviso).
- */
+/** Local authentication replaces the retired remote provider in a separate migration. */
 export function authenticatorFromEnv(env: Env = process.env): Authenticator | null {
-  const { url, publishableKey } = supabaseKeys(env);
-  if (!url) {
-    if (env.NODE_ENV === 'production' || env.VERCEL)
-      return {
-        authenticate: () => Promise.reject(new AppError('Autenticação não configurada', 503)),
-      };
-    return null;
-  }
-  return createAuthenticator({
-    key: createRemoteJWKSet(new URL(url + '/auth/v1/.well-known/jwks.json'), {
-      cacheMaxAge: 10 * 60 * 1000,
-    }),
-    issuer: url + '/auth/v1',
-    fallback: publishableKey ? remoteUserFallback(url, publishableKey) : undefined,
-  });
+  if (env.NODE_ENV === 'production' || env.VERCEL)
+    return {
+      authenticate: () => Promise.reject(new AppError('Authentication is not configured', 503)),
+    };
+  return null;
 }
 
-/** Configuração PÚBLICA para o front (URL + publishable key são públicas por design). */
-export function publicAuthConfig(env: Env = process.env) {
-  const { url, publishableKey } = supabaseKeys(env);
-  return {
-    auth:
-      url && publishableKey
-        ? {
-            supabaseUrl: url,
-            supabasePublishableKey: publishableKey,
-            providers: { github: env.AUTH_GITHUB_ENABLED === 'true' },
-          }
-        : null,
-  };
+/** Public provider configuration stays empty until local authentication is configured. */
+export function publicAuthConfig(_env: Env = process.env) {
+  return { auth: null };
 }

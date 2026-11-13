@@ -26,20 +26,26 @@ New tests use existing public service, route, or storage interfaces.
 
 ## Database tests
 
-`pnpm db:up` starts Postgres 18 in Docker. Healthy, migrated storage enables the database-dependent tests.
+`pnpm db:up` starts PostgreSQL 17 in Docker. Healthy, migrated storage enables the database-dependent tests.
 
-| Command         | What it does                                                                     |
-| --------------- | -------------------------------------------------------------------------------- |
-| `pnpm db:up`    | Start `checkpoint-test-db`, wait for health, apply Supabase stubs and migrations |
-| `pnpm db:down`  | Stop and delete the container and its data                                       |
-| `pnpm db:reset` | `db:down`, then `db:up`: a clean database                                        |
-| `pnpm test:db`  | `db:up`, then `vitest run`; the container stays up                               |
+| Command         | What it does                                                           |
+| --------------- | ---------------------------------------------------------------------- |
+| `pnpm db:up`    | Start `checkpoint-test-db`, wait for health, apply migrations and seed |
+| `pnpm db:down`  | Stop and delete the container and its data                             |
+| `pnpm db:reset` | `db:down`, then `db:up`: a clean database                              |
+| `pnpm test:db`  | `db:up`, then `vitest run`; the container stays up                     |
 
-1. `db:up` is safe to run twice. It marks the database with a comment after the last migration and skips the work when it finds the mark.
-2. The container uses `apps/api/infra/docker-compose.test.yml`: image `postgres:18`, port `127.0.0.1:54329` only, data in tmpfs, fixed test password.
-3. `apps/api/scripts/test-db.mjs` needs only the docker CLI. It runs SQL through `docker exec`. It creates the roles `anon`, `authenticated`, `service_role`, the `auth` schema with `auth.users`, and the `extensions` schema. Then it applies `apps/api/infra/supabase/migrations` in order. It loads `infra/db/seed/seed.sql` before migration `20261012134709`.
-4. A Vitest `globalSetup` (`apps/api/scripts/test-db-global-setup.ts`) prints one line: `db tests: using checkpoint-test-db`, or `db tests: SKIPPED (run pnpm db:up)`. It sets `SECURITY_TEST_DATABASE_URL` only when the container is healthy and migrated.
-5. A `SECURITY_TEST_DATABASE_URL` that you set yourself wins over the container.
+1. The container uses PostgreSQL 17, port 127.0.0.1:54329, and tmpfs storage.
+2. The data directory is /var/lib/postgresql/data.
+3. The test runner applies apps/api/db/migrations through src/data/migrate.ts.
+4. Each file and its SHA-256 checksum enter public.schema_migration in one transaction.
+5. A session advisory lock serializes migration runners. Changed checksums stop startup.
+6. The runner rejects missing applied files and pending files older than the ledger.
+7. Test setup loads apps/api/db/seed.sql after migrations. API startup never loads seed data.
+8. No provider roles, auth schema, or RLS policies are installed.
+9. The API enforces authorization. It does not set a database identity per request.
+10. Global setup enables tests only when the container is healthy and its ledger matches all migration files.
+11. An explicit SECURITY_TEST_DATABASE_URL takes precedence.
 
 Without a database URL, SQL-injection, IDOR, and log-persistence tests skip. Other suites run without PostgreSQL.
 Use the current Vitest summary for totals; the count changes when tests are added.

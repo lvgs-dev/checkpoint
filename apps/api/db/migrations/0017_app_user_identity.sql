@@ -1,0 +1,2 @@
+-- The migration runner supplies one transaction for this file.
+-- Authorization runs in the API. No database identity or client roles are installed.

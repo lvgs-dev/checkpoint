@@ -1,5 +1,4 @@
--- Gerado por db/seed/import.mjs em 2026-10-11T16:18:00.220Z
--- Jogos: 481; metadados: 481; modo: insere faltantes
+-- Development seed: 481 games and their metadata.
 BEGIN;
 SET LOCAL client_min_messages = warning;
 

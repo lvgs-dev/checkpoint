@@ -27,14 +27,14 @@ area: backend
 12. Keep actor columns nullable without defaults. Never backfill actor identifiers.
 13. Reuse existing timestamp handlers. Otherwise, attach `trg_touch_updated_at()` as a `BEFORE UPDATE` row trigger.
 14. Use `deleted_at` and `deleted_by` for soft deletion. The application sets both when it marks a row deleted.
-15. Enable row-level security (RLS). Define policies and grants for the intended access.
-16. Write the canonical migration in `apps/api/infra/supabase/migrations/` with a timestamp prefix.
-    Set `lock_timeout = '5s'` and `statement_timeout = '60s'` with `SET LOCAL` immediately after `BEGIN` in new migrations.
-17. Copy the migration into `apps/api/infra/db/migrations/` with the next numbered prefix. Keep both copies equal.
+15. Enforce ownership in API queries. Do not add RLS without a request-scoped database identity.
+16. Add the next ordered SQL file to apps/api/db/migrations. Reserve 0100_auth.sql for local authentication.
+17. Let the runner supply the transaction. Do not add BEGIN, COMMIT, or ledger writes inside migration files.
+    Use SET LOCAL for transaction settings. Never edit an applied file.
 18. Validate the migration on local Postgres. Run it twice when it claims idempotence.
 19. Run `pnpm check` from the repository root and confirm exit code `0`.
 
-Existing tables receive missing audit columns through `20261015130000_audit_columns.sql`.
+Existing tables receive missing audit columns through `0021_audit_columns.sql`.
 New timestamp defaults record migration time for existing rows. They do not reconstruct historical dates.
 The migration preserves `app_release.created_by` as `text` for release script compatibility.
 Release tables remain append-only; their existing triggers reject updates and deletions.

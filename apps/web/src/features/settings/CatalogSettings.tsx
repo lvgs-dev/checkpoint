@@ -5,7 +5,6 @@ import {
   can,
   Permission,
   Role,
-  roleFromAppMetadata,
 } from '../../../../../packages/core/src/authorization';
 import {
   metadataFields,
@@ -28,7 +27,7 @@ const labels: Record<MetadataCategory, string> = {
 };
 export function CatalogSettings() {
   const auth = useAuth();
-  const role = auth.enabled ? roleFromAppMetadata(auth.user?.app_metadata) : Role.Admin;
+  const role = auth.enabled ? (auth.user?.role ?? Role.User) : Role.Admin;
   return can(role, Permission.CatalogUpdate) ? <CatalogEditor userId={auth.userId} /> : null;
 }
 function CatalogEditor({ userId }: { userId: string }) {

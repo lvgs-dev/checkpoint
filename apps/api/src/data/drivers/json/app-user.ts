@@ -6,9 +6,6 @@ export class JsonAppUserDriver implements AppUserDriver {
   async findByAuthId(authId: string) {
     return authId;
   }
-  async claimSeed() {
-    return undefined;
-  }
   async create(authId: string) {
     return authId;
   }

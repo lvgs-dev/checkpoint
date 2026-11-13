@@ -1,4 +1,3 @@
-import type { User } from '@supabase/auth-js';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   createContext,
@@ -8,10 +7,10 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import { authSession, type AuthState } from './session';
+import { authSession, type AuthState, type AuthUser } from './session';
 
 export interface AuthValue extends AuthState {
-  user: User | null;
+  user: AuthUser | null;
   /** Stable identity used to scope query keys; 'local' when auth is disabled. */
   userId: string;
 }

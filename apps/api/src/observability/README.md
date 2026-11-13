@@ -45,5 +45,5 @@ matching `^[A-Za-z][\w.:-]{0,79}$`) and writes them through the same sink, with 
 ## Notes
 
 - `fanout` is not accepted as a `LOG_SINK` list entry; list the destinations directly (`console,file`).
-- Roles come from the JWT `app_metadata.role`. A role change takes effect only after the user's current access token expires (up to 1 hour by default), or when the HS256 fallback cache expires (30 s).
+- Roles come from the authentication identity table. Each session lookup reads the current role.
 - Client telemetry events are logged as `client.<eventName>` and never go through the ErrorReporter.

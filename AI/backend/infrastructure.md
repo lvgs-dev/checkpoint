@@ -42,7 +42,7 @@ Environment variables select the driver for each entity:
 
 When `DATABASE_URL` is present, entities default to `pg`.
 Otherwise, entities default to `json`.
-Private stores must use the same driver. With `SUPABASE_URL`, every private store must use `pg`.
+Private stores must use the same driver. With database authentication, every private store must use `pg`.
 The local server uses `apps/api/data`. The Vercel entry uses `DATA_DIR` or the temporary `checkpoint` directory.
 Explicit file variables, such as `DATA_FILE`, override paths in that directory.
 Use local JSON storage for development only.
@@ -66,17 +66,17 @@ The API loads metadata vocabularies through `ConfigRepository`.
 
 `.env.example` lists the main variables.
 Search `process.env` and `env.` in `apps/api` for other variables.
-Variable groups include Supabase (`SUPABASE_URL`), database (`DATABASE_URL`), storage drivers (`GAMES_STORE`), logging (`LOG_SINK`), and release tooling.
+Variable groups include authentication (`AUTH_ORIGIN`), SMTP (`SMTP_HOST`), database (`DATABASE_URL`), storage drivers (`GAMES_STORE`), logging (`LOG_SINK`), and release tooling.
 `API_DEADLINE_MS` (default 15000) sets the request deadline; see "Pooler and deadlines" below.
 
 ## Hosting
 
 Vercel builds the web app (`apps/web/dist`) and runs the API as one function through `vercel.json`.
-Without `SUPABASE_URL`, production uses an authenticator that returns 503 on protected routes.
+Without `DATABASE_URL`, production uses an authenticator that returns 503 on protected routes.
 System and release routes run before that authenticator. Release registration still requires its separate token and a release store.
 The Vercel entry passes no release store, so release endpoints return 503 there.
 The local executable permits no-auth mode only on a loopback host outside production.
-With `SUPABASE_URL`, JSON private stores prevent startup.
+With database authentication, JSON private stores prevent startup.
 
 ## Release and account commands
 

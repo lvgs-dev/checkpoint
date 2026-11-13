@@ -29,18 +29,22 @@ Run quality gates with `pnpm check`.
 Format code with `pnpm format`.
 Lint code with `pnpm lint`.
 
-## Authentication (Supabase Auth)
+## Authentication
 
-The API reads `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` from `.env`.
+The API stores identities and sessions in PostgreSQL through `DATABASE_URL`.
+Set `AUTH_ORIGIN` to the exact public origin. Use `http://localhost:5173` for Vite development.
+Production requires HTTPS and SMTP configuration. See `.env.example`.
 The frontend requests public configuration from `GET /api/v1/config` on startup.
-It creates a Supabase client that manages session tokens.
+It sends the HttpOnly session cookie with API requests. It never stores bearer tokens.
 
-All `/api/*` routes require `Authorization: Bearer <access_token>`, except `health`, `openapi.json`, and `config`.
-The API validates JWT signatures locally using project JWKS keys (`apps/api/src/auth/auth.ts`).
-Without `SUPABASE_URL`, the API runs without authentication in development only.
-In production, missing authentication causes the API to return HTTP 503.
-Set `AUTH_GITHUB_ENABLED=true` to enable GitHub authentication.
-The request context provides current user data through `getContext()` in `apps/api/src/shared/context.ts`.
+Passwords use scrypt because Argon2 is not installed.
+Session cookies use SameSite=Lax and Secure on HTTPS. Browser writes require the configured Origin.
+Without `DATABASE_URL`, development permits unauthenticated access only on loopback.
+Production fails closed when authentication is unavailable.
+Set `AUTH_GITHUB_ENABLED=true` and configure GitHub credentials to enable OAuth with state and PKCE.
+Existing owners require an explicit `app_user.auth_identity_id` mapping. Email text never grants ownership.
+The request context exposes the database identity and role through `getContext()`.
+See [[AI/backend/authorization]] for expiry, recovery, and password parameters.
 
 ## Data and persistence
 

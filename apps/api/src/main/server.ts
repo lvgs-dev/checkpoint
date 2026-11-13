@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertOrigin, authRoute } from '../auth/http.ts';
 import { AppError } from '../shared/errors.ts';
 import { GameService } from '../services/games.ts';
 import { createService } from './setup.ts';
@@ -50,7 +51,7 @@ const need = (permission: Permission) => {
   if (!can(getContext()?.role, permission)) throw new AppError('Acesso negado', 403);
 };
 
-// auth: null desliga a autenticação (dev/testes sem SUPABASE_URL). Ver api/src/auth.ts.
+// A null authenticator permits local development only.
 export function makeServer(
   service: GameService,
   auth: Authenticator | null = authenticatorFromEnv(),
@@ -164,6 +165,9 @@ export function makeServer(
         try {
           const url = new URL(req.url ?? '/', 'http://localhost');
           const path = url.pathname;
+          if (auth?.sessionService && path.startsWith(ApiPath.Root)) {
+            if (await authRoute(auth.sessionService, req, res, url, readJson)) return;
+          }
           const system = await systemRoute(path, releases);
           if (system) return reply(system);
           // Public release reads and dedicated-token registration precede user authentication.
@@ -171,14 +175,19 @@ export function makeServer(
             const hit = await releaseRoute(releases, req, url, readJson);
             if (hit) return reply(hit);
           }
-          // Daqui em diante, toda rota /api/* exige JWT do Supabase (401 se ausente/inválido).
+          // Protected routes resolve the server session before permission checks.
           if (auth && path.startsWith(ApiPath.Root)) {
+            if (auth.sessionService)
+              assertOrigin(req.method, req.headers.origin, process.env.AUTH_ORIGIN ?? '');
             const user = await span('auth', () =>
-              auth.authenticate(req.headers.authorization, req.socket.remoteAddress ?? '127.0.0.1'),
+              auth.authenticate(
+                auth.sessionService ? req.headers.cookie : req.headers.authorization,
+                req.socket.remoteAddress ?? '127.0.0.1',
+              ),
             );
             setContext({
               userId: user.id,
-              accessToken: user.accessToken,
+              emailVerified: user.emailVerified,
               email: user.email,
               role: user.role,
             });
@@ -258,7 +267,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const server = makeServer(service, auth, wishlist, releaseStoreFromEnv(), config, track);
   if (!auth)
     logger.warn('server.no_auth', {
-      note: 'SUPABASE_URL is unset: running WITHOUT authentication (local dev only)',
+      note: 'DATABASE_URL is unset: running without authentication on loopback only',
     });
   for (const signal of ['SIGTERM', 'SIGINT'] as const)
     process.on(signal, () => void flushLogs().finally(() => process.exit(0)));

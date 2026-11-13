@@ -12,6 +12,7 @@ Start with [AGENTS.md](../../AGENTS.md). The roadmap stays the source of the rul
 `lvgs --start-new-project` asks a few questions and runs every step. Each step is also its own flag.
 Each step checks first. The setup flow skips finished steps.
 Run `--subharness` alone to merge later baseline updates.
+For a provider takeover, start with `bash scripts/agent-resume.sh` and follow the [Beads protocol](../architecture/beads.md).
 State lives in `<project>/.git/lvgs-state.json`. It holds names and ids only, never a secret.
 
 ## Install
@@ -22,27 +23,42 @@ bash scripts/lvgs --install    # links ~/.local/bin/lvgs to this checkout; never
 
 ## Flags
 
-| Flag                  | What it does                                                                                                                             |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `--start-new-project` | Asks the path and the name, then runs the steps below in order. Asks "Publish the default project now?" before `--deploy`.               |
-| `--git`               | Runs `git init -b main` when the folder is not a repository.                                                                             |
-| `--subharness`        | Merges committed Subharness baseline files (`AGENTS.md`, `CLAUDE.md`, `AI/`, `.agents/`). Keeps project-only files.                      |
-| `--all`               | Soft-syncs every configured project in order. Prints a summary table.                                                                    |
-| `--all --hard`        | Runs the same list with hard sync and backup.                                                                                            |
-| `--subharness-hard`   | Replaces the whole `AI/` folder after confirmation and backup. Soft-merges the other baseline paths. Excluded from the setup flow.       |
-| `--ci-workflow`       | Calls `lvgs-bootstrap scaffold static-site` with the name, a free port, the hostname and the newest engine release.                      |
-| `--github`            | Creates the private repository with owner access, adds `origin`, pushes `main` and creates `homolog`.                                    |
-| `--environments`      | Creates the `production` and `homolog` Environments with owner access. Each one accepts only its branch.                                 |
-| `--host-folders`      | Prints the sudo line for `/var/lib/<name>-production` and waits until the folders exist.                                                 |
-| `--cloudflare`        | Asks for the missing Cloudflare ids and the hidden token. Runs the engine route script in `check` mode, asks, applies, and checks again. |
-| `--default-page`      | Writes `public/index.html` ("Project <name> in progress"), `package.json` and `pnpm-lock.yaml`.                                          |
-| `--deploy`            | Opens the PR into `homolog`, waits for checks, merges, waits for the pipeline and opens the promotion PR. The owner approves it.         |
-| `--status`            | Shows each step and the saved facts.                                                                                                     |
-| `--doctor`            | Checks the local tools and the scaffold support.                                                                                         |
-| `--install`           | Links the wrapper into `~/.local/bin`.                                                                                                   |
+| Flag                  | What it does                                                                                                                                   |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--start-new-project` | Asks the path and the name, then runs the steps below in order. Asks "Publish the default project now?" before `--deploy`.                     |
+| `--git`               | Runs `git init -b main` when the folder is not a repository.                                                                                   |
+| `--subharness`        | Merges committed Subharness baseline files (`AGENTS.md`, `CLAUDE.md`, `AI/`, `.agents/`, `scripts/agent-resume.sh`). Keeps project-only files. |
+| `--all`               | Soft-syncs every configured project in order. Prints a summary table.                                                                          |
+| `--all --hard`        | Runs the same list with hard sync and backup.                                                                                                  |
+| `--subharness-hard`   | Replaces the whole `AI/` folder after confirmation and backup. Soft-merges the other baseline paths. Excluded from the setup flow.             |
+| `--ci-workflow`       | Calls `lvgs-bootstrap scaffold <kind>` (default `static-site`) with the name, a free port, the hostname and the newest engine release.         |
+| `--github`            | Creates the private repository with owner access, adds `origin`, pushes `main` and creates `homolog`.                                          |
+| `--environments`      | Creates the `production` and `homolog` Environments with owner access. Each one accepts only its branch.                                       |
+| `--host-folders`      | Prints the sudo line for `/var/lib/<name>-production` and waits until the folders exist.                                                       |
+| `--cloudflare`        | Asks for the missing Cloudflare ids and the hidden token. Runs the engine route script in `check` mode, asks, applies, and checks again.       |
+| `--default-page`      | Writes `public/index.html` ("Project <name> in progress"), `package.json` and `pnpm-lock.yaml`.                                                |
+| `--deploy`            | Opens the PR into `homolog`, waits for checks, merges, waits for the pipeline and opens the promotion PR. The owner approves it.               |
+| `--status`            | Shows each step and the saved facts.                                                                                                           |
+| `--doctor`            | Checks the local tools and the scaffold support.                                                                                               |
+| `--install`           | Links the wrapper into `~/.local/bin`.                                                                                                         |
 
-Common options: `--path`, `--name`, `--owner` (default `lvgs-dev`), `--domain` (default `gps.dev.br`), `--hostname`, `--port`, `--ci-workflows-ref`, `--engine`, `--cf-account-id`, `--cf-zone-id`, `--cf-tunnel-id`, `--cf-access-policy-id`, `--publish yes|no`, `--yes`, `--dry-run`, `--ref`, `--force`.
+Common options: `--kind static-site|python-service|node-service`, `--path`, `--name`, `--owner` (default `lvgs-dev`), `--domain` (default `gps.dev.br`), `--hostname`, `--port`, `--ci-workflows-ref`, `--engine`, `--cf-account-id`, `--cf-zone-id`, `--cf-tunnel-id`, `--cf-access-policy-id`, `--publish yes|no`, `--yes`, `--dry-run`, `--ref`, `--force`.
 `lvgs start-new-project` works too. The first word may drop the dashes.
+
+## Select the delivery kind
+
+Use `lvgs --ci-workflow --kind node-service` for a pnpm workspace with `apps/web`, `apps/api` and PostgreSQL.
+Use `static-site` for a frontend served by Caddy without a database. It stays the default.
+Use `python-service` for a Python API with PostgreSQL and Alembic. Its existing kit stays unchanged.
+`--port` selects the host port. The container port comes from `deploy/project.json`:
+8080 for static sites and 8000 for the service templates.
+Run service scaffolding against an existing application. The default page step creates only a static site.
+
+Node services run migrations at API start under a PostgreSQL advisory lock.
+The engine accepts only `none` and `alembic` migration kinds, so the Node contract uses `migrate.kind: none`.
+Use forward only migrations and expand/contract changes. Image rollback does not reverse the schema.
+A generic `command` migration kind in `ci-workflows` is a pending improvement.
+Read [the Node runtime contract](new-project-compose-and-dockerfile.md#node-service-runtime-contract) before the first image check.
 
 ## Rules
 
@@ -105,7 +121,7 @@ A dirty tree requires both `--force` and `--yes`.
 Before replacement, it copies the current folder into `.git/lvgs-backup/<UTC timestamp>/AI/`.
 Git worktrees use their actual Git directory. Non-Git projects use `.lvgs-backup/<UTC timestamp>/AI/`.
 The command prints the backup path. Project-only files outside `AI/` remain untouched.
-Hard sync can still report soft-merge conflicts in `AGENTS.md`, `CLAUDE.md` or `.agents/`.
+Hard sync can still report soft-merge conflicts in `AGENTS.md`, `CLAUDE.md`, `.agents/` or `scripts/agent-resume.sh`.
 
 ```bash
 lvgs --subharness --path ./demo --ref origin/main --dry-run

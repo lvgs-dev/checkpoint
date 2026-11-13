@@ -79,7 +79,7 @@ Prepare exact operator steps for the chosen environment, identifying the platfor
 - Cloudflare: zone/nameserver activation, tunnel inventory and connector health, single tunnel reused or new tunnel explicitly justified, published hostname → service route, DNS verification, Cloudflare Access or application authentication **before** treating hostname as private, TLS, public health probe, and fallback procedure. Never copy an existing connector token into repo or start duplicate connectors casually.
 - Operator recovery: backup retention and restoration exercise based on data value and risk, alerts, monitoring, logs, image pruning policy, secret expiration/rotation, capacity and monthly costs.
 
-Every human action must state exactly *where to click or run*, its expected result, how to validate, and what evidence (not credentials) the user should report.
+Every human action must state exactly _where to click or run_, its expected result, how to validate, and what evidence (not credentials) the user should report.
 
 ## Phase 4 — verification and release gates
 

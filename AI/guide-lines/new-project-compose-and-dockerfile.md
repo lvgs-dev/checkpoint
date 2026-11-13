@@ -10,6 +10,44 @@ area: guide-lines
 Start with [the roadmap](new-project-roadmap.md). Read this note in phase 4.
 The examples come from `lvgs-dev/server-supply`. Replace `<PROJECT>` and `<PORT>` with your values. Project-owned `deploy/project.json` declares services, ports, health, database and migrations. `deploy/env-manifest.json` declares all application variables and secrets. Example application names are not engine requirements. Optional values use `required:false` because GitHub cannot store empty secrets.
 
+## Select a scaffold
+
+Use `static-site` for a built frontend with Caddy, port 8080 and no database.
+Use `python-service` for the existing Python API kit with PostgreSQL, Alembic and port 8000.
+Use `node-service` for a pnpm workspace with `apps/web`, `apps/api`, PostgreSQL and port 8000.
+Select it with `lvgs --ci-workflow --kind node-service`.
+The examples below describe the Python kit. Node has no separate migrate service.
+
+## Node service runtime contract
+
+The Node scaffold supplies delivery files for an existing application, not a new workspace.
+Pin pnpm and commit `pnpm-lock.yaml`. Both workspace packages must have a `build` script.
+The web build writes `apps/web/dist`. The API build writes `apps/api/dist/index.js` and `dist/migrate.js`.
+The API package depends on `pg`. Its package files must include `dist` and migration assets for `pnpm deploy`.
+The image copies the API production package to `/app` and the web build to `/app/public`.
+The API serves that directory and binds to `HOST=0.0.0.0` and `PORT=8000`.
+
+`deploy/start.cjs` holds advisory lock `74201901` on a dedicated PostgreSQL connection.
+`dist/migrate.js` exports an async CommonJS function that takes that connected `pg` client.
+It applies migrations through that client only; it must not create a separate connection.
+Startup awaits it, closes the lock connection, then loads `dist/index.js`.
+A failed migration stops startup. The migration script applies only missing revisions.
+Startup and API code read `/run/secrets/db_password` and use `PGHOST`, `PGUSER` and `PGDATABASE`.
+Call the supplied CommonJS `require('../health.cjs')` handler from the compiled API before other routes.
+For example: `if (health(req, res)) return;` inside the HTTP request handler.
+It serves `GET /api/health` with `{status: "ok", revision: process.env.APP_REVISION || "unknown"}`.
+Compose supplies `APP_REVISION` from `EXPECTED_REVISION` at runtime. Never bake the revision into the image.
+The engine smoke test runs `node dist/index.js` with `APP_SMOKE_TEST=true`, without PostgreSQL or mounted secrets.
+The API must skip database initialization in that explicit smoke mode and still expose its real health route.
+This checks the built API and runtime image. It does not exercise database integration or migrations.
+
+PostgreSQL 17 uses a named volume. Only the application joins `edge`; the database stays internal.
+Production selects the application image by digest and reads secrets from the environment's files.
+The engine has no generic migration kind. It accepts only `none` or `alembic`.
+Node therefore uses `migrate.kind: none` and migrates at API start under the advisory lock.
+Use forward only migrations and expand/contract changes so the previous image can use the new schema.
+A generic `command` migration kind in `ci-workflows` is a pending improvement.
+
 ## How the files fit together
 
 | File                  | Used by                   | Purpose                                                                 |
@@ -94,14 +132,14 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://app@db:5432/app}
     secrets: [db_password]
-    ports: ['127.0.0.1:<PORT>:8000']
+    ports: ["127.0.0.1:<PORT>:8000"]
     networks: [internal]
 
   migrate:
     build: { context: ., secrets: [github_token] }
     image: <PROJECT>:latest
-    restart: 'no'
-    command: ['python', '-m', 'app.migrate']
+    restart: "no"
+    command: ["python", "-m", "app.migrate"]
     depends_on:
       db: { condition: service_healthy }
     environment:
@@ -119,7 +157,7 @@ services:
     secrets: [db_password]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U app -d app']
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -153,13 +191,13 @@ services:
     depends_on: !override # the migration runs from the deploy script, not from Compose
       db: { condition: service_healthy }
     ports: !override
-      - '127.0.0.1:${APP_HOST_PORT:-<PORT>}:8000'
+      - "127.0.0.1:${APP_HOST_PORT:-<PORT>}:8000"
     healthcheck:
       test:
         [
-          'CMD',
-          'python',
-          '-c',
+          "CMD",
+          "python",
+          "-c",
           "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status == 200 else 1)",
         ]
       interval: 30s
@@ -168,12 +206,12 @@ services:
       start_period: 20s
 
   migrate:
-    profiles: ['migrate'] # started only by the deploy script
+    profiles: ["migrate"] # started only by the deploy script
     build: !reset null
     image: ${IMAGE_REF:?set IMAGE_REF}
     pull_policy: never
-    restart: 'no'
-    command: ['python', '-m', 'app.migrate']
+    restart: "no"
+    command: ["python", "-m", "app.migrate"]
     depends_on:
       db: { condition: service_healthy }
 ```

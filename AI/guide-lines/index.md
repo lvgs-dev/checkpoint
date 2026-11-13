@@ -11,6 +11,7 @@ Start with [AGENTS.md](../../AGENTS.md).
 
 - Every code task: read [agent practices](agent-practices.md).
 - Every task that writes documents: read [documentation rules](documentation.md).
+- Every task that writes or changes code, config or Markdown: read [formatting](formatting.md). Run the formatter; do not lay out code by hand.
 - Every task that changes branches, CI/CD, environments, rulesets or deploy: read the delivery standard:
   [branches and naming](branches-and-naming.md), [CI and CD](ci-cd.md), [environments and secrets](environments-and-secrets.md), [branch protection](branch-protection.md).
 - Every task that creates a new project with CI and CD, or that explains the infrastructure: read [the new project roadmap](new-project-roadmap.md).

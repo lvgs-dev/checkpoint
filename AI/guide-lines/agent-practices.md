@@ -77,10 +77,20 @@ A test never depends on a path, a user or a tool that exists on one machine only
 A gate wrapper must return a non-zero exit code when a stage fails. A wrapper that hides failures behind a pipe reports success on a red build.
 Use these checks with the [delegation rules](#single-agent-default) and [handoff format](#handoff-format).
 
+## durable-mission-context
+
+For claims, leases, step memory and provider takeover, follow the [Beads protocol](../architecture/beads.md).
+For a successor session, use the [handoff skill](../../.agents/skills/handoff/SKILL.md).
+
 ## handoff-format
 
 Require every worker report to state: result, changed files, exact commands with exit codes, blockers, and next step.
 Store progress in the tracker, not in the chat.
+
+## format-after-writing
+
+Write the code first, then run the project `format` command. Do not spend effort on hand layout.
+Run `format:check` in the gate. See [formatting](formatting.md) for the tools per file type.
 
 ## evidence-notes
 

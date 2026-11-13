@@ -7,7 +7,9 @@ disable-model-invocation: true
 
 For this repository, start with [AGENTS.md](../../../AGENTS.md). Load only guidance relevant to the assigned task.
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS (`$TMPDIR`, else `/tmp`; `%TEMP%` on Windows) - not the current workspace.
+In a repository that uses Beads, put durable state in Beads and Git. Follow the [Beads protocol](../../../AI/architecture/beads.md). A handoff file may only point to the epic id and the branch.
+
+In a repository without Beads, write a handoff document summarising the current conversation so a fresh agent can continue the work. Save it to the temporary directory of the user's OS (`$TMPDIR`, else `/tmp`; `%TEMP%` on Windows), not the current workspace.
 
 Include a "suggested skills" section in the document, naming which skills the next agent should call the Skill tool for.
 

@@ -14,6 +14,7 @@ The target deployment uses local PostgreSQL, one application container, and the 
 5. Never write secrets or personal data in files.
 6. Write files in english.
 7. Write short active sentences. One idea per sentence. This is a style preference, not a tested LLM-performance rule.
+8. Do not format code by hand. Run the project `format` command after you write, then `format:check` in the gate. See [formatting](AI/guide-lines/formatting.md) and [agent practices](AI/guide-lines/agent-practices.md).
 
 ## Map
 
@@ -42,6 +43,8 @@ pnpm --filter <package> <script>   # run one package script
 4. Select the current design from the [architecture index](AI/architecture/index.md).
 5. For branches, CI/CD, environments or rulesets, read the [practices index](AI/guide-lines/index.md) delivery rules.
 6. Run the checklists of the [role index](AI/jobs/index.md) before you report completion.
+
+To resume work, run `bash scripts/agent-resume.sh` (see the [Beads workflow](AI/architecture/beads.md)).
 
 Follow a link only when its stated condition applies. If a practice conflicts with the code, report the difference.
 

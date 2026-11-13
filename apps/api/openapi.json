@@ -292,9 +292,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -350,9 +348,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -1106,11 +1102,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "production",
-                "preview",
-                "development"
-              ],
+              "enum": ["production", "preview", "development"],
               "default": "production"
             }
           },
@@ -1140,10 +1132,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "items",
-                    "nextBefore"
-                  ],
+                  "required": ["items", "nextBefore"],
                   "properties": {
                     "items": {
                       "type": "array",
@@ -1152,10 +1141,7 @@
                       }
                     },
                     "nextBefore": {
-                      "type": [
-                        "integer",
-                        "null"
-                      ]
+                      "type": ["integer", "null"]
                     }
                   }
                 }
@@ -1296,11 +1282,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "production",
-                "preview",
-                "development"
-              ],
+              "enum": ["production", "preview", "development"],
               "default": "production"
             }
           }
@@ -1383,9 +1365,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "status"
-                  ],
+                  "required": ["status"],
                   "properties": {
                     "status": {
                       "const": "accepted"
@@ -1432,10 +1412,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -1480,10 +1457,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -1560,9 +1534,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email"
-                ],
+                "required": ["email"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -1599,10 +1571,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "token",
-                  "password"
-                ],
+                "required": ["token", "password"],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -1669,9 +1638,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "token"
-                ],
+                "required": ["token"],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -1770,74 +1737,42 @@
     "schemas": {
       "VersionInfo": {
         "type": "object",
-        "required": [
-          "version",
-          "gitSha",
-          "environment",
-          "deployedAt",
-          "name",
-          "description"
-        ],
+        "required": ["version", "gitSha", "environment", "deployedAt", "name", "description"],
         "properties": {
           "version": {
             "type": "string",
             "description": "semver do package.json"
           },
           "gitSha": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "environment": {
             "type": "string",
-            "enum": [
-              "production",
-              "preview",
-              "development"
-            ]
+            "enum": ["production", "preview", "development"]
           },
           "deployedAt": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "date-time"
           },
           "name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "description": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "PublicConfig": {
         "type": "object",
-        "required": [
-          "auth"
-        ],
+        "required": ["auth"],
         "properties": {
           "auth": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "required": [
-              "providers"
-            ],
+            "type": ["object", "null"],
+            "required": ["providers"],
             "properties": {
               "providers": {
                 "type": "object",
-                "required": [
-                  "github"
-                ],
+                "required": ["github"],
                 "properties": {
                   "github": {
                     "type": "boolean"
@@ -1862,51 +1797,26 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "Não iniciado",
-              "Jogando",
-              "Abandonado",
-              "Finalizado",
-              "Desejado"
-            ]
+            "enum": ["Não iniciado", "Jogando", "Abandonado", "Finalizado", "Desejado"]
           },
           "desire": {
             "type": "string",
-            "enum": [
-              "Imediata",
-              "Muito Alta",
-              "Alta",
-              "Média",
-              "Baixa",
-              "Muito Baixa"
-            ]
+            "enum": ["Imediata", "Muito Alta", "Alta", "Média", "Baixa", "Muito Baixa"]
           },
           "store": {
             "type": "string"
           },
           "actualHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "startedAt": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "finishedAt": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "rating": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "notes": {
             "type": "string"
@@ -1927,22 +1837,13 @@
             "type": "string"
           },
           "mainHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "extraHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "completionistHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "size": {
             "type": "string"
@@ -1957,10 +1858,7 @@
             "type": "string"
           },
           "previousEstimatedHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "coop": {
             "type": "string"
@@ -1969,57 +1867,33 @@
             "type": "string"
           },
           "prerequisiteId": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "imported": {
             "type": "object",
             "properties": {
               "plannedHours": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "affinity": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "baseScore": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "queueScore": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "previousPendingId": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             }
           },
           "updatedAt": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "plannedHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "affinity": {
             "type": "number"
@@ -2028,36 +1902,19 @@
             "type": "number"
           },
           "coverUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "steamAppId": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "steamHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "steamUpdatedAt": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         },
-        "required": [
-          "id",
-          "name",
-          "status",
-          "desire"
-        ]
+        "required": ["id", "name", "status", "desire"]
       },
       "GamePatch": {
         "type": "object",
@@ -2103,72 +1960,36 @@
             "type": "string"
           },
           "actualHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "mainHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "extraHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "completionistHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "previousEstimatedHours": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": ["number", "null"]
           },
           "startedAt": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "finishedAt": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "status": {
             "type": "string",
-            "enum": [
-              "Não iniciado",
-              "Jogando",
-              "Abandonado",
-              "Finalizado"
-            ]
+            "enum": ["Não iniciado", "Jogando", "Abandonado", "Finalizado"]
           },
           "desire": {
             "type": "string",
-            "enum": [
-              "Imediata",
-              "Muito Alta",
-              "Alta",
-              "Média",
-              "Baixa",
-              "Muito Baixa"
-            ]
+            "enum": ["Imediata", "Muito Alta", "Alta", "Média", "Baixa", "Muito Baixa"]
           },
           "rating": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "minimum": 1,
             "maximum": 5
           },
@@ -2180,10 +2001,7 @@
             "maxItems": 3
           },
           "prerequisiteId": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "autoFinish": {
             "type": "boolean",
@@ -2247,10 +2065,7 @@
             }
           },
           "pinnedPosition": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "description": "Posição fixada pelo usuário ao arrastar (null = posição decidida pela pontuação)"
           },
           "pinnedBeforePrerequisite": {
@@ -2366,10 +2181,7 @@
       "ReorderRequest": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "gameId",
-          "toPosition"
-        ],
+        "required": ["gameId", "toPosition"],
         "properties": {
           "gameId": {
             "type": "string"
@@ -2447,22 +2259,13 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "reorder",
-              "reset"
-            ]
+            "enum": ["reorder", "reset"]
           },
           "fromPosition": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": ["integer", "null"]
           },
           "toPosition": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": ["integer", "null"]
           },
           "createdAt": {
             "type": "string",
@@ -2563,10 +2366,7 @@
       },
       "ScoringConfig": {
         "type": "object",
-        "required": [
-          "weights",
-          "rules"
-        ],
+        "required": ["weights", "rules"],
         "properties": {
           "weights": {
             "$ref": "#/components/schemas/ScoreWeights"
@@ -2634,13 +2434,7 @@
           },
           "minDesire": {
             "type": "string",
-            "enum": [
-              "Muito Alta",
-              "Alta",
-              "Média",
-              "Baixa",
-              "Muito Baixa"
-            ],
+            "enum": ["Muito Alta", "Alta", "Média", "Baixa", "Muito Baixa"],
             "nullable": true
           }
         }
@@ -2713,13 +2507,7 @@
           },
           "section": {
             "type": "string",
-            "enum": [
-              "base",
-              "context",
-              "filter",
-              "manual",
-              "params"
-            ]
+            "enum": ["base", "context", "filter", "manual", "params"]
           },
           "label": {
             "type": "string"
@@ -2785,11 +2573,7 @@
       },
       "GameList": {
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "createdAt"
-        ],
+        "required": ["id", "name", "createdAt"],
         "properties": {
           "id": {
             "type": "string",
@@ -2836,10 +2620,7 @@
         }
       },
       "SteamPrice": {
-        "type": [
-          "object",
-          "null"
-        ],
+        "type": ["object", "null"],
         "description": "Preço atual na Steam (centavos). finalCents null = sem preço à venda.",
         "required": [
           "currency",
@@ -2853,23 +2634,14 @@
         ],
         "properties": {
           "currency": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "example": "BRL"
           },
           "initialCents": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": ["integer", "null"]
           },
           "finalCents": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": ["integer", "null"]
           },
           "discountPercent": {
             "type": "integer",
@@ -2877,20 +2649,14 @@
             "maximum": 100
           },
           "discountEndsAt": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "date-time"
           },
           "isFree": {
             "type": "boolean"
           },
           "formatted": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "example": "R$46,99"
           },
           "fetchedAt": {
@@ -2901,12 +2667,7 @@
       },
       "SteamSearchItem": {
         "type": "object",
-        "required": [
-          "appId",
-          "name",
-          "imageUrl",
-          "price"
-        ],
+        "required": ["appId", "name", "imageUrl", "price"],
         "properties": {
           "appId": {
             "type": "integer"
@@ -2915,10 +2676,7 @@
             "type": "string"
           },
           "imageUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "price": {
             "$ref": "#/components/schemas/SteamPrice"
@@ -2971,29 +2729,17 @@
             }
           },
           "releaseDate": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "date"
           },
           "headerUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "capsuleUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "heroUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "storeUrl": {
             "type": "string"
@@ -3005,11 +2751,7 @@
       },
       "WishlistItem": {
         "type": "object",
-        "required": [
-          "game",
-          "price",
-          "description"
-        ],
+        "required": ["game", "price", "description"],
         "properties": {
           "game": {
             "$ref": "#/components/schemas/Game"
@@ -3018,10 +2760,7 @@
             "$ref": "#/components/schemas/SteamPrice"
           },
           "description": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
@@ -3030,9 +2769,7 @@
         "oneOf": [
           {
             "type": "object",
-            "required": [
-              "appId"
-            ],
+            "required": ["appId"],
             "additionalProperties": false,
             "properties": {
               "appId": {
@@ -3046,9 +2783,7 @@
           },
           {
             "type": "object",
-            "required": [
-              "name"
-            ],
+            "required": ["name"],
             "properties": {
               "name": {
                 "type": "string"
@@ -3091,28 +2826,16 @@
                 "type": "string"
               },
               "mainHours": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "extraHours": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "completionistHours": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "steamAppId": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
+                "type": ["integer", "null"]
               }
             }
           }
@@ -3120,12 +2843,7 @@
       },
       "WishlistImportResult": {
         "type": "object",
-        "required": [
-          "total",
-          "created",
-          "existing",
-          "failed"
-        ],
+        "required": ["total", "created", "existing", "failed"],
         "properties": {
           "total": {
             "type": "integer"
@@ -3154,28 +2872,16 @@
         }
       },
       "ReleaseDeploy": {
-        "type": [
-          "object",
-          "null"
-        ],
+        "type": ["object", "null"],
         "properties": {
           "vercelDeploymentId": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "vercelUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "dbMigrationVersion": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "createdAt": {
             "type": "string",
@@ -3210,22 +2916,12 @@
             "example": "0.0.5"
           },
           "name": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "maxLength": 80
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "feature",
-              "fix",
-              "refactor",
-              "chore",
-              "release",
-              "rollback"
-            ]
+            "enum": ["feature", "fix", "refactor", "chore", "release", "rollback"]
           },
           "description": {
             "type": "string",
@@ -3240,31 +2936,18 @@
             "description": "Full commit SHA-1, normalized to lowercase on registration."
           },
           "gitRef": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "environment": {
             "type": "string",
-            "enum": [
-              "production",
-              "preview",
-              "development"
-            ]
+            "enum": ["production", "preview", "development"]
           },
           "rollbackTo": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": ["integer", "null"],
             "description": "Versão alvo, quando kind = rollback."
           },
           "createdBy": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "api, vercel-build, release:note, release:rollback ou migration."
           },
           "createdAt": {
@@ -3278,10 +2961,7 @@
       },
       "ReleaseCreate": {
         "type": "object",
-        "required": [
-          "description",
-          "gitSha"
-        ],
+        "required": ["description", "gitSha"],
         "additionalProperties": false,
         "properties": {
           "description": {
@@ -3291,13 +2971,7 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "feature",
-              "fix",
-              "refactor",
-              "chore",
-              "release"
-            ],
+            "enum": ["feature", "fix", "refactor", "chore", "release"],
             "default": "chore"
           },
           "name": {
@@ -3306,11 +2980,7 @@
           },
           "bump": {
             "type": "string",
-            "enum": [
-              "patch",
-              "minor",
-              "major"
-            ],
+            "enum": ["patch", "minor", "major"],
             "default": "patch",
             "description": "Ignorado se version vier."
           },
@@ -3330,11 +3000,7 @@
           },
           "environment": {
             "type": "string",
-            "enum": [
-              "production",
-              "preview",
-              "development"
-            ],
+            "enum": ["production", "preview", "development"],
             "default": "production"
           }
         }
@@ -3342,14 +3008,7 @@
       "Problem": {
         "type": "object",
         "description": "RFC 9457 Problem Details (application/problem+json). `error.message` duplicates `detail` for clients written before the standard format; it is deprecated.",
-        "required": [
-          "type",
-          "title",
-          "status",
-          "detail",
-          "code",
-          "requestId"
-        ],
+        "required": ["type", "title", "status", "detail", "code", "requestId"],
         "properties": {
           "type": {
             "type": "string",
@@ -3397,9 +3056,7 @@
       },
       "TelemetryBatch": {
         "type": "object",
-        "required": [
-          "events"
-        ],
+        "required": ["events"],
         "properties": {
           "events": {
             "type": "array",
@@ -3409,22 +3066,13 @@
               "oneOf": [
                 {
                   "type": "object",
-                  "required": [
-                    "type",
-                    "level",
-                    "message"
-                  ],
+                  "required": ["type", "level", "message"],
                   "properties": {
                     "type": {
                       "const": "log"
                     },
                     "level": {
-                      "enum": [
-                        "debug",
-                        "info",
-                        "warn",
-                        "error"
-                      ]
+                      "enum": ["debug", "info", "warn", "error"]
                     },
                     "message": {
                       "type": "string",
@@ -3441,10 +3089,7 @@
                 },
                 {
                   "type": "object",
-                  "required": [
-                    "type",
-                    "message"
-                  ],
+                  "required": ["type", "message"],
                   "properties": {
                     "type": {
                       "const": "error"
@@ -3468,11 +3113,7 @@
                 },
                 {
                   "type": "object",
-                  "required": [
-                    "type",
-                    "name",
-                    "value"
-                  ],
+                  "required": ["type", "name", "value"],
                   "properties": {
                     "type": {
                       "const": "metric"
@@ -3500,18 +3141,11 @@
       },
       "TrackEvent": {
         "type": "object",
-        "required": [
-          "kind",
-          "screen",
-          "occurredAt"
-        ],
+        "required": ["kind", "screen", "occurredAt"],
         "properties": {
           "kind": {
             "type": "string",
-            "enum": [
-              "page_view",
-              "click"
-            ]
+            "enum": ["page_view", "click"]
           },
           "screen": {
             "type": "string",
@@ -3531,11 +3165,7 @@
       },
       "TrackBatch": {
         "type": "object",
-        "required": [
-          "sessionId",
-          "automated",
-          "events"
-        ],
+        "required": ["sessionId", "automated", "events"],
         "properties": {
           "sessionId": {
             "type": "string",
